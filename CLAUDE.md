@@ -163,7 +163,7 @@ only the metadata *listing* is unstable, not the actual data access.
 | `account_analytic_account_cc.csv` | 14 | Standard OData v1 `costcentre` service, `CostCentreCollection` |
 | `purchase_order.csv` | 655 | `khpurchaseorder` custom service, `PurchaseOrderCollection` + `SupplierCollection` for the partner link |
 | `purchase_order_line.csv` | 1861 | `khpurchaseorder`'s `ItemCollection`; `product_id/id` resolves for 1586/1595 lines now that Products is wired up |
-| `product_template.csv` | 3058 | `vmumaterial`'s `MaterialCollection`, `standard_price` enriched from `vmumaterialvaluationdata`'s latest `ValuationPriceCollection` row per material (994/3058 have a price on this tenant) |
+| `product_template.csv` | 3058 | Full field coverage across all of `vmumaterial`'s real per-material entities: `MaterialCollection` (base), `TextCollection` (detailed description), `PurchasingCollection`/`SalesCollection` (UOM + purchase_ok/sale_ok), `ProductCategoryCollection` (category); `standard_price` from `vmumaterialvaluationdata`'s latest `ValuationPriceCollection` row (994/3058 priced). No barcode/weight fields exist on this tenant (checked live, 0 rows) - not fabricated. |
 
 Odoo CSV conventions: every row's `id` is an external ID (`sap_bp_<CBP_UUID>`,
 `sap_bank_<name>`); relation columns use Odoo's `field/id` syntax (`partner_id/id`,

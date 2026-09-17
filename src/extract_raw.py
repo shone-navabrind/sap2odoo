@@ -74,6 +74,13 @@ SOURCES = [
     ("sap/byd/odata/cust/v1/khsupplierinvoice", "CashDiscountTermsCollection"),  # Payment Terms, supplier side
     ("sap/byd/odata/cust/v1/vmumaterial", "MaterialBaseMeasureUnitCodeCollection"),  # UOM, 23 real units
     ("sap/byd/odata/cust/v1/vmumaterial", "ProductCategoryCollection"),  # Product Categories, 3058 rows (dedupe by ID)
+
+    # Full Products/Materials field coverage - vmumaterial has 78 entity sets total; these 3
+    # carry real per-material data beyond MaterialCollection's own 18 fields (checked live,
+    # ParentObjectID confirmed to join directly to MaterialCollection.ObjectID).
+    ("sap/byd/odata/cust/v1/vmumaterial", "TextCollection"),  # 2197 rows - detailed descriptions
+    ("sap/byd/odata/cust/v1/vmumaterial", "PurchasingCollection"),  # 2959 rows - purchasing UOM, purchase_ok signal
+    ("sap/byd/odata/cust/v1/vmumaterial", "SalesCollection"),  # 979 rows - sales UOM, sale_ok signal
 ]
 
 

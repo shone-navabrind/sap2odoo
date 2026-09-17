@@ -287,25 +287,47 @@ def build_purchase_orders():
     }
 
 
-PRODUCT_FIELDNAMES = ["id", "name", "default_code", "type", "standard_price", "active"]
+PRODUCT_FIELDNAMES = [
+    "id", "name", "default_code", "description", "type", "categ_id/id", "uom_id/id",
+    "uom_po_id/id", "standard_price", "purchase_ok", "sale_ok", "active",
+]
 
 
 def build_products():
     """
-    Sources (real CRUD OData, confirmed columns in output_raw/*__MaterialCollection*.json etc.):
-      vmumaterial/MaterialCollection                          - 3058 materials
-      vmumaterialvaluationdata/MaterialValuationDataCollection - links Material.UUID -> valuation
-      vmumaterialvaluationdata/ValuationPriceCollection        - cost price history (StartDate-scoped)
+    Full field coverage for Products/Materials (#57, mandatory), from ALL of vmumaterial's
+    per-material entities confirmed to carry real data on this tenant (checked all 78 entity
+    sets in vmumaterial's metadata; most are empty codelists or unrelated org data - these are
+    the ones with real rows, each confirmed to join via ParentObjectID -> Material.ObjectID):
 
-    default_code uses InternalID, which matches the ProductID values already referenced in
+      MaterialCollection                    - 3058 materials, the base 18 fields
+      TextCollection (TypeCode 10006)        - 2197 rows, "Detailed Description" text
+      PurchasingCollection                   - 2959 rows, purchasing UOM -> purchase_ok signal
+      SalesCollection                        - 979 rows, sales UOM -> sale_ok signal
+      ProductCategoryCollection              - 3058 rows, one category per material
+      vmumaterialvaluationdata/MaterialValuationDataCollection + ValuationPriceCollection
+                                             - links Material.UUID -> latest cost price
+
+    uom_id/id, uom_po_id/id, categ_id/id reference this same pipeline's own uom_uom.csv /
+    product_category.csv external IDs (built from the same SAP codes, so they resolve).
+    default_code uses InternalID, matching ProductID values already referenced in
     purchase_order_line.csv (e.g. sap_prod_1) - wiring this up resolves those product_id/id links.
     standard_price picks each material's ValuationPrice row with the latest StartDate (most
     recent = current cost), not filtered by currency/type - single-currency tenant assumption,
     documented as a known limitation if that's wrong.
+
+    NOT available on this tenant (checked live, zero rows): GlobalTradeItemNumberCollection
+    (barcode/GTIN), SalesTextCollection/PurchasingTextCollection (channel-specific descriptions),
+    QuantityCharacteristicCollection (would have carried weight/dimensions if populated),
+    CustomerInformationCollection. No weight/barcode fields are fabricated - left blank.
     """
     materials = load_raw("MaterialCollection")["rows"]
     valuation_data = load_raw("MaterialValuationDataCollection")["rows"]
     prices = load_raw("ValuationPriceCollection")["rows"]
+    texts = load_raw("TextCollection", service_hint="vmumaterial")["rows"]
+    purchasing = load_raw("PurchasingCollection")["rows"]
+    sales = load_raw("SalesCollection")["rows"]
+    categories = load_raw("ProductCategoryCollection")["rows"]
 
     prices_by_valuation_id = {}
     for price in prices:
@@ -326,19 +348,53 @@ def build_products():
         latest = max(candidates, key=lambda p: p.get("StartDate") or "")
         price_by_material_uuid[material_uuid] = latest.get("Amount", "")
 
+    description_by_material = {}
+    for t in texts:
+        if t.get("TypeCode") == "10006" and t.get("ParentObjectID") not in description_by_material:
+            description_by_material[t["ParentObjectID"]] = t.get("Text", "")
+
+    purchase_uom_by_material = {}
+    for p in purchasing:
+        parent = p.get("ParentObjectID")
+        if parent and parent not in purchase_uom_by_material:
+            purchase_uom_by_material[parent] = p.get("PurchasingMeasureUnitCode", "")
+
+    sale_uom_by_material = {}
+    for s in sales:
+        parent = s.get("ParentObjectID")
+        if parent and parent not in sale_uom_by_material:
+            sale_uom_by_material[parent] = s.get("SalesMeasureUnitCode", "")
+
+    category_by_material = {}
+    for c in categories:
+        parent = c.get("ParentObjectID")
+        if parent:
+            category_by_material[parent] = c.get("ProductCategoryInternalID", "")
+
     rows = []
     for material in materials:
         object_id = material.get("ObjectID")
         if not object_id:
             continue
         material_uuid = material.get("UUID")
+        base_uom = material.get("BaseMeasureUnitCode", "")
+        purchase_uom = purchase_uom_by_material.get(object_id)
+        category_code = category_by_material.get(object_id)
         rows.append(
             {
                 "id": external_id("sap_prod", material.get("InternalID") or object_id),
                 "name": material.get("Description") or material.get("InternalID") or object_id,
                 "default_code": material.get("InternalID", ""),
+                "description": description_by_material.get(object_id, ""),
                 "type": "consu",
+                "categ_id/id": external_id("sap_prodcat", category_code) if category_code else "",
+                "uom_id/id": external_id("sap_uom", base_uom) if base_uom else "",
+                "uom_po_id/id": external_id("sap_uom", purchase_uom) if purchase_uom else (
+                    external_id("sap_uom", base_uom) if base_uom else ""
+                ),
                 "standard_price": price_by_material_uuid.get(material_uuid, ""),
+                "purchase_ok": "True" if object_id in purchase_uom_by_material else "False",
+                "sale_ok": "True" if object_id in sale_uom_by_material else "False",
                 "active": "True",
             }
         )

@@ -83,6 +83,18 @@ check "Valuation price history returns" \
   "${SAP_BASE_URL}/sap/byd/odata/cust/v1/vmumaterialvaluationdata/ValuationPriceCollection?\$top=3&\$select=ParentObjectID,Amount,StartDate&sap-client=${SAP_CLIENT}" \
   '"d":{"results":['
 
+check "Material detailed descriptions (TextCollection) return data" \
+  "${SAP_BASE_URL}/sap/byd/odata/cust/v1/vmumaterial/TextCollection?\$top=3&\$select=ParentObjectID,Text,TypeCode&sap-client=${SAP_CLIENT}" \
+  '"d":{"results":['
+
+check "Material purchasing data returns" \
+  "${SAP_BASE_URL}/sap/byd/odata/cust/v1/vmumaterial/PurchasingCollection?\$top=3&\$select=ParentObjectID,PurchasingMeasureUnitCode&sap-client=${SAP_CLIENT}" \
+  '"d":{"results":['
+
+check "Material sales data returns" \
+  "${SAP_BASE_URL}/sap/byd/odata/cust/v1/vmumaterial/SalesCollection?\$top=3&\$select=ParentObjectID,SalesMeasureUnitCode&sap-client=${SAP_CLIENT}" \
+  '"d":{"results":['
+
 echo
 echo "=== 12 more cust/v1 custom services (user-imported, 2026-09-15) ==="
 
