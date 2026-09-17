@@ -1,0 +1,7 @@
+.env
+venv/
+output_raw/
+output_odoo/
+logs/*.log
+__pycache__/
+*.pyc

@@ -1,0 +1,759 @@
+Name,DataSourceID,Description,Exposed
+Service Category,/CCAT/SICAT,Contains all parameters and values of service categories.,No
+Service Category Catalog,/CCAT/SICTG,"Contains parameters and values of a service category catalogue. It allows you to analyze version, status and validity and is used to calculate category usage in service processes.",No
+Document Output History (To be deprecated),/DOC/OMDORB01,This report will be deprecated in the future releases. Please use the new report Manage Document Output History instead.,No
+Manage Document Output History,/DOC/OMDORB02,"Provides the output history information, including the business document context, output channel, output status, error and system administrative information.",No
+Coding Block Extension Fields,/ISCB/COBLEXTMDB,Coding Block Extension Fields,No
+Incidents Analysis,/ITSAM/SAPSRB,"Shows data about incidents, including creation, processing, and completion data along with status information.",No
+SAP Service Delivery and Service Tasks,/ITSAM/SVCB,Shows data about SAP service delivery and service task.,No
+Company Master Data,/MOM/COMPANY,"Provides company master data, including the company name, ID, and manager.",No
+Cost Center Master Data,/MOM/COSTCTR,"Provides cost center master data, including the cost center name, ID, manager, country, and information about whether or not financial postings are allowed.",No
+Functional Unit Master Data,/MOM/FUNCUNIT,"Provides functional unit master data, including the functional unit name, ID, and manager.",No
+Job Master Data,/MOM/JOB,"Provides job master data, including the job name and ID.",No
+Org Unit Master Data,/MOM/ORGCENTRE,"Provides org unit master data, including the org unit name and ID, and information about whether it was created based on a business partner or represents a business partner.",No
+Business Residence Master Data,/MOM/PERMEST,"Provides business residence master data, including the business residence name, ID, and location.",No
+Position Master Data,/MOM/POSITION,"Provides position master data, including the position name, ID, associated cost center, associated profit center, and associated reporting line unit.",No
+Profit Center Master Data,/MOM/PROFITCTR,"Provides profit center master data, including the profit center name, ID, manager, and information about whether or not financial postings are allowed.",No
+Program Master Data,/MOM/PROGRAMME,"Provides program master data, including the program name, ID, and manager.",No
+Reporting Line Unit Master Data,/MOM/RLINEUNIT,"Provides reporting line unit master data, including the reporting line unit name, ID, and manager.",No
+Segment Master Data,/MOM/SEGMENT,"Provides segment master data, including the segment name, ID, and manager.",No
+Account Hierarchies,ACCOUNT_HIERARCHY,"Provides an overview of account hierarchy data, including hierarchy ID and name.",No
+Account Hierarchies (External Data Replication),ACCOUNT_HIERARCHY_001,"Provides an overview of account hierarchy data, including hierarchy ID and name.
+It also gives you the possibitliy to structure according to the hierarchy. Moreover, it contains the references to the accounts belonging to a certain hierarchy level.",No
+Address Snapshot Data,ADDRESS_SNAPSHOT,"Provides address snapshot data, including the name, country and other address data, as well as communication data.",No
+Deleted Data (ODP Integration),ANAODPDELV,Contains details that can be used to delete records from target systems connected through ODP integration.,No
+Business Partner Master Data,BPARTNER,"Provides business partner master data, including the business partner name and ID, country and other address data, information that is specific to a business partner person or organization, and system administrative information.
+",No
+Business Partner Master Data for ILM,BPARTNER_ILM,"Provides business partner master data with status information for ILM
+",No
+Contact Master Data,BPCONTB,"Provides contact master data, including the contact name and ID, Academic Title, Date of Birth, Gender, Marital Status, and Profession.",No
+Account Collaboration Data,BPCSCARB,"Provides the collaboration data of an account, including the business document name and the output channel along with data of the related account, such as the account ID, name, and address. 
+
+",No
+Account Contact Data,BPCSCONTB,"Provides the contacts of a corporate account, including the contact address information and other contact-specific data along with data of the related account, such as the account ID, name, and address.",No
+Account Contact Data (with not used communication data),BPCSCONTB_2,"Provides the contacts of a corporate account, including the contact address information and other contact-specific data along with data of the related account, such as the account ID, name, and address. It also contains communication data (email,telephone ...) that is marked as invalid.",No
+Business Partner Master Data - script dependent,BPARTNER_SCRIPT,"Provides script dependent business partner master data, including the business partner name and ID, country and other postal address data, information that is specific to a business partner person or organization. This data source is meant to be used to create joined data sources for reporting script dependent name and postal address data.
+",No
+Account Financial Data,BPCSFINB,"Provides the financial data of an account, including the bank data, payment data, and tax data along with data of the related account, such as the account ID, name, and address.",No
+Account Responsibility Data,BPCSRSPB,"Provides the employees directly responsible for an account, including the employee ID, name, address, and the party role along with data of the related account, such as the account ID, name, and address.",No
+Account Details,BPCSDB,"Provides an overview of account master data, including the account name and ID and the address data along with information that is required in the sales process, such as the sales organization ID and name, the distribution channel, the delivery priority, the payment terms, the currency, and the Incoterms. In addition, the report also shows financial data, such as bank, credit card, and tax data.
+",No
+Supplier Product Category Lifecycle,BPSP_PRD_CAT_LIFE,"Provides details of supplier product category lifecycle data, such as product category, enagement status, market segementation and validity periods.",No
+Approval Task Details,BTMAPPV01,Provides information about an approval task,No
+Employee Master Data without Human Resources,BUPAEMPB,"Provides information on Employees, Service Agents and their assigned Organizational Unit, Company, Cost Center, Reporting Line Unit, Job, Manager and User Details, without reference to Work Agreements. You should use it when Personnel Administration is not scoped.",No
+Business Partner Identification,BUPAIDENTIFICATIONB01,"Provides identifications of persons (like internal ID, employee ID, etc) in context of GDPR disclosure requirement.",No
+Business Partner Person Disclosure,BUPAPERSONDISCLOSUREB01,"Provides business partner master data for persons, containing all data relevant for data disclosure in context of GDPR requirement.",No
+Business Partner Relationship,BUPAREL,,No
+Supplier Collaboration Data,BUPASUPPLIERCOLLB01,"Provides the collaboration data of a supplier, including data of the related supplier, such as the account ID, name, and address. 
+",No
+Business Partner - Account,BUS_PARTNER,Business Partner,No
+Business Partner Hierarchy,BUS_PARTNER_HIERARCHY,Business Partner Hierarchy,No
+Business Partner - Supplier,BUS_PARTNER_SUPPLIER,,No
+Forecasting Group Master Data,CATDP,"Provides forecasting group master data, including identification and description data.
+",No
+User - Current Status Details,CCAB01,"Provides data about the current status of users, including assigned work center, work center views, validity dates, and whether the user is inactive. 
+",No
+User - Activation Change Documents,CCAB02,"Provides data about the activation change documents for users, including technical ID, whether the user is a technical user or locked, and validity dates.",No
+User - Access Rights Change Documents,CCAB03,"Provides data about the access rights change documents for users, including changes to the assignment of work centers, work center views, and access rights. 
+",No
+Identity,CCAIDNTYB,Provides all the attributes of user.,No
+Identity,CCAIDNTYB_SOL,Provides all the attributes of user.,No
+Knowledge Transfer Learning Data,CCAKTPU01,"Provides data about which learning modules employees have passed. 
+",No
+Segregation of Duty Conflicts,CCARSODCONFLICTS,Shows the segregation of duty conflicts between the work center views assigned to the user.,No
+Report Assignment Details,CCARURV01,"Shows the history of the assignment of reports to work centers, including change data, assignment details, and whether access to reports is restricted.",No
+User Logon Details,CCARUSRLOG,Shows all the logon information for a user.,No
+Clearing House Master Data,CLRHOUSE,"Provides clearing house master data, including the clearing house name and ID, country and other address data, and system administrative information.
+",No
+Customer Consignment Report,CONSGTU01,"Provides a comprehensive view of the customer consignment quantities, which are open for fill-up, delivered, open for invoicing, invoiced, returned, etc.",No
+All Activities,CRMACTU,Contains all types of activities. It allows you to analyze number and usage of all six activity types.,No
+Appointment,CRMAPAHB,Contains all appointments. It allows you to analyze the usage of activities by type appointment.,No
+Customer Contract Header,CRMCCOHB,Contains data on the customer contracts.,No
+Customer Contract Item,CRMCCOIB,Contains data on the customer contract items.,No
+Customer Contract Item,CRMCCOIB01,Contains data on the customer contract items.,No
+Customer Contract Item with Price Components,CRMCCOIPATCB,"Contains data on the customer contract items , along with details about the price components like price, discount, freight, surcharge, goodwill, warranty, quality loss fee, cost estimate, profit margin. also provides information like is the price component is manullay changed or automatically determined, what prices are proposed by the system and which is the active price, base value of each price component calculation for price, discount, freight, surcharge. Calculation of total discount , total tax value .",No
+Customer Contract Item Period Values,CRMCCOIPB,Contains customer contract revenue data forecasted over the validity period of customer contract items.,No
+Customer Contract Price Components,CRMCCOPATCIU,"Customer Contract Document Price and Tax price components analytical object which provides details about the price components like price, discount, freight, surcharge, goodwill, warranty, quality loss fee, cost estimate, profit margin. also provides information like is the price component is manullay changed or automatically determined, what prices are proposed by the system and which is the active price, base value of each price component calculation for price, discount, freight, surcharge. Calculation of total discount , total tax value .",No
+Customer Invoice Item with Price Components,CRMCIVIPATCB,"Contains data on the quantities and values of customer invoice items. It allows you to analyze the development and distribution of sales quote items across organizational units , along with details about the price components like price, discount, freight, surcharge, goodwill, warranty, quality loss fee, cost estimate, profit margin. also provides information like is the price component is manullay changed or automatically determined, what prices are proposed by the system and which is the active price, base value of each price component calculation for price, discount, freight, surcharge. Calculation of total discount , total tax value .
+",No
+Customer Invoice  Price Components,CRMCIVPATCIU,"Customer Invoice  Document Price and Tax price components analytical object which provides details about the price components like price, discount, freight, surcharge, goodwill, warranty, quality loss fee, cost estimate, profit margin. also provides information like is the price component is manullay changed or automatically determined, what prices are proposed by the system and which is the active price, base value of each price component calculation for price, discount, freight, surcharge. Calculation of total discount , total tax value .",No
+Knowledge Base Article,CRMCPASB,Contains all knowledge base articles. It allows you to analyze all KB articles.,No
+Campaign Header,CRMCPGHB,"You can analyze the campaign by using header data such as planned start and end date, ID, description and system administrative data. This report contains the campaign header data.",No
+Campaign Inbound,CRMCPGIB,"You can analyze campaigns by responses, such as response classification, type of response and a number of other types of responses. This report contains the data for all campaign responses.",No
+Campaign Outbound,CRMCPGOB,You can analyze campaigns by using outbound data. This report contains data on the outbound node.,No
+Campaign Header and Item,CRMCPGU,"The report contains header and item data of all campaigns and can be analyzed using three components: information that applies to the entire campaign, contacted members and responses collected from the campaign.",No
+Sales Quote Header,CRMCQTHB,Contains data on the quantities and values of sales quotes in total. It allows you to analyze the distribution of sales quotes across organizational units.,No
+Sales Quote Item,CRMCQTIB,Contains data on the quantities and values of sales quote items. It allows you to analyze the distribution of sales quote items across organizational units.,No
+Sales Quote Item with Price Components,CRMCQTIPATCB,"Contains data on the quantities and values of sales quote items. It allows you to analyze the development and distribution of sales quote items across organizational units , along with details about the price components like price, discount, freight, surcharge, goodwill, warranty, quality loss fee, cost estimate, profit margin. also provides information like is the price component is manullay changed or automatically determined, what prices are proposed by the system and which is the active price, base value of each price component calculation for price, discount, freight, surcharge. Calculation of total discount , total tax value .
+",No
+Sales Quote Price Components,CRMCQTPATCIU,"Sales Quote Document Price and Tax price components analytical object which provides details about the price components like price, discount, freight, surcharge, goodwill, warranty, quality loss fee, cost estimate, profit margin. also provides information like is the price component is manullay changed or automatically determined, what prices are proposed by the system and which is the active price, base value of each price component calculation for price, discount, freight, surcharge. Calculation of total discount , total tax value .",No
+Customer Returns Header,CRMCRTHB,"Contains values of customer returns in total. It allows you to analyze status, workload and responsibility for the organizational units and is used to calculate the return rate related to sales revenue.",No
+Customer Returns Item,CRMCRTIB,Contains all quantities and values of return items. It allows you to analyze status and  reason for return and is used to calculate the return rate for different products.,No
+Customer Returns,CRMCRTU,"Contains all quantities and values of customer returns. It allows you to analyze status, workload and responsibility for the organizational units and to calculate return share of sales revenue and return rate of products.",No
+E-Mail,CRMEMAHB,Contains all e-mails. It allows you to analyze the usage of activities by type e-mails.,No
+Fax,CRMFXAHB,Contains all faxes. It allows you to analyze the usage of activities by type fax.,No
+Customer Returns Invoice Reference,CRMINVCRIB,,No
+Used Knowledge Base Articles,CRMKBU,Contains knowledge base articles used in service requests and service orders. It allows you to analyze the usage and reuse of them in the different objects.,No
+Lead,CRMLEAHB,"Contains all leads. It allows you to analyze leads by various criteria such as by category, by status or by origin.",No
+Lead Extended,CRMLEAHB01,"Contains all leads. It allows you to analyze leads by various criteria such as by category, by status or by origin.In contrast to the Lead data source it shows inconsistent leads and provides additional parties as characteristic.",No
+Lead Funnel,CRMLEFU,"Contains all leads and their related objects. It allows you to analyze all opportunities, sales quotes and sales orders that originate, either directly or indirectly, from these leads.",No
+Letter,CRMLTAHB,Contains all letters. It allows you to analyze the usage of activities by type letters.,No
+All Activities with Predecessor Opportunities,CRMOACTU,"Shows all types of activities which includes phone calls, e-mails, faxes, appointments, letters and activity Tasks that originate directly from opportunities.
+Note: Due to technical limitations, the number of characters in data source fields is restricted to 60 characters. If a field contains more than 60 characters, only the first 60 characters are displayed in a report, and the remaining characters will be truncated.
+",No
+All Appointments with Predecessor Opportunities,CRMOAPAHB,"Shows all appointment activities that originate directly from opportunities.
+Note: Due to technical limitations, the number of characters in data source fields is restricted to  60 characters. If a field contains more than 60 characters, only the first 60 characters are displayed in a report, and the remaining characters will be truncated.
+",No
+All E-Mails with Predecessor Opportunities,CRMOEMAHB,"Shows all e-mail activities that originate directly from opportunities.
+Note: Due to technical limitations, the number of characters in data source fields is restricted to  60 characters. If a field contains more than 60 characters, only the first 60 characters are displayed in a report, and the remaining characters will be truncated.
+",No
+All Fax with Predecessor Opportunities,CRMOFXAHB,"Shows all fax activities that originate directly from opportunities.
+Note: Due to technical limitations, the number of characters in data source fields is restricted to  60 characters. If a field contains more than 60 characters, only the first 60 characters are displayed in a report, and the remaining characters will be truncated.
+",No
+All Letters with Predecessor Opportunities,CRMOLTAHB,"Shows all letter activities that originate directly from opportunities.
+Note: Due to technical limitations, the number of characters in data source fields is restricted to  60 characters. If a field contains more than 60 characters, only the first 60 characters are displayed in a report, and the remaining characters will be truncated.
+",No
+All Phone Calls with Predecessor Opportunities,CRMOPCAHB,"Shows all phone call activities that originate directly from opportunities.
+Note: Due to technical limitations, the number of characters in data source fields is restricted to  60 characters. If a field contains more than 60 characters, only the first 60 characters are displayed in a report, and the remaining characters will be truncated.
+",No
+Supplier Details,BPSPPB,"Provides an overview of supplier master data, including the supplier name and ID and address data along with information that is required in the purchasing process, such as the purchase order currency, the Incoterms, the customer ID at the supplier, and the expected purchase order acknowledgement. In addition, the report also shows financial data, such as bank and tax data.",No
+Opportunity Funnel,CRMOPFU,"Contains all opportunities and their related objects. It allows you to analyze all sales quotes and sales orders that originate, either directly or indirectly, from these opportunities.",No
+Opportunity Header Period Values,CRMOPPHPB,Contains sales forecast per period revenue data.,No
+Opportunity Item,CRMOPPIB,Contains all opportunity item data. It allows you to analyze opportunities by item data such as opportunity items or net values.,No
+Opportunity Header and Item,CRMOPPU,"Contains all opportunities with their header and item data. It allows you to analyze opportunities by header and item data such as sales cycle, sales phase, expected value, opportunity items or net values.",No
+Opportunity Header and Item Extended,CRMOPPU01,"Contains all opportunities with their header and item data. It allows you to analyze opportunities by header and item data such as sales cycle, sales phase, expected value, opportunity items or net values.In contrast to the Opportunity Header and Item data source it shows inconsistent opportunities and provides additional parties as characteristic.",No
+Sales Analysis Pipeline,CRMOPQU,Contains all opportunities and quotes. It allows you to analyze opportunities and sales quotes by various criteria or key figures.,No
+All Tasks with Predecessor Opportunities,CRMOTKAHB,"Shows all activity tasks that originate directly from opportunities.
+Note: Due to technical limitations, the number of characters in data source fields is restricted to  60 characters. If a field contains more than 60 characters, only the first 60 characters are displayed in a report, and the remaining characters will be truncated.
+",No
+Phone Call,CRMPCAHB,Contains all phone calls. It allows you to analyze the usage of activities by type phone call.,No
+Point-of-Sale Transaction Header,CRMPOSTLB,"Provides header master data of received sales transactions documents, including creation, internal and external IDs and transaction details. It allows you to display and compare received data with data from the external system.",No
+Sales Transaction Header,CRMPOSTVB,"Provides sales item master data of released sales transactions, including internal and external IDs, payment and tax information, and item details. It allows you to analyze revenue and quantity information for sales items from consistently-released sales transactions.",No
+Sales Quote Funnel,CRMQUFU,Contains data on the development of sales quotes. It allows you to analyze and monitor the progress of sales quotes across organizational units.,No
+Rebate Due List,CRMREBATE,"Contains all rebate due list entries. It provides a basis for reporting on queries to identify rebate due list with reference Rebate Agreement IDs, Rebate Credit Memo IDs, Account , Products",No
+Rebate Due List,CRMREBATE_AGREEMENT,"Contains all rebate due list entries. It provides a basis for reporting on queries to identify rebate due list with reference Rebate Agreement IDs, Rebate Credit Memo IDs, Account , Products",No
+Revenue Forecast Data,CRMRVFU,Shows the revenue from various business transaction documents including opportunities.,No
+Service Confirmation Header,CRMSCFHB,"Contains values of service confirmations in total. It allows you to analyze status, workload and responsibility for the organizational units and is used to calculate usage of categories and rate of due date compliance.",No
+Service Confirmation Item,CRMSCFIB,"Contains all quantities and values of service confirmation items. It allows you to analyze status, coverage, services and spare parts consumption and is used to calculate its compliance to referenced service order items.",No
+Service Confirmation Header,CRMSCSCB,"Contains values of service confirmations in total. It allows you to analyze status, workload and responsibility for the organizational units and is used to calculate usage of categories and rate of due date compliance. (No access context.)",No
+Used Service Categories,CRMSCU,"Contains all parameters and values of service categories. It allows you to analyze how often a certain service category has been used in service processes, for example in service requests, service orders and in the knowledge base.",No
+Service Order Header & Service Confirmation Item,CRMSHSCIB,Contains service confirmations for service items originating from service orders.,No
+Service Level,CRMSLEB,"Contains parameters and values of a service level objective. It allows you to analyze status, usage and is used to calculate the rate of due date compliance in service request and service order processes.",No
+Sales Order Header,CRMSLOHB,Contains data on the quantities and values of sales orders in total. It allows you to analyze the development and distribution of sales orders as a workload indicator across organizational units.,No
+Sales Order Item,CRMSLOIB,Contains data on the quantities and values of sales order items. It allows you to analyze the development and distribution of sales order items across organizational units.,No
+Sales Order Item with Price Components,CRMSLOIPATCB,"Contains data on the quantities and values of sales order items. It allows you to analyze the development and distribution of sales order items across organizational units , along with details about the price components like price, discount, freight, surcharge, goodwill, warranty, quality loss fee, cost estimate, profit margin. also provides information like is the price component is manullay changed or automatically determined, what prices are proposed by the system and which is the active price, base value of each price component calculation for price, discount, freight, surcharge. Calculation of total discount , total tax value .
+",No
+Sales Order Item Period Values,CRMSLOIPB,Contains sales order revenue data forecasted over the validity period of sales order items.,No
+Sales Order Item Schedule Line,CRMSLOISB,Contains sales order revenue data forecasted for the sales order items.,No
+Sales Order Item with Invoice Schedule Items,CRMSLOISCU,Contains all sales order items with corresponding invoice schedule items. It allows you to see the planned revenue for each date specified in an invoice schedule.,No
+Sales Order Price Components,CRMSLOPATCIU,"Sales Order Document Price and Tax price components analytical object which provides details about the price components like price, discount, freight, surcharge, goodwill, warranty, quality loss fee, cost estimate, profit margin. also provides information like is the price component is manullay changed or automatically determined, what prices are proposed by the system and which is the active price, base value of each price component calculation for price, discount, freight, surcharge. Calculation of total discount , total tax value .",No
+Sales Order Item & Service Confirmation Item,CRMSLSCIB,Contains service confirmations for service items originating from sales orders. It helps you to analyze the ordered and the confirmed quantities.,No
+Customer Returns Sales Order Reference,CRMSOCRIB,Customer Returns Sales Order Reference,No
+Customer Returns,CRMSOCRTU,,No
+Service Order and Service Confirmation,CRMSOCU01,Contains service order and service confirmation header and item data. It helps you to track the ordered and the confirmed  quantities and due date compliance.,No
+Used Service Categories,CRMSOCU02,"Contains all parameters and values of service categories. It allows you to analyze how often a certain service category has been used in service processes, for example in service requests, service orders and in the knowledge base.",No
+Service Order Header,CRMSORHB,"Contains values of service orders in total. It allows you to analyze status, workload and responsibility for the organizational units and to calculate due date compliance and usage of service categories and warranties.",No
+Service Order Header Extended,CRMSORHB01,Contains values of service orders in total.,No
+Service Order Item,CRMSORIB,"Contains all quantities and values of service order items. It allows you to analyze status, logistics, planned services and spare parts consumption and to calculate compliance to confirmed services.",No
+Service Order Item period values,CRMSORIPB,"Contains values of service order items distributed on monthly periods according to the requested execution timeframe.
+It allows you to analyze the revenues that will result from service orders accurately on the time horizon.",No
+Service Order Price Components,CRMSORPATCIU,"Service Order Document Price and Tax price components analytical object which provides details about the price components like price, discount, freight, surcharge, goodwill, warranty, quality loss fee, cost estimate, profit margin. also provides information like is the price component is manullay changed or automatically determined, what prices are proposed by the system and which is the active price, base value of each price component calculation for price, discount, freight, surcharge. Calculation of total discount , total tax value .",No
+Service Order Header,CRMSOSCB,"Contains values of service orders in total. It allows you to analyze status, workload and responsibility for the organizational units and to calculate due date compliance and usage of service categories and warranties. (No access context.)",No
+Assigned KB Articles for Service Order,CRMSOSPB,"Contains all service orders with attached KB articles. It allows you to analyze where and how often a certain KB article was used. 
+",No
+Service Order Header and Item,CRMSROU,"Contains values of service orders in total and on item level. It allows you to analyze status, workload and responsibility for the organizational units, and to calculate the usage of service categories and warranties.",No
+Service Request,CRMSRQHB,"Contains all service requests. It allows you to analyze the service requests, their usage, and all relevant informations.",No
+Service Request History,CRMSRQHHB,Contains historical data on the quantities and values of service requests.,No
+Service Request,CRMSRSCB,"Contains all service requests. It allows you to analyze the service requests, their usage, and all relevant informations. (No access context.)",No
+Service Order Item & Service Confirmation Item,CRMSRSCIB,Contains service confirmations for service items originating from service orders. It helps you to analyze the ordered and the confirmed quantities.,No
+"Service Order, Sales Order & Service Confirmation Item",CRMSRSOCU,"Contains service confirmations for service items originating either from sales orders or service orders. It helps you to track the ordered, the confirmed and the invoiced quantities.",No
+Assigned KB Articles for Service Request,CRMSRSPB,Contains all service requests with and attached KB article. It allows you to analyze where and how often a certain KB article was used.,No
+Sales Target Setting,CRMSTPP,"Enables managers to enter and change sales targets with Excel. If this report is opened with a browser, sales targets can be displayed but not changed.",No
+Sales Target Setting,CRMSTPU01,"Enables managers to enter and change sales targets with Excel. If this report is opened with a browser, sales targets can be displayed but not changed.",No
+Target Group Header,CRMTGPHB,Contains data on the target group header.,No
+Target Group Member,CRMTGPMB,"Contains all target group member data. It allows you to analyze target group members by data such as target group life cycle status, target group creation date or target group member number value.",No
+Activity Task,CRMTKAHB,Contains all activity tasks. It allows you to analyze the usage of activities by type activity tasks.,No
+Account Master Data,CUSTOMER,"Provides account master data, including the account name and ID, country and other address data, information that is specific to a corporate or private account, the Nielsen ID, the account ABC classification, and system administrative information.",No
+Material Customer Part Number Master Data,CUST_PART_NUM_MAT,"Provides material Customer part number master data, including material id, description, and account information.",No
+Product Customer Part Number Master Data,CUST_PART_NUM_PRODUCT,"Provides product customer part number master data, including material ID, description, and account information.",No
+Service Product Customer Part Number Master Data,CUST_PART_NUM_SERVICE,"Provides Service Customer part number master data, including service id, description, and account information.
+",No
+Entitlement Master Data,ENTITLEMENT,"Provides entitlement master data, including identification, description, product category, and system administration data.",No
+Journal Header,FINACCDHB,Journal Header,No
+Journal Entry Item,FINACCDIB,Journal Entry Item,No
+Journal Entry Voucher,FINACCENB,Provides data for the journal entry vouchers that have been created in the system. The datasource is mainly a master data provider for the journal entry vouchers.,No
+Partner Company,FINAFLCOU,Provides data about affiliated companies and affiliated business partners. Attributes provide information about whether the entity is a company or a business partner as well as the time period of affiliation. The data source forms basis for populating the master data of partner companies for many key reports in the general ledger and other areas such as trial balances and financial statements.,No
+Accounts Receivables/Payables Cumulative Year Totals,FINARPCTU01,Accounts Receivables/Payables Cumulative Year Totals,No
+Bill of Exchange Storage,FINBOESTB,Provides the details of bill of exchange storages.,No
+Cost Center - Line Items,FINCACU01,Provides details about the overhead costs incurred by a particular cost center. It is possible to see the costs of multiple cost centers at the same time as well. Aggregates information from the following Data Source: Overhead Costs.,No
+Project Line Items,FINCACU02,"Provides details about the costs incurred by a project and the revenues posted against it. These include postings such as time recordings, expense recordings, supplier invoices, or overhead charges. Aggregates information from the following Data Sources: Overhead Costs; Other Direct Costs; Sales Ledger Line Items.
+",No
+Project Plan Values,FINCACU03,Provides details about the estimated costs for a single project based on the planned quantities for the project work plus the planned expenses. It also indicates the error status of the cost estimate. Aggregates information from the following Data Sources: Cost Estimates of Services; Cost Estimates of Overheads; Cost Estimates of Expenses.,No
+Project Cost and Revenue - Aggregated,FINCACU04,"Provides aggregated details about planned costs, actual costs, actual revenues, and deviations for multiple projects or a single project by project task. Also provides a breakdown by the G/L account of origin. Aggregates information from the following Data Sources: Cost Estimates of Services; Cost Estimates of Overheads; Cost Estimates of Expenses; Overhead Costs; Other Direct Costs; Sales Ledger Line Items.",No
+Cost Center Master Data,FINCACU05,Provides a list of the available cost centers from the master data. Also provides details about the sales area to which a cost center is linked. Aggregates information from the following Data Source: Master Data - Cost Centers.,No
+Cost Center - Plan/Actual Comparison,FINCACU06,Provides details about the overhead costs incurred by a particular cost center. There is a provision to see the costs of multiple cost centers at the same time as well. Aggregates information from the following Data Source: Overhead Costs.,No
+Baseline Plan Data Details,FINCACU09,"Baseline DataSource contains the Baseline attributes from the Project Cost Estimate. The Project attributes like project type, market segment attributes etc. are taken from the Base Project linked to the Baseline. In the case of overhead project, the market segment attributes have to be taken from the requesting Cost Center.",No
+Cost Centers - Plan/Actual/Forecast,FINCACU16,"Provides details about the overhead costs incurred by cost centers. Aggregates information from data sources for actual costs, plan and forecast values.",No
+Financial Plan Details,FINCACU17,"Provides financial plan data related to cost centers, income statement or balance sheet.",No
+Planning Object - Budget Monitoring,FINCACU19,Planning Object - Budget Monitoring,No
+Financial Budget Snapshot,FINCACU20,Financial Budget Snapshot,No
+Revenue Recognition Run Log Section,FINCACU80,,No
+Clearing House Account,FINCHACTB,Provides the details of clearing house acccounts.,No
+Check Storage,FINCHQSTB,Provides the details of check storages.,No
+Free Cost Object,FINCOBMDB,"Provides all free cost object master data information such as the following: cost object type, time-dependent organizational assignments to profit centers, to segments and to functional areas, time-dependent assignment to parent cost objects and market segment data.
+Aggregates information from the following Data Sources: Free Cost Object Master Data. 
+",No
+Primary Cost Object Type,FINCOBTPB,"Provides all the primary cost object types and their descriptions. Those values include cost centers, project task, ..., and in addition all free cost object types.",No
+Free Cost Object Master Data,FINCOBU01,"Provides all free cost object master data information such as the following: cost object type, time-dependent organizational assignments to profit centers, to segments and to functional areas, time-dependent assignment to parent cost objects and market segment data.
+Aggregates information from the following Data Sources: Free Cost Object Master Data. 
+",No
+Free Cost Object - Line Items,FINCOBU02,"Provides details about the costs incurred by a Free Cost Object and the revenues posted against it. These include postings such as time
+recordings, expense recordings, supplier invoices, or settlements. Aggregates information from the following Data Sources: Other Direct
+Costs; Sales Ledger Line Items.",No
+FINCOELB,FINCOELB,,No
+Contracts,FINCONTRU,"Contracts 
+",No
+Cash Ledger Cumulative Year Totals,FINCSHCTU01,Cash Ledger Cumulative Year Totals,No
+Cash Location,FINCSHLOB,"Provides the details of all cash locations : my bank accounts, clearing house accounts, cash Storage, check storage, bill of exchange storage.",No
+Cash Location,FINCSHLOU,"Provides the details of all cash locations : my bank accounts, clearing house accounts, cash Storage, check storage, bill of exchange storage.",No
+Petty Cash,FINCSHSTB,Provides the details of every petty cash.,No
+Trade Receivables Payables Register Details for KPI Monitoring,FINDUEMMCU01,,No
+Dunning History By Customer,FINDUEU01,Provides a detailed dunning history of all overdue payment items for each customer. The aggregated dunning amount and the overdue days are shown for each customer. Aggregates information from the following Data Sources: Dunning Header Details; Dunning Items. This data source forms the basis for the following key report: Dunning History by Customer.,No
+Dunning Statistics,FINDUEU03,"Provides total receivable and overdue receivable amount for a customer, total items, and the amount sent to the legal department. It also provides the percentage of the open receivable amount which is dunned and the percentage of the dunning amount sent to the legal department. Aggregates information from the following Data Sources: Dunning Items; AP/AR Details. This data source forms the basis for the following key reports: Dunning Statistics; Current Dunning Statistics.",No
+Trade Receivables Payables Register,FINDUEU04,"Provides information about the document amount, the payment amount, and cash discounts of the trade receivables and payables resulting from the business transactions of a company. Aggregates information from the following Data Sources: AP/AR Details, Dunning Items, Reset Clearing Adjustment amount. This data source forms the basis for the following key reports: Open Item List - Suppliers/Customers; Details Item List -Suppliers/Customers; Aging List -Suppliers/Customers; Forecast List -Suppliers/Customers; Payment Statistics -Suppliers/Customers.
+
+",No
+Dunning History By Documents,FINDUEU05,"Provides a detailed dunning history of all overdue payment items. This information is provided at the document level, showing the number of times dunned and the dates the overdue payment was dunned. It also provides information pertaining to dunning fees incurred. Aggregates information from the following Data Sources: Dunning Header Details, Dunning Items. This data source forms the basis for the following key  report: Dunning History By Documents.",No
+Collection Case,FINDUEU06,,No
+Collection Case Transactions,FINDUEU07,,No
+TRP Register Open and Cleared Payment with Payment File Id,FINDUEU08,"Provides information about the list of open & cleared documents, document amount, cleared amount, clearing id, payment id and payment file id of the trade receivables and payables resulting from the business transactions of a company. Aggregates information from the following Data Sources: TRP Register Payment File and TRP Register Payment File Open Payment.",No
+FINDUEU09,FINDUEU09,,No
+Encumbrance - Line Items,FINENCU01,Shows all Encumbrance Lines.,No
+Mileage Reimbursements,FINERMB21,Mileage Reimbursements,No
+Expense and Reimbursement Details,FINERMU01,"Provides detailed information about expenses and reimbursement rates. Shows the expense amounts, net expense amounts, and VAT amounts, as well as the reimbursement amounts and prepaid amounts. 
+
+Aggregates information from the following Data Sources: Expense Report Information; Expenses and Expense Amounts; Reimbursement Rates. 
+
+This data source forms the basis for the following key reports: Expense Reports - Expenses and Reimbursements; Expense Reports - Input VAT Refund.
+",No
+Aggregated Tax Details view including Municipality Travel Information in Austria,FINERMU02,"Provides detailed information about amounts which are relevant for tax purposes (such as in payroll). Items shown include taxable benefits, amounts taxable at flat rates, income-related expenses, and tax-exempt meals per diems. 
+
+Aggregates information from the following Data Sources:  Expense Report Information; Expenses and Expense Amounts; Reimbursement Rates. 
+
+This data source forms the basis for the following key report: Expense Reports - Taxable and Tax-Exempt Amounts for Payroll.",No
+Allocated Expenses,FINERMU03,"Provides detailed information about the cost assignments of the posted amounts of expense reports. Possible assignments are to cost centers, project tasks, sales orders, and service orders. 
+
+Aggregates information from the following Data Sources: Expenses and Expense Amounts; Reimbursement Rates. 
+
+This data source forms the basis for the following key report: Expense Reports by Cost Object.",No
+Additional Destination,FINERMU04,"Provides detailed information about the additional destinations of an expense report for a business trip. 
+
+Aggregates information from the following Data Sources: Information About Expense Reports and Their Additional Destinations. 
+
+This data source forms the basis for the following key report: Expense Reports - Additional Destination.
+",No
+Expense Report,FINEXPRPB,Expense Report,No
+Functional Area Determination,FINFADETU,Default Functional Area,No
+Missing Scheme Assignments – Functional Area,FINFAFSTU,Missing Scheme Assignments – Functional Area,No
+Missing Scheme Assignments – Functional Area,FINFAFSTV,Missing Scheme Assignments – Functional Area,No
+Forecast Document Items,FINFCDU02,Forecast Document Items,No
+Financial Plan Master Data,FINFPLANB,"Provides master data for planning. It includes information like plan horizon  (Plan Start period, plan end period), set of books, plan created by, plan created on.",No
+Function Master Data,FINFUNCNU,,No
+Fund Master Data,FINFUNDMU,"Provides Fund master data, including the Fund ID, description, fund type, fund category, fund size, company assignments and status.",No
+Financial Plan Version,FINFVERSB,"Provides data for a version of plan. It includes information like the plan start period, plan end period, set of books, version created by, version created on. 
+",No
+Fixed Asset,FINFXASSB,Fixed Asset,No
+Fixed Assets Values,FINFXAU01,"Provides data for period-based balances and totals for fixed assets aggregated by combinations of line item type and fixed asset movement category. The values displayed are based on accumulated acquisition costs at the beginning of the fiscal year, acquisition costs of the current fiscal year, or net book values for all sets of books and valuation views. 
+
+Aggregates information from the following Data Sources: Fixed assets period-based totals and balances aggregated by line item type and movement category. 
+
+This data source forms the basis for the following key reports: Schedule of Fixed Assets; Depreciation.
+",No
+Fixed Assets and Individual Materials Values,FINFXAU02,"Provides transactional data for individual materials and their assigned fixed assets. Data for acquisitions, retirements, and individual material transfers is aggregated into period-based balances and totals for each set of books and valuation view. 
+
+Aggregates information from the following Data Sources: Periodically-calculated fixed asset value totals and balances, Periodically-calculated individual material totals and balances. 
+
+This data source forms the basis for the following key report: Fixed Assets - Inventory List.
+",No
+Fixed Assets Line Items,FINFXAU03,"Provides data for the line items of your fixed assets for each set of books and valuation view including fixed asset-specific line item data and, depending on the valuation view, G/L journal entry information. 
+
+Aggregates information from the following Data Source: Fixed Assets Line Items. 
+
+This data source forms the basis for the following key report: Fixed Assets - Line Items.
+",No
+Fixed Assets Master Data,FINFXAU04,"Provides all fixed asset master data information such as the following: fixed asset class, time-dependent organizational assignments to cost centers, profit centers and segments, life cycle data such as initial acquisition date or capitalization date, valuation parameters such as depreciation methods or useful life, and information about assigned individual materials. 
+
+Aggregates information from the following Data Sources: Fixed Assets Master Data. 
+
+This data source forms the basis for the following key report: Fixed Assets - Master Data
+",No
+Fixed Assets Account Balances,FINFXAU05,"Provides data for the balances and totals of your fixed asset accounts in company currency. The account movements are shown using the closing balance and current totals in the selected fiscal periods. 
+
+Aggregates information from the following Data Sources: Fixed assets period-based totals and balances aggregated by line item type, G/L account, posted profit center and posted segment, and G/L-relevant information. 
+
+This data source forms the basis for the following key report: Fixed Assets - Trial Balance.
+",No
+G/L Account,FINGLACCT,"Provides the master data of the G/L accounts for a specific Chart of Accounts. This conatins detailed data about G/L accounts, such as G/L Account Type, and Indicators such as Profit /Loss Account Indicator, G/L Account Posting Block Indicators, Open Item Management Indicators.
+",No
+G/L Account Period Totals / Balances,FINGLAU01,"Provides data for the balances and totals of your individual G/L accounts and G/L account types in company currency and line item currency. The account movements are shown using the opening balance, the credit and debit, and the closing balance in the selected fiscal periods. Aggregates information from the following Data Sources: Business Configuration (Chart of Accounts); General Ledger (General Ledger Account Totals and Balances). This data source forms the basis for the following key reports: Trial Balance; Trial Balance - Two Years; Balances on Favorite Accounts; Schedule of Changes; Balance Audit Trail.
+",No
+G/L Account Items,FINGLAU02,"Provides data for the line items of your G/L accounts. You can also display the line items of an individual G/L account or multiple G/L accounts. From the line items, you can view the relevant journal entries. You can include different details from the relevant document, such as the cost center, clearing date, or document number of the clearing document. Aggregates information from the following Data Sources: General Ledger (Line Items); Journal Entry (Items and Subledger Extensions); Subledgers, Offsetting Information. This data source forms the basis for the following key reports: G/L Accounts - Line Items; G/L Accounts - Open Items; Balance Audit Trail.
+",No
+Journal Entries,FINGLAU03,"Provides data for the journal entries that were posted to G/L accounts. The journal entries are recorded in chronological order by document number, document type, and posting date. For each journal entry, the individual line items are also displayed with the accounts to which the entry was posted and the amount in company currency and line item currency. Aggregates information from the following Data Sources: Journal Entry (Items and Subledger Extensions); Subledgers; Offsetting Information. This data source forms the basis for the following key reports: Journal; Journal - Print Layout.
+
+",No
+Financial Statements,FINGLAU04,"Provides data for the hierarchical display of G/L account balances in company currency based on different reporting structures: balance sheets, profit and loss statements, and cash flow statements. You can choose to analyze data for different fiscal year and accounting period combinations and also compare data for two different fiscal years. Three different types of balance sheet calculations are provided: cumulative, changes in current period and cumulative balance sheet, changes for income statement. Aggregates information from the following Data Sources: Business Configuration (Chart of Accounts, Reporting Structures); General Ledger (General Ledger Account Totals and Balances). This data source forms the basis for the following key reports: Financial Statements; Financial Statements - Two Years; Financial Statements - Print Layout.
+",No
+ARP Ledger Account Balances,FINGLAU07,"Provides data for the balances and totals of your individual accounts receivables and payables in company currency and line item currency. The account movements are shown using the opening balance, the credit and debit, and the closing balance in the selected fiscal periods. Aggregates information from the following Data Sources: Receivables and Payables (Totals and Balances). This data source forms the basis for the following key reports: Accounts Receivable - Trial Balance, Accounts Payable - Trial Balance.
+",No
+ARP Ledger Account Line Items,FINGLAU08,"Provides data for the line items of your accounts receivable and accounts payable accounts in company currency, transaction currency, and line item currency. For each line item, the posting date, document type, and document number are shown. Aggregates information from the following Data Sources: Accounts Receivable and Accounts Payable Line Items, Offsetting Information. This data source forms the basis for the following key reports: Accounts Receivable - Line Items; Accounts Payable - Line Items; Accounts Receivable - Open Items; Accounts Payable - Open Items; Accounts Receivable – Balance Audit Trail; Accounts Payable - Balance Audit Trail.
+",No
+Cash Ledger Account Balances,FINGLAU09,"Provides data for the balances and totals of your individual cash ledger accounts in company currency and line item currency. The account movements are shown using the opening balance, the credit and debit, and the closing balance in the selected fiscal periods. Aggregates information from the following Data Source: Cash Ledger Account (Totals and Balances). This data source forms the basis for the following key reports: Cash - Trial Balance; Cash  - Balance Audit Trail.
+",No
+Cash Ledger Account Line Items,FINGLAU10,"Provides data for the balances and line items of your individual G/L accounts and G/L account types in company currency and line item currency. For the individual line items for G/L accounts, you can include additional details such as the cost center. The balance audit trail shows the balance at the start of a specific period and the way in which the balance of the account changed by the end of the period. Aggregates information from the following Data Sources: General Ledger Account Line Items; General Ledger Account Totals and Balances; Offsetting Information. This data source forms the basis for the following key report: Balance Audit Trail.
+",No
+G/L Balance Audit Trail,FINGLAU11,"Provides data for the balances and line items of your individual G/L accounts and G/L account types in company currency and line item currency. For the individual line items for G/L accounts, you can include additional details such as the cost center. 
+The balance audit trail shows the balance at the start of a specific period and the way in which the balance of the account changed by the end of the period. Aggregates information from the following Data Sources: General Ledger Account Line Items; General Ledger Account Totals and Balances; Offsetting Information. This data source forms the basis for the following key report: Balance Audit Trail.
+",No
+ARP Balance Audit Trail,FINGLAU12,"Provides data for the balances and line items of your individual accounts receivable and accounts payable accounts in company currency and line item currency. For the individual line items for accounts receivable and accounts payable, you can include additional details such as the cost center. The balance audit trail shows the balance at the start of a specific period and the way in which the balance of the account changed by the end of the period. Aggregates information from the following Data Sources: Accounts Receivables / Accounts Payables Ledger Account Line Items; Accounts Receivables / Accounts Payables Ledger Account Totals and Balances; Offsetting Information. This data source forms the basis for the following key reports: Accounts Receivable Balance Audit Trail; Accounts Payable Balance Audit Trail.
+",No
+Cash Balance Audit Trail,FINGLAU13,"Provides data for the balances and line items of your individual cash ledger accounts  in company currency and line item currency. For the individual line items for  cash ledger accounts, you can include additional details such as the profit center. The balance audit trail shows the balance at the start of a specific period and the way in which the balance of the account changed by the end of the period. Aggregates information from the following Data Sources: Cash Ledger Account Line Items; Cash Ledger Account Totals and Balances; Offsetting Information. This data source forms the basis for the following key report: Cash Ledger Account Balance Audit Trail.
+",No
+Recurring Journal Entries,FINGLAU15,"Provides data for recurring journal entry vouchers existing in the system. Data about total recurring amount of recurring journal entry voucher as well as individual recurring amounts of related journal entry vouchers are provided along with further details about the items of individual journal entry vouchers , such as , G/L Account, posting status, partner information, etc.",No
+G/L Account Master Data,FINGLAU17,"Provides data for general ledger master data attributes and also for hierarchical display of general ledger account assignments based on different reporting structures: balance sheet, income statements, cash flow statements. Aggregates information from the following Data Sources: Business Configuration (Chart of Accounts); General Ledger (General Ledger Account Totals and Balances). This data source forms the basis for the following key report: Financial Reporting Structure for G/L Accounts.
+
+",No
+Financial Statements - Plan/Actual/Forecast,FINGLAU25,"Provides details about the balance sheet, income statement and cash flow statement for a fiscal year. Aggregates information from data sources for actual, plan and forecast values.",No
+Set of Books And Period Closing Status,FINGLAU28,Set of Books And Period Closing Status,No
+Accounting And Trade Receivables Payables Register,FINGLAU29,,No
+Financial Statements for Public Sector,FINGLAU30,"Provides details about the balance sheet, income statement and cash flow statement for a fiscal year. Aggregates information from data sources for actual, budget and encumbrance values.",No
+Grant Master Data,FINGRANTMU,"Provide Grant Master Data Including Fund ID, Fund Contribution Percentage, Sponsor ID, Validate Start & End Date, Company Assignment Its Status, Start & End Date.",No
+House Bank Account,FINHBACTB,Provides the details of House Bank Acccounts.,No
+Material Ledger Cumulative Year Totals,FININVCTU01,Material Ledger Cumulative Year Totals,No
+Material Ledger Account Line Items,FININVU01,"Provides data that is used in reports for viewing detailed information on the line items posted to the material ledger account. Aggregates information from the following Data Sources: Material Ledger Account (Line Item, Offset Accounts); Material Valuation Data. This data source forms the basis for the following key report: Material Inventories - Line Items Report. 
+",No
+Production Ledger Account Line Items,FININVU02,"Provides line item data used in reports for viewing detailed information on the WIP postings in the production ledger account. Aggregates information from the following Data Sources: Production Ledger Account (Line Item, Offset Accounts); Financial Accounting View of Production Document (Item). This data source forms the basis for the following key reports: Production Lot - Line Items; Production Variances; Production Information for Income Statement by Nature of Expense.                                                         
+",No
+Purchase Ledger Account Line Items,FININVU03,"Provides line item information on postings to the goods receipt/invoice receipt clearing accounts (Unbilled Payables and Purchase in Transit). Aggregates information from the following Data Sources: Purchase Ledger Account (Clearing, Line Item, Offset Accounts); Financial Accounting View of Purchasing Document (Item). This data source forms the basis for the following key report: GR/IR Inventories - Balance Summary.
+",No
+Material Ledger Account Aggregated,FININVU04,"Provides aggregated information on the quantities and values of material inventories. Aggregates information from the following Data Sources: Material Ledger Account (Line Item, Offset Accounts); Material Valuation Data. This data source forms the basis for the following key reports: Material Inventories - Balance Summary; Material Inventories -  Balance History; Material Inventories -  Rolling Inventory Comparison.
+",No
+Production Ledger Account Aggregated Items,FININVU05,"Provides aggregated information on the quantities and values of WIP inventories. Aggregates information from the following Data Sources: Production Ledger Account (Line Item, Offset Accounts); Financial Accounting View of Production Document (Item). This data source forms the basis for the following key reports: WIP Inventories - Balance Summary; WIP Inventories -  Rolling Comparison.
+",No
+GRIR Clearing Run Log,FININVU06,"Provides log information on successfully posted items of goods receipt/invoice receipt clearing runs (update runs only). Aggregates information from the following Data Sources: GR/IR Clearing Run (Log, Successfully Calculated Items); Purchase Ledger Account (Clearing). This data source forms the basis for the following key report: Purchase Price Variances.
+",No
+Material Valuation Data,FININVU07,"Provides information about material costs in valuated stock for all cost types (valuation cost, standard cost , etc). Aggregates information from the following Data Sources: Material Valuation Data ( Root, Valuation Price ). This data source forms the basis for the following key report: Material Unit Costs Report.
+",No
+Material Inventories - Reconciliation,FININVU08,"Provides data used in reports for comparing quantities posted to material inventories in FIN and SCM (reconciliation). Aggregates information from the following Data Sources: Material Ledger Account (Line Item, Offset Accounts); Material Ledger Account Aggregated; SCM Inventory Snapshots; Material Valuation Data (Valuation Price). This data source forms the basis for the following key report: Material Inventories - Reconciliation.                                           
+",No
+Inventory Cost Analysis Based On FIFO,FININVU09,Provides information about variances between material inventory values based on current inventory cost and FIFO cost. This data source forms the basis for the following key report: Inventory Cost Analysis Based On FIFO Report.,No
+Material Inventories - Unposted Source Documents,FININVU10,Provides a navigation target for the Material Inventories - Reconciliation report to check whether unposted Source Documents are listed in the General Ledger workcenter that effect the quantity shown in the report.,No
+Valid Material Cost Components,FININVU12,,No
+Material Ledger Account Aggregated,FININVU14,"Provides aggregated information on the quantities and values of material inventories. Aggregates information from the following Data Sources: Material Ledger Account (Line Item, Offset Accounts); Material Valuation Data. This data source forms the basis for the following key reports: Material Inventories - Balance Summary; Material Inventories -  Balance History; Material Inventories -  Rolling Inventory Comparison.",No
+Valid Material Actual Cost Components,FININVU15,Valid Material Actual Cost Components,No
+Valid Production Lot Actual Cost,FININVU16,Valid Production Lot Actual Cost,No
+Valid Resource Actual Cost Components,FININVU17,Valid Resource Actual Cost Components,No
+Sales Documents Actual Costing - Cost Breakdown(Item Type),FININVU18,Sales Documents Actual Costing - Cost Breakdown(Item Type),No
+Cost Variance,FININVU19,Provides Cost Variance data for production lot .,No
+Purchase Ledger Account Line Items ( Landed Cost ),FININVU24,"Provides line item information on postings to the goods receipt/invoice receipt related to landed cost clearing accounts (Unbilled Payables and Purchase in Transit). Aggregates information from the following Data Sources: Purchase Ledger Account (Landed Cost Clearing, Line Item, Offset Accounts); Financial Accounting View of Purchasing Document (Item).",No
+Financial Lease Contract,FINLCMU,Financial Lease Contract for IFRS16,No
+Lease Contract Payment Schedule,FINLCPAYSCHEDMU,Lease Contract Payment Schedule,No
+Lease Contract Valuation Cash Flows,FINLCVALUU,Lease Contract Valuation Cash Flows,No
+Financial Subledger Cumulative Year Totals - Payment Register,FINPAYCTU01,,No
+SEPA Mandates,FINPAYU01,"Provides a list of SEPA mandates from the master data. Aggregates information from the following data source: SEPA Mandates Master Data
+",No
+Liquidity Forecast,FINPAYU02,"Provides the details of cash inflows and outflows expected over the medium term in transactional and forecast currency. As a prerequisite, you need to have created a liquidity forecast by scheduling a liquidity forecast run. Aggregates information from the following Data Sources: Due Item Processing (payables, receivables and tax items); Payment Processing (incoming and outgoing payments); Cash Management (forecast planning items). This data source forms the basis for the following key reports: Liquidity Forecast by Payment Method; Liquidity Forecast by Liquidity Level; Key Performance Indicator for Liquidity.",No
+Cash Position,FINPAYU03,"Provides the petty cash balances and the balances and postings for each bank account. The amounts are based on the bank statements plus unconfirmed payments. Aggregates information from the following Data Sources: Due Item Processing (payables, receivables and tax items); Payment Processing (incoming and outgoing payments); Cash Management (forecast planning items). This data source forms the basis for the following key reports: Cash Position by Payment Method; Cash Position by Transaction Source; Cash Position by Transaction Details.",No
+Checkbook Register,FINPAYU05,Shows how each check number of a check lot has been used.,No
+Missing Scheme Assignments – Price Components,FINPCFSTU,"Missing Scheme Assignments – Price Components
+",No
+Primary Cost Object,FINPCOMDB,"Provides all the primary cost objects. Those values include cost centers, project task, ..., and in addition all free cost object.",No
+Performance Obligation Master Data,FINPOBMU,Performance Obligation Master Data,No
+Production Ledger Cumulative Year Totals,FINPRDCTU01,Production Ledger Cumulative Year Totals,No
+Profitability : Sales Ledger Line Items - CPEL,FINPRFB27,"Profitability : Sales Ledger Line Items - CPEL
+Provides accounting documents created with Customer project Expense List items only. The purpose is to derive the original expense document for which the CPEL item is created.",No
+Profitability Key Figures for Mobile Manager Cockpit,FINPRFMMCU40,,No
+Profitability : Order Profit,FINPRFU01,"Displays predictive profit data based on sales orders, service orders, and sales returns. By unifying the data from CRM orders, it enables contribution margin reports that provide a preliminary indication of what future profit may be. Displays profit data for analysis by multiple market segments, such as all customers in a particular region and customer group. Aggregates information from the following Data Sources: Profitability: Sales Orders; Profitability: Service Orders; Profitability: Customer Returns.
+
+",No
+Profitability : Invoice Profit,FINPRFU10,"Displays predictive profit data based on customer invoices by multiple market segments, such as all customers in a particular region and customer group. Invoice profit information supports analyses such as: (1) Profit drilldowns for determining the contribution margins of customer groups, territories, and sales organizations; (2) Rest-of-year forecasting; (3) Analysis of seasonal effects on profit and the impact of pricing and rebates. Aggregates information from the following Data Source: Profitability: Customer Invoices.
+",No
+Profitability : Earned Profit,FINPRFU20,"Displays earned profit data by market segment, such as all customers in a particular region and customer group. You can choose to analyze profit by detailed attributes such as sales documents, GL accounts, and journal entry IDs. Three methods are supported to calculate the profit, based on financial accounting data. Aggregates information from the following Data Sources: Profitability: General Ledger; Profitability: Overhead Cost Ledger; Profitability: Other Direct Cost Ledger; Profitability: Material Ledger; Profitability: Sales Ledger.
+",No
+Sales Ledger Line Items,FINPRFU24,"Shows the revenues and the cost of goods manufactured posted to the Sales Ledger Account business object. This also contains the accrual items from sales transactions, together with their offsetting postings. This serves as the data basis for earned profit. Aggregates information from the following Data Source: Profitability: Sales Ledger Line Items.
+",No
+Profitability Management,FINPRFU30,"Provides profit data for analysis by multiple market segments such as all customers in a particular region and customer group. You can choose to analyze profit by detailed attributes such as sales documents, GL accounts, and journal entry IDs. Three methods are supported to calculate the profit, which are based on financial accounting data (for earned profit), or sales documents (for order or invoice profit). Aggregates information from the following Data Sources: Profitability: Order Profit; Profitability: Invoice Profit; Profitability: Earned Profit. This data source forms the basis for the following key reports: Profit Detail by Contribution Margin Scheme; Profit Overview by Key Figure; Key Performance Indicators, and Dashboards based on Profitability.
+",No
+Enhanced Contribution Margin,FINPRFU50,Enhanced Contribution Margin,No
+Financial View Of Revenue Accounting Contract,FINRACMU,Financial View Of Revenue Accounting Contract,No
+Recurring Journal Entry Voucher,FINRECJVB,"Provides data for recurring journal entry vouchers created in the system. Data is shown about the type of recurring journal entry voucher, the recurrance pattern, occurance , status and so on.",No
+Tax Ledger Cumulative Year Totals,FINTAXCTU01,Tax Ledger Cumulative Year Totals,No
+Tax Ledger Account Balances,FINTAXU03,"Provides balances from tax ledger accounts.
+",No
+Tax Ledger Account Ledger Account Line Items,FINTAXU04,"Provides line items from tax ledger accounts.
+",No
+Tax Balance Audit Trail,FINTAXU05,"Shows the opening and closing balance and the line items for each tax account.
+",No
+WH Tax Details,FINTAXU08,"Provides withholding tax line items from the tax register.
+",No
+Data Source for all VAT / Sales Tax Items with Journal Entry Details,FINTAXU10,"Provides data for VAT and sales tax items in the tax register including additional journal entry details. You can display the tax attributes for each source document, for example tax code or tax rate, and amounts such as base, deductible and non deductible tax amount. The data source also includes the G/L accounts to which the costs or revenues and taxes are posted as well as further journal entry details. Company, set of books, and kind of date (tax due date or posting date) are mandatory variables for this data source. The tax countries/regions Canada, India, and Mexico are not supported. For more information see the documentation of the report: All VAT / Sales Tax Items with Journal Entry Details",No
+Product Tax Declaration,FINTAXU11,The Product Tax Declarations data source provides details on the Tax returns created in the system including the current status of the return. The details provided by this data source is similar to the data available from Work Center Tax Management and Work Center View VAT Returns. The data source does not provide information on business transactions part of individual tax returns. For this information please use the report All VAT / Sales Tax in the Tax Management Work Center.,No
+Trade Receivables Payables Account,FINTRACTB,Provides the details of all trade receivables payables accounts.,No
+Financial Subledger Cumulative Year Totals - Trade Recievables/Payables Register,FINTRPCTU01,,No
+Code List Mapping,FNDCLMB,Code List Mapping,No
+Sales Kits root view,FNDKITB01,Sales Kits root view,No
+Sales Kits list view,FNDKITB02,Sales Kits list view,No
+Sales Kits Item list view,FNDKITC01,Sales Kits Item list view,No
+Object ID Mapping,FNDOIMB,Object Identifier Mapping,No
+Supplier Address Details,FND_SUP_ADDRESS,"Provides an overview of address details of a supplier such as default address and different address types such as ship-from, invoicer, payee, and remittance advice to.
+",No
+Supplier Payment Data,FND_SUP_FINDATA,Provides the payment data of a supplier.,No
+Customer Invoice Item with Tax Details,GLOCIB01,"Contains all customer invoice items which are not released and in approval status. It provides you with information on the products, quantities, gross amounts, net amounts, tax amounts.",No
+Customer Invoice Item with Tax Details,GLOCIU01,"Contains all customer invoice items which are not released and in approval status. It provides you with information on the products, quantities, gross amounts, net amounts, tax amounts.",No
+Cost Auditing,GLOCOSTAJ,Contains all relevent data for the Cost Auditing report which is specific to the country/region India,No
+Cost Auditing,GLOCOSTAU,Contains all relevent data for the Cost Auditing report which is specific to the country/region India,No
+Transportation Approval,GLOCRMTRANAPPRB01,,No
+Tax Details with Municipality Travel Information for Austria,GLOERMB04,Shows the tax-related data for the expense reports including Municipality Travel Information for Austria,No
+Trip Overview – Austria,GLOERMB05,Trip Overview – Austria,No
+Accounts Receivable - Pledging of Open Items,GLOFINB01,"Shows all open items that are pledged as collateral, which can be particular open items or if the customer account is pledged, all open items of this customer.",No
+Cash Report - Israel,GLOFINPAYILB01,,No
+Cash Position - Israel,GLOFINPAYILU03,,No
+Accounts Receivable - Pledging of Open Items,GLOFINU01,"Shows all open items that are pledged as collateral, which can be particular open items or if the customer account is pledged, all open items of this customer.",No
+Asset Register Italy,GLOFXAU01,Asset Register Italy,No
+Asset Register Italy,GLOFXAV01,Asset Register Italy,No
+IETU Tax-Base-Amount Determination – Mexico,GLOGLAU01,"Provides on the basis of the total income and expenses of the company, the tax base amount for calculation of the IETU tax payable in a fiscal year.",No
+Invoice Payment Due Date (Law 15/2010) – Spain,GLOGLAU02,"Shows the totals of paid and overdue open supplier invoices made before and after Spanish legal due dates, as required according to Law 15/2010.",No
+Trial Balance - South Korea,GLOGLAU06,"Provides data for the balances and totals of your individual G/L accounts and G/L account types in company currency and line item currency. The account movements are shown using the opening balance, the credit and debit, and the closing balance in the selected fiscal periods. Aggregates information from the following Data Sources: Business Configuration (Chart of Accounts); General Ledger (General Ledger Account Totals and Balances).",No
+Invoice Payment Due Date (Law 15/2010) – Spain,GLOGLAV02,"Shows the totals of paid and overdue open supplier invoices made before and after Spanish legal due dates, as required according to Law 15/2010.",No
+GLOHCMEPAAUB01,GLOHCMEPAAUB01,,No
+GLOISJPB01,GLOISJPB01,,No
+Japan Summary Invoice Reference Details,GLOISJPB03,"Provides header information, balance information details, details of customer and supplier invoices and invoice item details included in the Monthly invoices.",No
+Clearing Status Report for Japan,GLOISJPU01,,No
+GLO Material Master Data,GLOMATERIAL,GLO Material Master Data for the Cost Auditing report for country India,No
+Employee Payroll Data Source,GLOPAEMPNLHIR001,Provides information on Employee Payroll and Time data,No
+Employee Payroll Data Source,GLOPAEMPNLHIR002,Provides information on Employee Payroll and Time data,No
+Opportunity Header,CRMOPPHB,"Contains all opportunity header data. It allows you to analyze opportunities by header data such as sales cycle, sales phase or expected value.",No
+Taxes - Product Tax Details,GLOTAXB02,Product Tax Details - Taxes MDAV,No
+Taxes - Excise Annexure 10,GLOTAXB08,Taxes - Excise Annexure 10,No
+Taxes - Product Tax Details,GLOTAXB09,Product Tax Details - Taxes Data Source,No
+Taxes - Supplier Invoice Details,GLOTAXB11,Taxes - Supplier Invoice Details,No
+Stock Transfer Annexure 10,GLOTAXB12,,No
+Sales Register - India,GLOTAXB13,Sales Register - India,No
+Stock Transfer - Filter out Tax return,GLOTAXB14,Stock Transfer - Filter out Tax return,No
+ER5 Report,GLOTAXB15,,No
+All Incoming/Outgoing VAT Invoices with Original Order Items,GLOTAXTIB02,All Incoming/Outgoing VAT Invoices with Original Order Items - Data Source,No
+RG1: Excise Register - India,GLOTAXU03,"Shows an overview of the RG1 Indian excise register for the selected period
+",No
+GLOTAXU05,GLOTAXU05,,No
+Trade Receivables Payables Register - Details,GLOTRPB01,Trade Receivables Payables Register - Details,No
+Gregorian Date,GREGDATEB,,No
+Employee Bank Details,HCMBANKB01,"Provides information on employee bank details such as bank name, account number and account type.",No
+Compensation Details,HCMCMPB,"Provides information on employee compensation details such as Compensation Component ID, Compensation Component Amount, Compensation Structure ID, Grade ID and other related details.",No
+Taxes - Product Tax Details,GLOTAXB01,Product Tax Details - Taxes Data Source,No
+Employee Master Data,HCMEMPB,Provides information on employee master data such as employee's workplace address and user details with their validities,No
+Comparison of Employee Data in ByD and EC,HCMMDRC01,Provides comparison of employee’s data in ByDesign and Employee Central systems.,No
+Headcount,HCMPAB01,"Provides information on employee headcount, FTE, age and length of service.",No
+Employee Disability - US,HCMPAB05US,Provides information on employee’s physical or mental impairment.,No
+Military Service & Ethnicity - US,HCMPAB06US,"Provides information on country-specific requirements that govern employers' compliance with legislation regulating employment.
+
+",No
+Employee Turnover,HCMPAU01,"Provides the number of employees entering, leaving, or transferring within the company.",No
+Internal Employee Changes,HCMPAV01,"Provides information on change history of employee master data such as employee's Biographical Data, Private Contact Data, Payment Information and Organizational Assignment.",No
+Forecasted Utilization,HCMRPMU01,"Provides visualization into the future on Forecasted Utilization of resources relevant for Resource Management, within a set period of time. Compares the commitments derived from the Scheduled Work and Absences of relevant resources assigned within a Company or a given Reporting Line Unit, with the Gross Capacity (planned working time) of these resources.",No
+Forecasted Demand,HCMRPMU02,"Provides visualization into the future on the demand for resources relevant for Resource Management within a company or reporting line unit from given projects, within a set period of time. Shows the accumulated (absolute) commitments of these relevant resources to projects.",No
+Actual Utilization,HCMRPMU03,"Provides an overview of past actual utilization of service-related resources, within a set period of time
+",No
+Employee Recorded Times,HCMTLMB07,Provides information on recorded employee times,No
+Employee Deviating Holiday Calendar,HCMTLMB11,"Employees may be assigned holiday calendars that are different from what is assigned to the Business Residence of the employee – these are termed as ""Deviating Holiday Calendars"". This data source lists out all the employees who have deviating holiday calendar assignments, and at what period of time.",No
+Employee Time Account Assignment,HCMTLMB12,Provides an overview of employee time profile with time account assignment rules.,No
+Employee Time Profile,HCMTLMB13,"Provides an overview of employee time profile with basic data and work schedule information, such as time recording profile, time recording method, hire date, termination date, work schedule category and assigned time models.",No
+Employee Time Accounts,HCMTLMU02,Provides information on the balances of employee time accounts.,No
+Employee Recorded Times for internal employees and service agent,HCMTLMU03,Employee Recorded Times for internal employees and service agent with and without org assignments,No
+Employee Time Account Postings with Corresponding calendar quantity,HCMTLMU06,Employee Time Account Postings with Corresponding calendar quantity,No
+My Bank Master Data,HOUSEBANK,"Provides my bank master data, including the bank name and ID, country and other address data, the payment medium format, and system administrative information. 
+",No
+Data Lifecycle Analysis for Business Documents,ILMBONU01,Provides lifecycle data for Business Documents such as Retention and Residence status as well as Retention and Residence dates. Deletion status of documents are also shown such as whether documents are blocked for deletion or already deleted.,No
+Data Lifecycle Predecessor Analysis for Business Documents,ILMBONU02,Data Lifecycle Predecessor Analysis for Business Documents,No
+Individual Material Master Data,INDV_MATR,"Provides individual material master data, including identification, description, quantity, product category, and system administration data.",No
+Individual Material Master Data,INDV_MATR_FA,"Provides individual material master data, including identification, description, quantity, product category, and system administration data for Fixed Assets references.",No
+Individual Material Master Data,INDV_MAT_INSTPT,"ACE DATA specific Data Source - Provides individual material master data, including identification, description,Account , Location and system administration data.
+",No
+Material Master Data,MATERIAL,"Provides material master data, including identification, description, quantity, product category, and system administration data.
+",No
+Material Availability Confirmation,MAT_AVAIL_CONF,Provides material Availability Confirmation data.,No
+Material General Data,MAT_GENERAL,Provides material general data and UoM characteristics,No
+Material General Data and UoM characteristics,MAT_GENERAL_MULTI,"Provides material general data and UoM characteristics with multiple lines
+",No
+Material Logistics Data,MAT_LOGISTICS,Provide material logistics information,No
+Material Planning,MAT_PLANNING,Provides Material Planning Data.,No
+Material Purchasing Data,MAT_PURCHASING,Provides material purchasing data.,No
+Material Quantity Conversions,MAT_QUAN_CONVERSION,Provides material quantity conversions data.,No
+Material Sales General,MAT_SALES_GEN,Provides material sales general data,No
+Material Valuation Data,MAT_VALUATION,Provide material valuation information,No
+Prediction Result,MLSINFB,,No
+Expense Report Header,ODTEXPREPHEADB,Contains expense report header data tailored for data extraction into an analytics system,No
+Expense Report Mileage,ODTEXPREPMILEAGEB01,Contains expense report mileage data tailored for data extraction into an analytics system,No
+Expense Report Action History,ODTEXPU03,Shows details about statuses of expense reports and actions that initiated the status changes.,No
+Meal Per Diems,ODTMEALPERDIEMB01,"Contains expense report meal per diem data tailored for data extraction for Offboarding Processes only
+",No
+Expense Report Expense,ODTRECEIPTB01,Contains expense report expense data (expenses and itemization) tailored for data extraction into an analytics system,No
+Party Master Data,PARTY,"Provides business partner and org unit master data, including the party name and ID, the org unit ID, country and other address data, an indication whether or not the address is protected, and system administrative information.
+
+",No
+Product Design Version,PLMPDB02,"Provides product design version master data information including product design version ID, name and description.",No
+Product Design,PLMPDU01,Provides product design details including relevant product and BOM details. It also provides data for parent product design.,No
+Defect Analysis,PLMQDFU01,"Provides data for the analysis of defects, including the inspection ID, customer, product category, and the number of internally caused defects.",No
+Inspection Analysis,PLMQINU01,"Provides data for the analysis of inspections, including the inspection decision, product category, and the inspector.",No
+Baseline Project,PROBSLB,Provides project baseline header data.,No
+Customer Projects,PROCPIU02,"Provides customer project-related key figures from sales orders, invoice requests, and invoices including work progress, quantities, amounts, and net values.",No
+Revenue Contribution,PROCPIU03,"Provides information on quantities, amounts, revenue contribution, and work progress, based on project time and expenses.",No
+Product Master Data,PRODUCT,"Provides product master data, including identification, description, quantity, product category, and system administration data.
+",No
+Product Category Master Data,PROD_CATG,"Provides product category master data, including identification and description data.
+",No
+Product Category Master Data,PROD_CATG_SUPP_PLAN,"Provides product category master data, including identification and description data.
+",No
+Product Category Master Data,PROD_CATG_USG_PRODUCTION,"Provides product category master data, including identification and description data.
+",No
+Product Valuation Level Master Data,PROD_VLLV,Provides Master Data for Product Valuation Level,No
+Project Time Confirmations,PROPCFB,Provides project time confirmation data.,No
+Project Expense Reassignment,PROPERRB01,Provides an overview of expenses reassignment,No
+Project Expense Item,PROPEVB01,Provides project expense data on item level.,No
+Project Expense Items,PROPEVU01,Provides project expense data on item level.,No
+Project Task Materials,PROPMTB,Provides planned and consumed quantities of materials assigned to project tasks.,No
+Project Task (MD),PROPOBB,Provides task master data from a project.,No
+Project Team Member,PROPPAB,Provides data like actual work or committed work for project team members. Data is not dissolved for project task or task services.,No
+Project Purchase Request,PROPPRB01,Provides Project Purchase Request Data,No
+Project,PROPRJB,Provides project header data.,No
+Project Snapshots,PROPRJU01,Provides all relevant snapshot-related data.,No
+Projects,PROPRJU02,Provides all relevant project-related data.,No
+"Projects, Baselines: Tasks and Staffing",PROPRJU04,"Provides task-related data (including phases, tasks, and milestones) and staffing data for projects and baselines.",No
+"Projects, Baselines, and Snapshots",PROPRJU05,"Provides all relevant data for tasks, staffing, and confirmations of projects, baselines, and snapshots.
+",No
+"Projects, Baselines, and Snapshots Without Period Plans",PROPRJU05_TS,"Provides all relevant data for tasks, staffing, and confirmations of projects, baselines, and snapshots (without period plans)
+",No
+Project Snapshot,PROSNAB,Provides project snapshot header data.,No
+Registered Product General Information,REG_PROD_GENERAL,"Provides registered product general data, including identification, description, referenced product, warranty assignment and product location data.",No
+Registered Product Involved Parties,REG_PROD_INVOLVED_PARTY,"Provides registered product involved parties, including account custodian and owner data.",No
+Registered Product Properties,REG_PROD_PROPERTIES,,No
+Registered Product Service Processing Information,REG_PROD_SRV_INFO,"Provides registered product service processing data, including service order and service request data.",No
+Batch Transaction,SCMBATU01,,No
+Bill Of Operation Element Details,SCMBOOELEMENTU01,,No
+Customer Demand Details,SCMCDU01,"Provides the details of all customer demands from various sources like sales order, service order, stock transfer order & project stock order.",No
+Confirmation Journal,SCMCFJU01,"Provides transaction data related to inventory changes and inventory movements, including goods issues/receipts/movements. It also shows changes to inventory as a result of confirmed warehouse and production tasks.",No
+Inbound Delivery Details,SCMCIDB01,"Provides transaction data of inbound delivery documents, including product items, quantities, business partner, item references, and status information.",No
+Inbound Delivery Item Details,SCMCIDB03,"Provides transaction data of inbound delivery documents, including product items, quantities, identified stock, product requirement specifications and status information.",No
+Inbound Delivery Document -  Item Details,SCMCIDB04,"Provides transaction data of inbound delivery documents, including product items, quantities, identified stock, product requirement specifications and status information.",No
+Demand Plan Report,SCMDPAV01,"Provides details of the demand plan, including the key figures: actuals, final actuals, forecast, final forecast, and distribution factors.  This information is based on the demand plan characteristics including ID, supply planning area, product and dates.
+",No
+Supply Planning Product Exceptions,SCMEXCV01,Provides information related to the supply planning product exceptions from planning runs and availability checks.,No
+Inbound Delivery Notification Item for Purchase Orders,SCMIDNB01,Provides data about inbound delivery notification item for purchase orders along with some purchase order information.,No
+Inbound Delivery Notification Item for All Orders,SCMIDNB02,Provides data about inbound delivery notification item for all type of orders.,No
+Inbound Delivery Request - Item Details,SCMIDRB01,Inbound Delivery Request - Item Details - Provides details related to Material movement with respect to Purchase Orders,No
+Inventory Balance,SCMINBU03,The Inventory Balance report provides details of the user’s opening and ending balance of inventory at a location and logistics area. It also shows details of incoming and outgoing inventory over a defined period of time.,No
+Inventory Balance Details,SCMINBU04,Shows details of confirmations relating to inventory over a given period of time.,No
+Inventory Ageing,SCMINVAGV04,,No
+Inventory Ageing for Predelivered Stock,SCMINVAGV05,,No
+Inventory Allocation,SCMINVALLOC,The Inventory Allocation report provides details of the allocated inventory at a location and logistics area for a particular document which could be warehouse order (inbound/outbound) or production order.,No
+Inventory Notification,SCMINVNOTIF,"Provides transaction data related to inventory notifications, including internal notification ID, external notification ID, product, product quantity and so on.",No
+Stock Overview,SCMINVV02,,No
+Production Bills of Material Line Items with Engineering Change Orders,SCMITEMCHST,,No
+Logistics Area General Information,SCMLOARESTB01,"Provides an overview of Logistics Area General Information, such as Location ID, Logistics Usage, Child Logistics Area ID.",No
+Logistics Area Restrictions Information,SCMLOARESTB02,,No
+Logistics Area Resources Information,SCMLOARESTB03,,No
+Logistics Area Material Flow Rules Information,SCMLOARESTB04,,No
+Logistics Area Replinishment and Removal Rules Information,SCMLOARESTB05,,No
+Site/Location Information Details,SCMLOCLYTB01,Site/Location Information Details,No
+Material Supply and Demand List Aggregated View,SCMMSDVV01,Provides aggregated information of material supply and demand. It includes the forecast and dependent demand of materials.,No
+Material Supply and Demand List,SCMMSDVV02,Provides information about material supply and demand.,No
+Compensation Structure Details,HCMCMPB02,"Provides an overview of all the Employees for a selected Compensation Structure ID. Also provides information on Grade, Compensation Structure Validity Start Date, End Date, and other compensation structure related details.",No
+Outbound Delivery Item Party Details,SCMOBDB04,Outbound Delivery Item Party Details,No
+Outbound Delivery Item Details,SCMOBDU01,Outbound Delivery Item Details,No
+Outbound Delivery Items,SCMOBDU01_IT,Outbound Delivery Items,No
+Outbound Delivery Detail Line Items,SCMOBDU02,Outbound Delivery Detail Line Items,No
+Outbound Delivery Performance Details,SCMODPB01,"Provides transaction data of outbound delivery documents, including order ID, product, account, sales unit, and ship-from site ID.",No
+Order – Delivery / Complete View,SCMODSOU01,Order – Delivery / Complete View,No
+PBOM Mass Maintenance Run Parameter Details,SCMPBOMMNT01,,No
+PBOM Mass Maintenance Run Selection Details,SCMPBOMMNTU01,,No
+PBOM Mass Maintenance Run Parameter Details,SCMPBOMMNTU02,,No
+Production Bills of Material Variant and Line Item Details,SCMPBOMU,,No
+Production Bills of Material Variant and Assigned Line Item Details,SCMPBOMU02,"Provides production bills of material variant details, including bill of material general data, variantdata, input product data, output product data and assigned line item data.",No
+Material Supply And Demand Keyfigures,SCMPDV01,"Provides information of the key figures related to material supply and demand such as available stock, safety stock, total demand and total receipts.",No
+Production Model Activity Details,SCMPMACTIVITYU01,,No
+Production Model ByProduct Activity Assignment Details,SCMPMBYPRODUCTU01,,No
+Production Model Element Details,SCMPMELEMENTU01,,No
+Production Model ItemGroup Item Details,SCMPMITEMSU01,,No
+Production Model Activity ItemGroup Assignment Details,SCMPMITMGRPU01,,No
+Production Model Details,SCMPMODELEMENTU01,,No
+Production Orders By Header Execution Details,SCMPOHDREXECU01,,No
+Production Orders By Header Input Products,SCMPOHDRIPU01,,No
+Production Order By Header Output Products,SCMPOHDROPU01,,No
+Production Orders/Lot: Dates and Quantities,SCMPOHDROPU02,Production Orders/Lot: Dates and Quantities,No
+Production Orders By Header Resources,SCMPOHDRRESU01,,No
+Production Orders By Header General Details,SCMPOHDRU01,,No
+Production Orders By Header Order Structure Activities,SCMPOHDR_ORDSTR_ACTU01,,No
+Production Orders By Header Order Structure Reporting Points,SCMPOHDR_ORDSTR_RPU01,,No
+Resource Requirement,SCMPPTB01,Provides transaction data of production orders including the planned processing time of resources used in the orders.,No
+Resource Utilisation,SCMPPTB02,Provides transaction data of production lots including the actual processing time of resources used in the production process.,No
+Production Processing Times,SCMPPTU01,Provides transaction data of planned and actual processing times of production orders.,No
+Outbound Delivery Header Details,SCMOBDB01,Outbound Delivery Header Details,No
+Production Request Fulfillment - Expected Data,SCMPRFB01,Provides transaction data of production requests including the requested quantity and fulfilled quantity.,No
+Production Request Fulfillment - Actual Data,SCMPRFB02,Provides transaction data of production requests including the start dates and end dates for the production processes.,No
+Production Request Fulfillment,SCMPRFU01,"Provides transaction data of production request fulfillment, including planned and actual quantities, and dates.",No
+Production Task,SCMPTV01,,No
+Production Task with all Dates,SCMPTV02,Production Task with all Dates,No
+Datasource for Resource Load,SCMRLU01,Datasource for Resource Load,No
+Production Bills of Material Variants,SCMVARIANT,,No
+Item Change List Aggregated View,SCMVARITEMCHSTASN,,No
+SCMWOINP,SCMWOINP,,No
+SCM Warehouse requests Execution details Items,SCMWREXEU01,,No
+Warehouse Request Items,SCMWREXE_V1,"Provides the details of the planned and executed warehouse request items for inbound, outbound and internal warehouse requests",No
+SCM Warehouse Requests,SCMWRGENU01,,No
+SCM Warehouse Requests Planned Items,SCMWRPLNU01,,No
+Yield & Scrap,SCMYASU01,Provides transaction data of planned and actual scrap of production orders.,No
+Identified Stock,SCM_ISTOCK,"Provides identified stock master data, including ID and description, as well as the reference Product ID and Material ID.",No
+Location,SCM_LOCATION,"Provides location master data, including ID and roles, for example: Service Point, Ship-From, and Ship-To data.",No
+Logistics Area,SCM_LOG_AREA,"Provides logistics area master data, including ID and description.",No
+Logistics Area,SCM_LOG_AREA_DESG_MAT,"Provides logistics area master data, including ID and description.",No
+Logistics Unit,SCM_LU,"Provides logistics unit master data, including ID and description.",No
+Production Lot,SCM_PROD_LOT,"Provides header master data of production lots including the ID and the organizational unit ID.
+",No
+Production Order,SCM_PROD_ORDER,"Provides header master data of production orders, including the ID and the output product.",No
+Released Execution Production Model Operation,SCM_REPM_OPER,"Provides released execution production model master data of operations, including the ID and the description.
+",No
+Resource,SCM_RESOURCE,"Provides resource master data, including resource ID and resource type.
+",No
+Resource Load,SCM_RESOURCE_LOAD,"Provides information related to resource load, including details of material, proposal document and operation dates.",No
+Supply Planning Area,SCM_S_PL_AREA,"Provides supply planning area master data, including planning area ID and location.
+
+",No
+Serial Inventory,SERIAL_INV,Serial Inventory.,No
+Service Master Data,SERVICE,"Provides service master data, including identification, description, quantity, product category, and system administration data.",No
+Purchasing Contract Header Data,SRMCT_B01,"Provides header transaction data of purchasing contracts, including creation date, project assignment, and status information.
+",No
+Purchasing Contract Item Details,SRMCT_B02,"Provides transaction data of items in a purchasing contract, including contract details, supplier information, contract item details, value, quantity, and status.",No
+Purchasing Contract Item Release,SRMCT_B03,"Provides transaction data of released items in a purchasing contract, including contract details, supplier information, contract item details, value, quantity, and status.",No
+Purchasing Contract Analysis,SRMCT_U01,"Provides transaction data of items in a purchasing contract, including contract details, supplier information, contract item details, value, quantity, and status. It also provides the contract item's Release details like release document, release quantity, release value and release date.",No
+Goods Receipt Item Details,SRMGR_B02,"Provides transaction data of goods receipt items, including the net value, the quantity, the product, and the transaction date.
+
+",No
+Production Confirmation Details for SAP Product Footprint Management for Clean O,SCMPRDCNFU01,"Provides the Production Confirmation details, such as the production lot data, resource data, and service activity data. This data source has been created for the Production Confirmation data to be consumed in the SAP Product Footprint Management for Clean Operations solution.",No
+Shopping Cart Item Details,SRMIR_B02,"Provides transaction data of shopping cart items, including the net value, the quantity, the product, the status, the requester, and the approver.
+",No
+Shopping Cart Account Assignment,SRMIR_B03,Shopping Cart Account Assignment,No
+Supplier Invoice Item Details,SRMIV_B03,"Provides transaction data of supplier invoice items, such as the net value, quantity, and the cost center.
+
+
+",No
+Spend per Product,SRMIV_UDC,"Provides an overview of the total costs (with additional costs) of supplier invoices per product and supplier.
+
+
+",No
+Supplier Invoice and Supplier Invoice Exception Analysis,SRMIX_U01,"Provides transaction data about the invoices with exceptions, the corresponding invoice values, the percent of invoices and invoice values with exceptions, and the number of exceptions as well as the kind of exception.",No
+Landed Cost Allocation Details,SRMLCA_B01,"Provides allocation document details such as allocation document ID, item ID, status, type, landed cost component, category, product ID, supplier, service provider, landed cost invoice, invoice posting date, invoice status, purchase order, purchase order currency, actual delivery date, planned amount, allocated amount, delivery quantity, gross weight, gross volume, allocated total invoice amount and allocated total credit memo amount.",No
+SRM PO Acknowledgement Details,SRMPCO_B01,,No
+SRM PCO Item level Details,SRMPCO_B02,,No
+SRM PO Acknowledgement Details,SRMPCO_U01,,No
+SRM PCO Item level Details,SRMPCO_U02,,No
+Planned Landed Costs in Purchase Orders,SRMPLC_B01,"Provides transaction data of planned landed cost components, including the net value, the delivery date, and the ordering date of the Purchase Orders.",No
+Purchase Order Header Data,SRMPO_B01,"Provides header transaction data of purchase orders, including the purchase order ID, the status, and the creation date.
+",No
+Purchase Order Item Details,SRMPO_B02,"Provides transaction data of purchase order items, including the net value, the quantity, the delivery date, and the ordering date.
+
+",No
+Purchase Order Account Assignment,SRMPO_B03,"Provides transaction data of the purchase orders created per account assignment, including the net value, the quantity, the ordering date, and the account assignment.
+
+",No
+Purchase Order Schedule Lines,SRMPO_B09,,No
+Purchase Order Item Details with Follow on Documents,SRMPO_B12,Purchase Order Item Details with Follow on Documents,No
+Purchase Order Items with Extended Tracking Details,SRMPO_U01,"Purchase Order Items with Extended Tracking Details
+",No
+Purchase Order Delivery Reliability,SRMPO_U02,Purchase Order Delivery Reliability,No
+Procurement Price Specification Details - Refer KBA 3555842 to display details,SRMPRC_B01,Procurement Price Specification Details - Refer KBA 3555842 to display details of List Price with Scale Prices,No
+Purchase Request Item Details,SRMPR_B02,"Provides transaction data of purchase request items, including the requester, the net value, the quantity, the creation date, and the delivery date.
+
+",No
+Purchase Request Account Assignment,SRMPR_B03,"Provides transaction data of the purchase requests created per account assignment, including the net value, the quantity, the ordering date, and the account assignment.
+
+",No
+Purchase Request Fullfillment,SRMPR_B04,"Provides transaction data of the purchase request items and purchase order items to evaluate the fulfillment.
+",No
+Supplier Quote Item Details,SRMQT_B02,"Provides transaction data of supplier quote items, including the net value, the quantity, the awarding status, the product, and the submission status. 
+
+",No
+Request For Quote Item Details,SRMRQ_B02,"Provides transaction data of request for quote items, including the target value, the quantity, the product, and the submission deadline.
+
+",No
+Return to Suppliers,SRMRTS_B01,"Provides transaction data of return to suppliers, including the product, the supplier, the site, the quantity and other information.",No
+Procurement Price Specification Scales Data Source - Ref KBA 3555842,SRM_PPS_SCALES_MDAV,Procurement Price Specification Scales Data Source - Refer KBA 3555842 to display details of List Price with Scale Prices,No
+Supplier Master Data,SUPPLIER,"Provides supplier master data, including the supplier name and ID, country and other address data, information that is specific to a business partner person or organization, the supplier ABC classification, and system administrative information.",No
+Supplier Hierarchies,SUPPLIER_HIERARCHY,"Provides an overview of supplier hierarchy data, including hierarchy ID and name.",No
+Supplier Hierarchy,SUPP_HIERARCHY,Supplier Hierarchy,No
+Software History,TLM_TENANT_HISTORY,"Provides data about the entire system history of your tenant, including change data, product version data, patches, and support packages.",No
+Warranty Master Data,WARRANTY,"Provides warranty master data, including identification, description, quantity, product category, and system administration data.
+
+",No
+Shopping Cart Header Data,SRMIR_B01,"Provides header transaction data of shopping carts, including the shopping cart ID, the status, and the creation date.
+
+",No
+Supplier Personal Data Disclosure,ILM_PERSON_SUPPLIER,,No
+PO Reminder Letter Proposal Details,SRMPO_REM_B01,"Provide details for PO Reminder Letter Proposals for eg. Proposal ID, Proposal Date, Purchase order, Purchase order item details like ordered and open qty.",No
+SRMSIV_STG_OBJ,SRMSIV_STG_OBJ,,No
+Electronic Payment Document for Mexico,GLOFINPAYMXU01,,No
+Electronic Payment Document for Mexico,GLOFINPAYMXV01,,No
+Compensation Component Details,HCMCMPB01,"Provides an overview of all the Employees for a selected Compensation Component ID. Also provides information on Compensation Amount, and other compensation component related details.",No
+Customer Contract Item with Invoice Schedule Items,CRMCUCOISCU,Contains all customer contract items with corresponding invoice schedule items. It allows you to see the planned revenue for each date specified in an invoice schedule.,No
+Sales Order Item-Extended,CRMSLOIB01,Contains data on the quantities and values of sales order items. It allows you to analyze the development and distribution of sales order items across organizational units.,No
+VAT / Sales Tax Details,FINTAXU09,"Provides line items for VAT or sales tax from the tax register.
+",No
+Japan Summary Invoice Tax Information Details,GLOISJPB02,"Provides header information, balance information details, tax information and tax details per tax code of the Monthly invoices.",No
+Customer Invoice Item,CRMCIVIB,"Contains all customer invoice items. It provides you with information on the products, quantities, gross amounts, net amounts, and tax amounts.",No
+Incoming Check,FINPAYU10,,No
+Acc Term Empl,BPCSRSPEMPTERM,Account with terminated employee responsible,No
+Gross Capacity and Absences,HCMRPMB04,"Provides visualization into the Gross Capacity (planned working time) and Absences of the employees, based on the entered period.",No
+Service Order Processing with Resource Calendar,HCMRPMB05,"Provides visualization into the Service Order Processing within Resource Calendar of the employees, based on the entered period.",No
+Planned Work Assignments,HCMRPMU04,"Provides visualization into the Planned Work assignments of resources relevant for Resource Management, within a set period of time. This information is derived from the tasks, task services and period plans (excluding the unassigned ones) used while planning the resource against projects.",No
+Resource Calendar,HCMRPMU05,"Provides visualization into the Planned Work assignments of resources relevant for Resource Management, within a set period of time. Shows the information provided in the Resource Calendar and compares the Planned Work, Absences and Availability of relevant resources assigned within a Company or a given Reporting Line Unit, with the Gross Capacity (planned working time) of these resources.",No
+Customer Invoice Header,CRMCIVHB,"Contains all customer invoice headers. It provides a basis for reporting on queries to identify customer invoice reference IDs, and document types, business partners like account or bill-to parties, for example. 
+",No
+Sales Price/Discount List Item Count,CRMPRC_CNT,DataSource to show Sales Price List ID/Discount List ID with Price Specification Count,No
+FINPAYU07,FINPAYU07,,No
+FINPAYU08,FINPAYU08,,No
+Employee Times,HCMTLMU01,Provides information on planned and recorded employee times.,No
+Registered Product Movement History,REG_PROD_MH,"Provides registered product movement history data, including confirmed inbound delivery, outbound delivery and service confirmation data.",No
+All Business Roles,CCABUSINESS_ROLE,Shows the authorization assigned in the business role,No
+Supplier Invoice Header Data,SRMIV_B01,"Provides transaction data of Supplier Invoice Header.
+",No
+Physical Inventory Count Items,SCMPIV01,,No
+Procurement Price Specification To display Details,SRMPRC_B01_PPS_SCALES,Procurement Price Specification To display Details -  List Price with Scale Prices,No
+Procurement Price Specification To display List Price with Scale Prices Details,SRMPRC_B01_SCALES,Procurement Price Specification To display Details -  List Price with Scale Prices,No
+Expense and Reimbursement Details,FINERMU01_IT1,"Provides detailed information about expenses and reimbursement rates. Shows the expense amounts, net expense amounts, and VAT amounts, as well as the reimbursement amounts and prepaid amounts. 
+
+Aggregates information from the following Data Sources: Expense Report Information; Expenses and Expense Amounts; Reimbursement Rates. 
+
+This data source forms the basis for the following key reports: Expense Reports - Expenses and Reimbursements; Expense Reports - Input VAT Refund.
+",No
+Internal Employee Details,HCMPAB08,"Provides an overview of employee’s data (Biographical Data, Private Contact Data, Workplace Contact Data, Work Agreement data, Org Assignment Data, Payment Info)",No
+DS_ProductionLot_Quantity,YESHSD9NY_ISOOCVN8WMG6I9,,No
+Production Order,Z120934CDD46673C458CD66,,No
+Sales Report,Z14D54353ED9EA8CE15BA35,,No
+Allocated V3,Z32D19A471F4BCF332BAD74,,No
+Prod Order V1,Z5392757422BF5C89F4D423,,No
+WIP,Z604BB753B223CD98AB512A,Production Order By Header Output Products + Material Valuation,No
+Sales Report 1,Z751DEBDDBF41B38A96FED2,Customer Invoice  Price Components + Customer Invoice Item,No
+Withhold Tax Report,Z77B472A48BDE0570E4EF8C,,No
+Supplier Master,Z82A0255AE27D1C732C3010,,No
+Purchase Order History,Z86ED0C578FEEBFEC9F5269,,No
+2022 feb,Z8F26BF2A5A39D7CE44D1CD,,No
+Sales Report 2,Z9E7AD1057D7BEC6BE9A489,Sales Report 1 + Account Financial Data + Sales Order Item + Product Master Data,No
+Open Purchase order report with supplier,ZAC77CD37E5C16E04440E0F,,No
+Allocated & Onhand Stock,ZAF2D340BC18F70A9B927F6,Stock Overview + Inventory Allocation,No
+FA Custom,ZBB4B8275C34742B42E21D4,,No
+test 2022 jan,ZC7A72FA23588794A6BADD1,,No
+Goods Receipt Tracking with Invoice,ZE05BD28A1593E1193DC49E,Goods Receipt Tracking with Invoice,No
+Consumption-With Value,ZF0F0E52ABC2005D01A899B,Inventory Adjustment-with value,No
+inbound del + purchase order,ZF57C49CD6EAFA5067E4659,,No
+Consumption Test,ZF998482F18394369C5C79F,,No
+Inventory Allocation Custom,ZFE0E93BFC6D48B322FDCA5,,No
+DS_ProductionLot_Quantity,Y9GPG2HBY_ISOOCVN8WMG6I9,,No
+Monitoring Purchase order,Z6F7ECA9CA0C98BFF4DA1BD,,No

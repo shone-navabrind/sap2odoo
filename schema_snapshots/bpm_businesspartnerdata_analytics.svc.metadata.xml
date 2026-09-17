@@ -1,0 +1,855 @@
+<?xml version="1.0" encoding="utf-8"?>
+<edmx:Edmx Version="1.0" xmlns:edmx="http://schemas.microsoft.com/ado/2007/06/edmx">
+    <edmx:DataServices m:DataServiceVersion="1.0"
+        xmlns:m="http://schemas.microsoft.com/ado/2007/08/dataservices/metadata">
+        <Schema Namespace="sapbyd" xmlns="http://schemas.microsoft.com/ado/2008/09/edm">
+            <EntityType Name="RPBPCSCARB_Q0001QueryResult" sap:semantics="aggregate"
+                sap:label="Account Collaboration Data"
+                xmlns:sap="http://www.sap.com/Protocols/SAPData">
+                <Key>
+                    <PropertyRef Name="ID" />
+                </Key>
+                <Property Name="CBO_ROLE_CODE" Type="Edm.String" Nullable="true" MaxLength="6"
+                    sap:label="Role ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:text="TBO_ROLE_CODE" />
+                <Property Name="CBUS_DOC_CODE_NAME" Type="Edm.String" Nullable="true"
+                    sap:label="Business Document Name ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CCOMMU_MEDIUM_TYPE_CODE_CONT" Type="Edm.String" Nullable="true"
+                    MaxLength="3" sap:label="Output Channel ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TCOMMU_MEDIUM_TYPE_CODE_CONT" />
+                <Property Name="CCOMM_ENABLED_INDICATOR" Type="Edm.Boolean" Nullable="true"
+                    sap:label="Active ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CDEFADDR_FORM_POSTAL_ADDR" Type="Edm.String" Nullable="true"
+                    sap:label="Account Address ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CDUPLICATE" Type="Edm.Boolean" Nullable="true"
+                    sap:label="Duplicate ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CEMAIL" Type="Edm.String" Nullable="true" MaxLength="255"
+                    sap:label="E-Mail ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CEMAIL_RECIPIENT_TYPE_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="3" sap:label="Recipient Type ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TEMAIL_RECIPIENT_TYPE_CODE" />
+                <Property Name="CFAX_NUMBER_FORMATTED" Type="Edm.String" Nullable="true"
+                    sap:label="Fax ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CFORM_TP_CODE_CONTENT" Type="Edm.String" Nullable="true"
+                    MaxLength="15" sap:label="Template ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TFORM_TP_CODE_CONTENT" />
+                <Property Name="CLIFE_CYCLE_STATUS" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Status ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:text="TLIFE_CYCLE_STATUS" />
+                <Property Name="COUTPUT_COPY_NUMBER_VALUE" Type="Edm.Int64" Nullable="true"
+                    sap:label="Number of Copies ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CPRINT_QUEUE" Type="Edm.String" Nullable="true" MaxLength="30"
+                    sap:label="Print Queue ID ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CROOT_UUID" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Account ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:filter-restriction="multi-value" sap:text="TROOT_UUID" />
+                <Property Name="FK0COUNT" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Counter Formatted" />
+                <Property Name="KK0COUNT" Type="Edm.Int32" Nullable="true" sap:label="Counter"
+                    sap:filterable="true" sap:text="FK0COUNT" sap:aggregation-role="measure" />
+                <Property Name="TBO_ROLE_CODE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Role Text" />
+                <Property Name="TCOMMU_MEDIUM_TYPE_CODE_CONT" Type="Edm.String" Nullable="true"
+                    MaxLength="60" sap:label="Output Channel Text" />
+                <Property Name="TEMAIL_RECIPIENT_TYPE_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="60" sap:label="Recipient Type Text" />
+                <Property Name="TFORM_TP_CODE_CONTENT" Type="Edm.String" Nullable="true"
+                    MaxLength="60" sap:label="Template Text" />
+                <Property Name="TLIFE_CYCLE_STATUS" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Status Text" />
+                <Property Name="TROOT_UUID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Account Text" />
+                <Property Name="P_ACCOUNT" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Account" sap:filterable="true" sap:selection-type="any"
+                    sap:selection="true" />
+                <Property Name="P_CITY" Type="Edm.String" Nullable="true" sap:label="City"
+                    sap:filterable="true" sap:selection-type="any" sap:selection="true" />
+                <Property Name="P_COUNTRY" Type="Edm.String" Nullable="true" MaxLength="3"
+                    sap:label="Country/Region" sap:filterable="true" sap:selection-type="any"
+                    sap:selection="true" />
+                <Property Name="P_STATUS" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Status" sap:filterable="true" sap:selection-type="any"
+                    sap:selection="true" />
+                <Property Name="TotaledProperties" Type="Edm.String"
+                    sap:aggregation-role="totaled-properties-list" />
+                <Property Name="ID" Type="Edm.String" />
+            </EntityType>
+            <EntityType Name="RPBPCSCONTB_Q0001QueryResult" sap:semantics="aggregate"
+                sap:label="Account Contact Data" xmlns:sap="http://www.sap.com/Protocols/SAPData">
+                <Key>
+                    <PropertyRef Name="ID" />
+                </Key>
+                <Property Name="CBO_ROLE_CODE" Type="Edm.String" Nullable="true" MaxLength="6"
+                    sap:label="Role ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:text="TBO_ROLE_CODE" />
+                <Property Name="CBP_STATUS_CODE" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Status ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:text="TBP_STATUS_CODE" />
+                <Property Name="CBP_UUID" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Account ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:filter-restriction="multi-value" sap:text="TBP_UUID" />
+                <Property Name="CCONT_FUNCTIONAL_AREA_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="4" sap:label="Department ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TCONT_FUNCTIONAL_AREA_CODE" />
+                <Property Name="CCONT_FUNCTION_TYPE_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="4" sap:label="Function ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TCONT_FUNCTION_TYPE_CODE" />
+                <Property Name="CCONT_MAIN_INDICATOR" Type="Edm.Boolean" Nullable="true"
+                    sap:label="Main Contact ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CCONT_UUID" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Contact ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:filter-restriction="multi-value" sap:text="TCONT_UUID" />
+                <Property Name="CCONT_WPA_BUILDING" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Building ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CCONT_WPA_DEPARTMENT_NAME" Type="Edm.String" Nullable="true"
+                    sap:label="Department From Business Card ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CCONT_WPA_EMAIL_CONTENT" Type="Edm.String" Nullable="true"
+                    MaxLength="255" sap:label="E-Mail ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CCONT_WPA_FAX_NUMBER" Type="Edm.String" Nullable="true"
+                    sap:label="Fax ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CCONT_WPA_FLOOR" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Floor ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CCONT_WPA_FUNCTIONAL_TITLE" Type="Edm.String" Nullable="true"
+                    sap:label="Function From Business Card ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CCONT_WPA_MOBILE_NUMBER" Type="Edm.String" Nullable="true"
+                    sap:label="Mobile ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CCONT_WPA_PHONE_NUMBER" Type="Edm.String" Nullable="true"
+                    sap:label="Phone ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CCONT_WPA_POSTAL_ADR_DESCR" Type="Edm.String" Nullable="true"
+                    sap:label="Contact Business Address ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CCONT_WPA_PREF_COMMU_MEDIUM" Type="Edm.String" Nullable="true"
+                    MaxLength="3" sap:label="Preferred Method of Contact ID"
+                    sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:text="TCONT_WPA_PREF_COMMU_MEDIUM" />
+                <Property Name="CCONT_WPA_ROOM_ID" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Room ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CCURR_EMPL_RESP_PARTY_ROLE_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="10" sap:label="Party Role ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TCURR_EMPL_RESP_PARTY_ROLE_CODE" />
+                <Property Name="CCURR_EMPL_RESP_UUID_CONTENT" Type="Edm.String" Nullable="true"
+                    MaxLength="20" sap:label="Employee Responsible ID"
+                    sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:filter-restriction="multi-value" sap:text="TCURR_EMPL_RESP_UUID_CONTENT" />
+                <Property Name="CDEFADDR_FORM_POSTAL_ADDR" Type="Edm.String" Nullable="true"
+                    sap:label="Account Address ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="FK0COUNT" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Counter Formatted" />
+                <Property Name="KK0COUNT" Type="Edm.Int32" Nullable="true" sap:label="Counter"
+                    sap:filterable="true" sap:text="FK0COUNT" sap:aggregation-role="measure" />
+                <Property Name="TBO_ROLE_CODE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Role Text" />
+                <Property Name="TBP_STATUS_CODE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Status Text" />
+                <Property Name="TBP_UUID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Account Text" />
+                <Property Name="TCONT_FUNCTIONAL_AREA_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="60" sap:label="Department Text" />
+                <Property Name="TCONT_FUNCTION_TYPE_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="60" sap:label="Function Text" />
+                <Property Name="TCONT_UUID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Contact Text" />
+                <Property Name="TCONT_WPA_PREF_COMMU_MEDIUM" Type="Edm.String" Nullable="true"
+                    MaxLength="60" sap:label="Preferred Method of Contact Text" />
+                <Property Name="TCURR_EMPL_RESP_PARTY_ROLE_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="60" sap:label="Party Role Text" />
+                <Property Name="TCURR_EMPL_RESP_UUID_CONTENT" Type="Edm.String" Nullable="true"
+                    MaxLength="60" sap:label="Employee Responsible Text" />
+                <Property Name="P_CONTACT" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Contact" sap:filterable="true" sap:selection-type="any"
+                    sap:selection="true" />
+                <Property Name="P_ACCOUNT" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Account" sap:filterable="true" sap:selection-type="any"
+                    sap:selection="true" />
+                <Property Name="P_CITY" Type="Edm.String" Nullable="true" sap:label="City"
+                    sap:filterable="true" sap:selection-type="any" sap:selection="true" />
+                <Property Name="P_COUNTRY" Type="Edm.String" Nullable="true" MaxLength="3"
+                    sap:label="Country/Region" sap:filterable="true" sap:selection-type="any"
+                    sap:selection="true" />
+                <Property Name="P_STATUS" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Status" sap:filterable="true" sap:selection-type="any"
+                    sap:selection="true" />
+                <Property Name="TotaledProperties" Type="Edm.String"
+                    sap:aggregation-role="totaled-properties-list" />
+                <Property Name="ID" Type="Edm.String" />
+            </EntityType>
+            <EntityType Name="RPBPCSRSPB_Q0001QueryResult" sap:semantics="aggregate"
+                sap:label="Account Responsibility Data"
+                xmlns:sap="http://www.sap.com/Protocols/SAPData">
+                <Key>
+                    <PropertyRef Name="ID" />
+                </Key>
+                <Property Name="CBO_ROLE_CODE" Type="Edm.String" Nullable="true" MaxLength="6"
+                    sap:label="Role ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:text="TBO_ROLE_CODE" />
+                <Property Name="CDEFADDR_FORM_POSTAL_ADDR" Type="Edm.String" Nullable="true"
+                    sap:label="Account Address ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CEEWA_EMAIL" Type="Edm.String" Nullable="true" MaxLength="255"
+                    sap:label="Employee E-Mail ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CEEWA_FAX_NUM_DESCR" Type="Edm.String" Nullable="true"
+                    sap:label="Employee Fax ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CEEWA_FORM_POSTAL_ADDR" Type="Edm.String" Nullable="true"
+                    sap:label="Employee Address ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CEEWA_MOBILE_NUM_DESCR" Type="Edm.String" Nullable="true"
+                    sap:label="Employee Mobile ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CEEWA_TEL_NUM_DESCR" Type="Edm.String" Nullable="true"
+                    sap:label="Employee Phone ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CLIFE_CYCLE_STATUS" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Status ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:text="TLIFE_CYCLE_STATUS" />
+                <Property Name="CROOT_UUID" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Account ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:filter-restriction="multi-value" sap:text="TROOT_UUID" />
+                <Property Name="CRSP_EMPL_UUID" Type="Edm.String" Nullable="true" MaxLength="20"
+                    sap:label="Employee ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:filter-restriction="multi-value" sap:text="TRSP_EMPL_UUID" />
+                <Property Name="CRSP_PTY_ROLE_CODE_DESCR" Type="Edm.String" Nullable="true"
+                    sap:label="Party Role ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="FK0COUNT" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Counter Formatted" />
+                <Property Name="KK0COUNT" Type="Edm.Int32" Nullable="true" sap:label="Counter"
+                    sap:filterable="true" sap:text="FK0COUNT" sap:aggregation-role="measure" />
+                <Property Name="TBO_ROLE_CODE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Role Text" />
+                <Property Name="TLIFE_CYCLE_STATUS" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Status Text" />
+                <Property Name="TROOT_UUID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Account Text" />
+                <Property Name="TRSP_EMPL_UUID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Employee Text" />
+                <Property Name="P_EMPLOYEE" Type="Edm.String" Nullable="true" MaxLength="20"
+                    sap:label="Employee" sap:filterable="true" sap:selection-type="any"
+                    sap:selection="true" />
+                <Property Name="P_ACCOUNT" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Account" sap:filterable="true" sap:selection-type="any"
+                    sap:selection="true" />
+                <Property Name="P_CITY" Type="Edm.String" Nullable="true" sap:label="City"
+                    sap:filterable="true" sap:selection-type="any" sap:selection="true" />
+                <Property Name="P_COUNTRY" Type="Edm.String" Nullable="true" MaxLength="3"
+                    sap:label="Country/Region" sap:filterable="true" sap:selection-type="any"
+                    sap:selection="true" />
+                <Property Name="P_STATUS" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Status" sap:filterable="true" sap:selection-type="any"
+                    sap:selection="true" />
+                <Property Name="TotaledProperties" Type="Edm.String"
+                    sap:aggregation-role="totaled-properties-list" />
+                <Property Name="ID" Type="Edm.String" />
+            </EntityType>
+            <EntityType Name="RPBPCSRSPEMPTERM_Q0001QueryResult" sap:semantics="aggregate"
+                sap:label="Accounts with term. resp employee"
+                xmlns:sap="http://www.sap.com/Protocols/SAPData">
+                <Key>
+                    <PropertyRef Name="ID" />
+                </Key>
+                <Property Name="CACCOUNT_INTERNAL_ID" Type="Edm.String" Nullable="true"
+                    MaxLength="10" sap:label="ID ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CACCOUNT_UUID" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Business Partner ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:filter-restriction="multi-value"
+                    sap:text="TACCOUNT_UUID" />
+                <Property Name="CEMPLOYEE_ID_CONTENT" Type="Edm.String" Nullable="true"
+                    MaxLength="20" sap:label="Employee ID ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CEMPLOYEE_TYPE_END_DATE" Type="Edm.DateTime" Nullable="true"
+                    sap:label="End Date ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CEMPLOYEE_TYPE_START_DATE" Type="Edm.DateTime" Nullable="true"
+                    sap:label="Start Date ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CEMPLOYEE_UUID" Type="Edm.Guid" Nullable="true" sap:label="UUID ID"
+                    sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:filter-restriction="multi-value" />
+                <Property Name="CINTERNAL_EMPLOYEE_INDICATOR" Type="Edm.Boolean" Nullable="true"
+                    sap:label="Internal Employee ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="FCCOUNT" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Counter Formatted" />
+                <Property Name="KCCOUNT" Type="Edm.Int32" Nullable="true" sap:label="Counter"
+                    sap:filterable="true" sap:text="FCCOUNT" sap:aggregation-role="measure" />
+                <Property Name="TACCOUNT_UUID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Business Partner Text" />
+                <Property Name="PARA_KEYDATE" Type="Edm.Boolean" Nullable="false"
+                    sap:label="PARA_KEYDATE" sap:filterable="true" sap:mandatory="true"
+                    sap:selection-type="single-value" sap:selection="true" />
+                <Property Name="TotaledProperties" Type="Edm.String"
+                    sap:aggregation-role="totaled-properties-list" />
+                <Property Name="ID" Type="Edm.String" />
+            </EntityType>
+            <EntityType Name="RPBUPATAXNUMBERS_Q0001QueryResult" sap:semantics="aggregate"
+                sap:label="Tax Numbers" xmlns:sap="http://www.sap.com/Protocols/SAPData">
+                <Key>
+                    <PropertyRef Name="ID" />
+                </Key>
+                <Property Name="CBUPA_UUID" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Business Partner ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:filter-restriction="multi-value" sap:text="TBUPA_UUID" />
+                <Property Name="CINTERNAL_ID" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="ID ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CTAX_COUNTRY_CODE" Type="Edm.String" Nullable="true" MaxLength="3"
+                    sap:label="Country/Region ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TTAX_COUNTRY_CODE" />
+                <Property Name="CTAX_NUMBER" Type="Edm.String" Nullable="true" MaxLength="20"
+                    sap:label="Tax Number ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CTAX_NUMBER_TYPE" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Tax Number Type ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TTAX_NUMBER_TYPE" />
+                <Property Name="FK0COUNT" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Counter Formatted" />
+                <Property Name="KK0COUNT" Type="Edm.Int32" Nullable="true" sap:label="Counter"
+                    sap:filterable="true" sap:text="FK0COUNT" sap:aggregation-role="measure" />
+                <Property Name="TBUPA_UUID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Business Partner Text" />
+                <Property Name="TTAX_COUNTRY_CODE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Country/Region Text" />
+                <Property Name="TTAX_NUMBER_TYPE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Tax Number Type Text" />
+                <Property Name="PARA_BUPA_UUID" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Business Partner" sap:filterable="true"
+                    sap:selection-type="multi-value" sap:selection="true" />
+                <Property Name="TotaledProperties" Type="Edm.String"
+                    sap:aggregation-role="totaled-properties-list" />
+                <Property Name="ID" Type="Edm.String" />
+            </EntityType>
+            <EntityType Name="RPBUPCSD_Q0001QueryResult" sap:semantics="aggregate"
+                sap:label="Account Details" xmlns:sap="http://www.sap.com/Protocols/SAPData">
+                <Key>
+                    <PropertyRef Name="ID" />
+                </Key>
+                <Property Name="CADDR_CMMNCTN_PREF_LANGU_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="2" sap:label="Language for Corporate Accounts ID"
+                    sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:text="TADDR_CMMNCTN_PREF_LANGU_CODE" />
+                <Property Name="CADDR_TAX_JURISD" Type="Edm.String" Nullable="true" MaxLength="25"
+                    sap:label="Tax Jurisdiction Code ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TADDR_TAX_JURISD" />
+                <Property Name="CBANK_ACCOUNT_ID" Type="Edm.String" Nullable="true" MaxLength="35"
+                    sap:label="Bank Account Number ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CBANK_CNTRLKEY" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Check Digit ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CBANK_END" Type="Edm.DateTime" Nullable="true"
+                    sap:label="Bank Account Valid To ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CBANK_HOLDER" Type="Edm.String" Nullable="true"
+                    sap:label="Bank Account Holder ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CBANK_IBAN" Type="Edm.String" Nullable="true" MaxLength="34"
+                    sap:label="IBAN ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CBANK_NAME" Type="Edm.String" Nullable="true"
+                    sap:label="Bank Name ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CBANK_NAT_CODE" Type="Edm.String" Nullable="true" MaxLength="35"
+                    sap:label="National Bank Code ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CBANK_NAT_COUNTRY" Type="Edm.String" Nullable="true" MaxLength="3"
+                    sap:label="Bank Country/Region ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TBANK_NAT_COUNTRY" />
+                <Property Name="CBANK_START" Type="Edm.DateTime" Nullable="true"
+                    sap:label="Bank Account Valid From ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CBP_UUID" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Account ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:filter-restriction="multi-value" sap:text="TBP_UUID" />
+                <Property Name="CCARE_OF_NAME" Type="Edm.String" Nullable="true" sap:label="C/O ID"
+                    sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CCASH_DSCNT_TERM" Type="Edm.String" Nullable="true" MaxLength="4"
+                    sap:label="Payment Terms ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TCASH_DSCNT_TERM" />
+                <Property Name="CCC_BLOCKING" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Credit Card Blocking Reason ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TCC_BLOCKING" />
+                <Property Name="CCC_DEFAULT" Type="Edm.Boolean" Nullable="true"
+                    sap:label="Default Credit Card ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CCC_EXPIRE" Type="Edm.DateTime" Nullable="true"
+                    sap:label="Credit Card Expiration Date ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CCC_HOLDER" Type="Edm.String" Nullable="true"
+                    sap:label="Credit Card Holder ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CCC_NUMBER" Type="Edm.String" Nullable="true" MaxLength="25"
+                    sap:label="Credit Card Number ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CCC_TYPE" Type="Edm.String" Nullable="true" MaxLength="14"
+                    sap:label="Credit Card Type ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TCC_TYPE" />
+                <Property Name="CCHANGE_DT" Type="Edm.String" Nullable="true" MaxLength="30"
+                    sap:label="Changed On ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CCITY_NAME" Type="Edm.String" Nullable="true" sap:label="City ID"
+                    sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CCOMPLETE_DELIVERY_REQUEST" Type="Edm.Boolean" Nullable="true"
+                    sap:label="Complete Delivery ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CCOUNTRY_CODE" Type="Edm.String" Nullable="true" MaxLength="3"
+                    sap:label="Country/Region ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TCOUNTRY_CODE" />
+                <Property Name="CCOUNTY_NAME" Type="Edm.String" Nullable="true"
+                    sap:label="County ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CCREATED_BY" Type="Edm.String" Nullable="true" MaxLength="20"
+                    sap:label="Created By ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:filter-restriction="multi-value" sap:text="TCREATED_BY" />
+                <Property Name="CCREATION_DT" Type="Edm.String" Nullable="true" MaxLength="30"
+                    sap:label="Created On ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CCURRENCY_CODE" Type="Edm.String" Nullable="true" MaxLength="3"
+                    sap:label="Currency ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:text="TCURRENCY_CODE" />
+                <Property Name="CCUST_ABC" Type="Edm.String" Nullable="true" MaxLength="1"
+                    sap:label="ABC Classification ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TCUST_ABC" />
+                <Property Name="CCUST_GRP_CODE" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Customer Group ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TCUST_GRP_CODE" />
+                <Property Name="CDELIVERY_BLOCK" Type="Edm.Boolean" Nullable="true"
+                    sap:label="Delivery Block ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CDELIVERY_BLOCK_REASON_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="2" sap:label="Delivery Block ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TDELIVERY_BLOCK_REASON_CODE" />
+                <Property Name="CDEL_PRIORITY" Type="Edm.String" Nullable="true" MaxLength="1"
+                    sap:label="Delivery Priority ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TDEL_PRIORITY" />
+                <Property Name="CDISTRICT_NAME" Type="Edm.String" Nullable="true"
+                    sap:label="District ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CDIST_CHANNEL" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Distribution Channel ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TDIST_CHANNEL" />
+                <Property Name="CDUNS_NUMBER_ID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="D-U-N-S ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CEIN_ID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="UID Number ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CEMAIL_URI" Type="Edm.String" Nullable="true" MaxLength="255"
+                    sap:label="E-Mail ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CFAX_NR" Type="Edm.String" Nullable="true" sap:label="Fax ID"
+                    sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CFRMTD_PSTL_ADDR" Type="Edm.String" Nullable="true"
+                    sap:label="Address ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CGLN_ID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Global Location Number ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CHOUSE_ID" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="House Number ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CINCTM_CODE" Type="Edm.String" Nullable="true" MaxLength="3"
+                    sap:label="Incoterms ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:text="TINCTM_CODE" />
+                <Property Name="CINCTM_TRNSFR_LOC" Type="Edm.String" Nullable="true" MaxLength="28"
+                    sap:label="Incoterms Location ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CINDS_SECTOR_CODE" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Industry ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:super-ordinate="CINDS_CLASS_SYS" sap:text="TINDS_SECTOR_CODE" />
+                <Property Name="CINVOICE_BLOCK" Type="Edm.Boolean" Nullable="true"
+                    sap:label="Invoice Block ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CINVOICE_BLOCK_REASON_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="2" sap:label="Invoice Block ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TINVOICE_BLOCK_REASON_CODE" />
+                <Property Name="CLEGAL_FORM" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Legal Form ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:text="TLEGAL_FORM" />
+                <Property Name="CMAIN_ADDRESS" Type="Edm.Boolean" Nullable="true"
+                    sap:label="Main Address ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CORDER_BLOCK" Type="Edm.Boolean" Nullable="true"
+                    sap:label="Order Block ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CORDER_BLOCK_REASON_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="2" sap:label="Order Block Reason ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TORDER_BLOCK_REASON_CODE" />
+                <Property Name="CPEPPOL_ID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Peppol Participant Identifier ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CPERS_NON_VRBAL_COM_LANGU" Type="Edm.String" Nullable="true"
+                    MaxLength="2" sap:label="Language for Private Accounts ID"
+                    sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:text="TPERS_NON_VRBAL_COM_LANGU" />
+                <Property Name="CPHONE_NR" Type="Edm.String" Nullable="true" sap:label="Phone ID"
+                    sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CPOBOX_DEVIATING_CITY_NAME" Type="Edm.String" Nullable="true"
+                    sap:label="P.O. Box City ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CPOBOX_DEVIATING_COUNTRY_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="3" sap:label="P.O. Box Country/Region ID"
+                    sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:text="TPOBOX_DEVIATING_COUNTRY_CODE" />
+                <Property Name="CPOBOX_ID" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="P.O. Box ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CPOBOX_POSTAL" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="P.O. Box Postal Code ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CPRJTN_ROLE_CODE" Type="Edm.String" Nullable="true" MaxLength="6"
+                    sap:label="Role ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:text="TPRJTN_ROLE_CODE" />
+                <Property Name="CREGION_CODE" Type="Edm.String" Nullable="true" MaxLength="6"
+                    sap:label="State ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:super-ordinate="CCOUNTRY_CODE" sap:text="TREGION_CODE" />
+                <Property Name="CSALES_GROUP_UUID" Type="Edm.String" Nullable="true" MaxLength="20"
+                    sap:label="Sales Group ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:filter-restriction="multi-value"
+                    sap:text="TSALES_GROUP_UUID" />
+                <Property Name="CSALES_OFFICE_UUID" Type="Edm.String" Nullable="true" MaxLength="20"
+                    sap:label="Sales Office ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:filter-restriction="multi-value"
+                    sap:text="TSALES_OFFICE_UUID" />
+                <Property Name="CSALES_ORGANISATION_UUID_CONT" Type="Edm.String" Nullable="true"
+                    MaxLength="20" sap:label="Sales Organization ID"
+                    sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:filter-restriction="multi-value" sap:text="TSALES_ORGANISATION_UUID_CONT" />
+                <Property Name="CSTATUS" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Status ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:text="TSTATUS" />
+                <Property Name="CSTREET_NAME" Type="Edm.String" Nullable="true"
+                    sap:label="Street ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CSTREET_POSTAL" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Postal Code ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CTAX_COUNTRY" Type="Edm.String" Nullable="true" MaxLength="3"
+                    sap:label="Tax Country/Region ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TTAX_COUNTRY" />
+                <Property Name="CTAX_ID_NR" Type="Edm.String" Nullable="true" MaxLength="20"
+                    sap:label="Tax Number ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CTAX_TYPE" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Tax Number Type ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:super-ordinate="CTAX_COUNTRY" sap:text="TTAX_TYPE" />
+                <Property Name="CWEB_URI" Type="Edm.String" Nullable="true" MaxLength="1280"
+                    sap:label="Web Site ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="FK0COUNT" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Counter Formatted" />
+                <Property Name="KK0COUNT" Type="Edm.Int32" Nullable="true" sap:label="Counter"
+                    sap:filterable="true" sap:text="FK0COUNT" sap:aggregation-role="measure" />
+                <Property Name="TADDR_CMMNCTN_PREF_LANGU_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="60" sap:label="Language for Corporate Accounts Text" />
+                <Property Name="TADDR_TAX_JURISD" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Tax Jurisdiction Code Text" />
+                <Property Name="TBANK_NAT_COUNTRY" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Bank Country/Region Text" />
+                <Property Name="TBP_UUID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Account Text" />
+                <Property Name="TCASH_DSCNT_TERM" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Payment Terms Text" />
+                <Property Name="TCC_BLOCKING" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Credit Card Blocking Reason Text" />
+                <Property Name="TCC_TYPE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Credit Card Type Text" />
+                <Property Name="TCOUNTRY_CODE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Country/Region Text" />
+                <Property Name="TCREATED_BY" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Created By Text" />
+                <Property Name="TCURRENCY_CODE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Currency Text" />
+                <Property Name="TCUST_ABC" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="ABC Classification Text" />
+                <Property Name="TCUST_GRP_CODE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Customer Group Text" />
+                <Property Name="TDELIVERY_BLOCK_REASON_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="60" sap:label="Delivery Block Text" />
+                <Property Name="TDEL_PRIORITY" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Delivery Priority Text" />
+                <Property Name="TDIST_CHANNEL" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Distribution Channel Text" />
+                <Property Name="TINCTM_CODE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Incoterms Text" />
+                <Property Name="TINDS_SECTOR_CODE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Industry Text" />
+                <Property Name="TINVOICE_BLOCK_REASON_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="60" sap:label="Invoice Block Text" />
+                <Property Name="TLEGAL_FORM" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Legal Form Text" />
+                <Property Name="TORDER_BLOCK_REASON_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="60" sap:label="Order Block Reason Text" />
+                <Property Name="TPERS_NON_VRBAL_COM_LANGU" Type="Edm.String" Nullable="true"
+                    MaxLength="60" sap:label="Language for Private Accounts Text" />
+                <Property Name="TPOBOX_DEVIATING_COUNTRY_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="60" sap:label="P.O. Box Country/Region Text" />
+                <Property Name="TPRJTN_ROLE_CODE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Role Text" />
+                <Property Name="TREGION_CODE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="State Text" />
+                <Property Name="TSALES_GROUP_UUID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Sales Group Text" />
+                <Property Name="TSALES_OFFICE_UUID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Sales Office Text" />
+                <Property Name="TSALES_ORGANISATION_UUID_CONT" Type="Edm.String" Nullable="true"
+                    MaxLength="60" sap:label="Sales Organization Text" />
+                <Property Name="TSTATUS" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Status Text" />
+                <Property Name="TTAX_COUNTRY" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Tax Country/Region Text" />
+                <Property Name="TTAX_TYPE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Tax Number Type Text" />
+                <Property Name="P_ACCOUNT" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Account" sap:filterable="true" sap:selection-type="any"
+                    sap:selection="true" />
+                <Property Name="P_CITY" Type="Edm.String" Nullable="true" sap:label="City"
+                    sap:filterable="true" sap:selection-type="any" sap:selection="true" />
+                <Property Name="P_COUNTRY" Type="Edm.String" Nullable="true" MaxLength="3"
+                    sap:label="Country/Region" sap:filterable="true" sap:selection-type="any"
+                    sap:selection="true" />
+                <Property Name="P_STATUS" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Status" sap:filterable="true" sap:selection-type="any"
+                    sap:selection="true" />
+                <Property Name="TotaledProperties" Type="Edm.String"
+                    sap:aggregation-role="totaled-properties-list" />
+                <Property Name="ID" Type="Edm.String" />
+            </EntityType>
+            <EntityType Name="RPBUPSPP_Q0001QueryResult" sap:semantics="aggregate"
+                sap:label="Supplier Details" xmlns:sap="http://www.sap.com/Protocols/SAPData">
+                <Key>
+                    <PropertyRef Name="ID" />
+                </Key>
+                <Property Name="CADDR_TAX_JURISD" Type="Edm.String" Nullable="true" MaxLength="25"
+                    sap:label="Tax Jurisdiction Code ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TADDR_TAX_JURISD" />
+                <Property Name="CBANK_ACCOUNT_ID" Type="Edm.String" Nullable="true" MaxLength="35"
+                    sap:label="Bank Account Number ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CBANK_CNTRLKEY" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Check Digit ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CBANK_END" Type="Edm.DateTime" Nullable="true"
+                    sap:label="Bank Account Valid To ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CBANK_HOLDER" Type="Edm.String" Nullable="true"
+                    sap:label="Bank Account Holder ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CBANK_IBAN" Type="Edm.String" Nullable="true" MaxLength="34"
+                    sap:label="IBAN ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CBANK_ID" Type="Edm.String" Nullable="true" MaxLength="4"
+                    sap:label="Bank ID ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CBANK_INTERNAL_ID" Type="Edm.String" Nullable="true" MaxLength="18"
+                    sap:label="Bank ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CBANK_NAME" Type="Edm.String" Nullable="true"
+                    sap:label="Bank Name ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CBANK_NAT_CODE" Type="Edm.String" Nullable="true" MaxLength="35"
+                    sap:label="National Bank Code ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CBANK_NAT_COUNTRY" Type="Edm.String" Nullable="true" MaxLength="3"
+                    sap:label="Bank Country/Region ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TBANK_NAT_COUNTRY" />
+                <Property Name="CBANK_START" Type="Edm.DateTime" Nullable="true"
+                    sap:label="Bank Account Valid From ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CBP_UUID" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Supplier ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:filter-restriction="multi-value" sap:text="TBP_UUID" />
+                <Property Name="CBUYR_PTY_SLR_ID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Customer ID at Supplier ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CCHANGE_DT" Type="Edm.String" Nullable="true" MaxLength="30"
+                    sap:label="Changed On ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CCITY_NAME" Type="Edm.String" Nullable="true" sap:label="City ID"
+                    sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CCON_ID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="German Customs Number ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CCOUNTRY_CODE" Type="Edm.String" Nullable="true" MaxLength="3"
+                    sap:label="Country/Region ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TCOUNTRY_CODE" />
+                <Property Name="CCREATED_BY" Type="Edm.String" Nullable="true" MaxLength="20"
+                    sap:label="Created By ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:filter-restriction="multi-value" sap:text="TCREATED_BY" />
+                <Property Name="CCREATION_DT" Type="Edm.String" Nullable="true" MaxLength="30"
+                    sap:label="Created On ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CCSH_DSCNT_TRM" Type="Edm.String" Nullable="true" MaxLength="4"
+                    sap:label="Payment Terms ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TCSH_DSCNT_TRM" />
+                <Property Name="CDUNS_NUMBER_ID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="D-U-N-S ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CEIN_ID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="UID Number ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CEMAIL_URI" Type="Edm.String" Nullable="true" MaxLength="255"
+                    sap:label="E-Mail ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CFAX_NR" Type="Edm.String" Nullable="true" sap:label="Fax ID"
+                    sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CFRMTD_PSTL_ADDR" Type="Edm.String" Nullable="true"
+                    sap:label="Address ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CGLN_ID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Global Location Number ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CHOUSE_ID" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="House Number ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CINCTM_CODE" Type="Edm.String" Nullable="true" MaxLength="3"
+                    sap:label="Incoterms ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:text="TINCTM_CODE" />
+                <Property Name="CINCTM_TRNSFR_LOC" Type="Edm.String" Nullable="true" MaxLength="28"
+                    sap:label="Incoterms Location ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CINDS_SECTOR_CODE" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Industry ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:super-ordinate="CINDS_SECTOR_CODE_LIST_ID" sap:text="TINDS_SECTOR_CODE" />
+                <Property Name="CKEY_WORDS_TEXT" Type="Edm.String" Nullable="true" MaxLength="20"
+                    sap:label="Key Word ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CLEGAL_FORM" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Legal Form ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:text="TLEGAL_FORM" />
+                <Property Name="CLEI_ID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Legal Entity Identifier ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CMIN_ORDER_CRNCY" Type="Edm.String" Nullable="true" MaxLength="3"
+                    sap:label="Currency Code ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TMIN_ORDER_CRNCY" />
+                <Property Name="CPEPPOL_ID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Peppol Participant Identifier ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CPHONE_NR" Type="Edm.String" Nullable="true" sap:label="Phone ID"
+                    sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CPUR_BLOCK_IND" Type="Edm.Boolean" Nullable="true"
+                    sap:label="Purchasing Blocked ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CPUR_ORDER_CONF" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Purchase Order Acknowledgement Expected ID"
+                    sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:text="TPUR_ORDER_CONF" />
+                <Property Name="CPUR_ORDER_CRNCY" Type="Edm.String" Nullable="true" MaxLength="3"
+                    sap:label="Purchase Order Currency ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TPUR_ORDER_CRNCY" />
+                <Property Name="CREGION_CODE" Type="Edm.String" Nullable="true" MaxLength="6"
+                    sap:label="State ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:super-ordinate="CCOUNTRY_CODE" sap:text="TREGION_CODE" />
+                <Property Name="CSCAC_ID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Standard Carrier Alpha-Code ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CSTATUS" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Status ID" sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:text="TSTATUS" />
+                <Property Name="CSTREET_NAME" Type="Edm.String" Nullable="true"
+                    sap:label="Street ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CSTREET_POSTAL" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Postal Code ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" />
+                <Property Name="CSUPL_ABC" Type="Edm.String" Nullable="true" MaxLength="1"
+                    sap:label="ABC Classification ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TSUPL_ABC" />
+                <Property Name="CSUPPLIER_GROUP_CODE_CONTENT" Type="Edm.String" Nullable="true"
+                    MaxLength="4" sap:label="Supplier Group ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TSUPPLIER_GROUP_CODE_CONTENT" />
+                <Property Name="CSWT_COUNTRY" Type="Edm.String" Nullable="true" MaxLength="3"
+                    sap:label="Withholding Tax Country/Region ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TSWT_COUNTRY" />
+                <Property Name="CSWT_TAX_EXEMPTION_REASON_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="13" sap:label="Withholding Tax Exemption Reason ID"
+                    sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:super-ordinate="CSWT_COUNTRY" sap:text="TSWT_TAX_EXEMPTION_REASON_CODE" />
+                <Property Name="CSWT_TAX_RATE" Type="Edm.String" Nullable="true" MaxLength="15"
+                    sap:label="Withholding Tax Rate ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:super-ordinate="CSWT_COUNTRY" sap:text="TSWT_TAX_RATE" />
+                <Property Name="CSWT_TAX_TYPE" Type="Edm.String" Nullable="true" MaxLength="13"
+                    sap:label="Withholding Tax Rate Type ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:super-ordinate="CSWT_COUNTRY" sap:text="TSWT_TAX_TYPE" />
+                <Property Name="CSWT_WITHH_TAX_INCOME_TYPE_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="18" sap:label="Withholding Tax Income Type ID"
+                    sap:aggregation-role="dimension" sap:filterable="true"
+                    sap:super-ordinate="CSWT_COUNTRY" sap:text="TSWT_WITHH_TAX_INCOME_TYPE_CODE" />
+                <Property Name="CTAX_COUNTRY" Type="Edm.String" Nullable="true" MaxLength="3"
+                    sap:label="Tax Country/Region ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:text="TTAX_COUNTRY" />
+                <Property Name="CTAX_ID_NR" Type="Edm.String" Nullable="true" MaxLength="20"
+                    sap:label="Tax Number ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="CTAX_TYPE" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Tax Number Type ID" sap:aggregation-role="dimension"
+                    sap:filterable="true" sap:super-ordinate="CTAX_COUNTRY" sap:text="TTAX_TYPE" />
+                <Property Name="CWEB_URI" Type="Edm.String" Nullable="true" MaxLength="1280"
+                    sap:label="Web Site ID" sap:aggregation-role="dimension" sap:filterable="true" />
+                <Property Name="FK0COUNT" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Counter Formatted" />
+                <Property Name="KK0COUNT" Type="Edm.Int32" Nullable="true" sap:label="Counter"
+                    sap:filterable="true" sap:text="FK0COUNT" sap:aggregation-role="measure" />
+                <Property Name="TADDR_TAX_JURISD" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Tax Jurisdiction Code Text" />
+                <Property Name="TBANK_NAT_COUNTRY" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Bank Country/Region Text" />
+                <Property Name="TBP_UUID" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Supplier Text" />
+                <Property Name="TCOUNTRY_CODE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Country/Region Text" />
+                <Property Name="TCREATED_BY" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Created By Text" />
+                <Property Name="TCSH_DSCNT_TRM" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Payment Terms Text" />
+                <Property Name="TGLO_IL_SHAAM_GROUP" Type="Edm.String" Nullable="true"
+                    MaxLength="60" sap:label="Shaam Group Text" />
+                <Property Name="TINCTM_CODE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Incoterms Text" />
+                <Property Name="TINDS_SECTOR_CODE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Industry Text" />
+                <Property Name="TLEGAL_FORM" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Legal Form Text" />
+                <Property Name="TMIN_ORDER_CRNCY" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Currency Code Text" />
+                <Property Name="TPUR_ORDER_CONF" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Purchase Order Acknowledgement Expected Text" />
+                <Property Name="TPUR_ORDER_CRNCY" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Purchase Order Currency Text" />
+                <Property Name="TREGION_CODE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="State Text" />
+                <Property Name="TSTATUS" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Status Text" />
+                <Property Name="TSUPL_ABC" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="ABC Classification Text" />
+                <Property Name="TSUPPLIER_GROUP_CODE_CONTENT" Type="Edm.String" Nullable="true"
+                    MaxLength="60" sap:label="Supplier Group Text" />
+                <Property Name="TSWT_COUNTRY" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Withholding Tax Country/Region Text" />
+                <Property Name="TSWT_TAX_EXEMPTION_REASON_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="60" sap:label="Withholding Tax Exemption Reason Text" />
+                <Property Name="TSWT_TAX_RATE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Withholding Tax Rate Text" />
+                <Property Name="TSWT_TAX_TYPE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Withholding Tax Rate Type Text" />
+                <Property Name="TSWT_WITHH_TAX_INCOME_TYPE_CODE" Type="Edm.String" Nullable="true"
+                    MaxLength="60" sap:label="Withholding Tax Income Type Text" />
+                <Property Name="TTAX_COUNTRY" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Tax Country/Region Text" />
+                <Property Name="TTAX_TYPE" Type="Edm.String" Nullable="true" MaxLength="60"
+                    sap:label="Tax Number Type Text" />
+                <Property Name="P_SUPPLIER" Type="Edm.String" Nullable="true" MaxLength="10"
+                    sap:label="Supplier" sap:filterable="true" sap:selection-type="any"
+                    sap:selection="true" />
+                <Property Name="P_CITY" Type="Edm.String" Nullable="true" sap:label="City"
+                    sap:filterable="true" sap:selection-type="any" sap:selection="true" />
+                <Property Name="P_COUNTRY" Type="Edm.String" Nullable="true" MaxLength="3"
+                    sap:label="Country/Region" sap:filterable="true" sap:selection-type="any"
+                    sap:selection="true" />
+                <Property Name="P_STATUS" Type="Edm.String" Nullable="true" MaxLength="2"
+                    sap:label="Status" sap:filterable="true" sap:selection-type="any"
+                    sap:selection="true" />
+                <Property Name="TotaledProperties" Type="Edm.String"
+                    sap:aggregation-role="totaled-properties-list" />
+                <Property Name="ID" Type="Edm.String" />
+            </EntityType>
+            <EntityContainer Name="bpm_businesspartnerdata_analytics"
+                m:IsDefaultEntityContainer="true">
+                <EntitySet Name="RPBPCSCARB_Q0001QueryResults"
+                    EntityType="sapbyd.RPBPCSCARB_Q0001QueryResult" />
+                <EntitySet Name="RPBPCSCONTB_Q0001QueryResults"
+                    EntityType="sapbyd.RPBPCSCONTB_Q0001QueryResult" />
+                <EntitySet Name="RPBPCSRSPB_Q0001QueryResults"
+                    EntityType="sapbyd.RPBPCSRSPB_Q0001QueryResult" />
+                <EntitySet Name="RPBPCSRSPEMPTERM_Q0001QueryResults"
+                    EntityType="sapbyd.RPBPCSRSPEMPTERM_Q0001QueryResult" />
+                <EntitySet Name="RPBUPATAXNUMBERS_Q0001QueryResults"
+                    EntityType="sapbyd.RPBUPATAXNUMBERS_Q0001QueryResult" />
+                <EntitySet Name="RPBUPCSD_Q0001QueryResults"
+                    EntityType="sapbyd.RPBUPCSD_Q0001QueryResult" />
+                <EntitySet Name="RPBUPSPP_Q0001QueryResults"
+                    EntityType="sapbyd.RPBUPSPP_Q0001QueryResult" />
+                <FunctionImport Name="Logoff" ReturnType="Edm.String" m:HttpMethod="POST" />
+            </EntityContainer>
+        </Schema>
+    </edmx:DataServices>
+</edmx:Edmx>

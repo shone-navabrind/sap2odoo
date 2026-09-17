@@ -1,0 +1,67 @@
+#,Module,Data Type,Data Object,Mandatory,FY25-26,FY24-25,FY23-24,FY22-23,FY21-22,FY20-21
+1,Accounts,Master,Chart of Accounts,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+2,Accounts,Master,Taxes,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+3,Accounts,Master,Fiscal Positions,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+4,Accounts,Master,Payment Terms,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+5,Accounts,Master,Banks,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+6,Accounts,Master,Cost Centers,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+7,Accounts,Master,Analytic Accounts,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+8,Accounts,Transaction,Open Customer Invoices,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+9,Accounts,Transaction,Open Vendor Bills,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+10,Accounts,Transaction,Customer Payments,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+11,Accounts,Transaction,Vendor Payments,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+12,Accounts,Transaction,Bank Statements,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+13,Accounts,Transaction,Journal Entries,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+14,Accounts,Transaction,Fixed Assets,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+15,Accounts,Transaction,Asset Depreciation,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+16,Common,Master,Attachments/Documents,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+17,CRM,Master,Customers,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+18,CRM,Master,Salespersons,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+19,CRM,Master,Activities,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+20,CRM,Transaction,Opportunities,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+21,CRM,Transaction,Open Opportunities,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+22,CRM,Transaction,Closed Opportunities,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+23,Engineering,Master,Engineering Items,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+24,Engineering,Master,Document Revisions,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+25,Engineering,Master,ECO,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+26,Engineering,Master,Drawings,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+27,Inventory,Master,Warehouses,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+28,Inventory,Master,Locations,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+29,Inventory,Master,UOM,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+30,Inventory,Master,Lot/Serial Numbers,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+31,Inventory,Transaction,Inventory Adjustments,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+32,Inventory,Transaction,Stock Transfers,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+33,Inventory,Transaction,Stock Moves History,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+34,Maintenance,Master,Equipment,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+35,Maintenance,Master,Maintenance Teams,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+36,Maintenance,Master,Maintenance Checklists,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+37,Maintenance,Transaction,Preventive Maintenance Schedule,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+38,Maintenance,Transaction,Maintenance Requests,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+39,Maintenance,Transaction,Maintenance History,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+40,Manufacturing,Master,BOMs,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+41,Manufacturing,Master,Routings,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+42,Manufacturing,Master,Work Centers,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+43,Manufacturing,Master,Operations,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+44,Manufacturing,Transaction,Manufacturing Orders,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+45,Manufacturing,Transaction,Production History,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+46,Purchase,Master,Vendors,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+47,Purchase,Master,Vendor Pricelists,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+48,Purchase,Transaction,Purchase Requisitions,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+49,Purchase,Transaction,RFQs,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+50,Purchase,Transaction,Purchase Orders,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+51,Purchase,Transaction,Vendor Bills,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+52,Purchase,Transaction,Vendor Credit Notes,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+53,Quality,Master,Quality Teams,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+54,Quality,Master,Quality Points,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+55,Quality,Transaction,Quality Checks,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+56,Quality,Transaction,Inspection Results,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+57,Sales,Master,Products,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+58,Sales,Master,Product Categories,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+59,Sales,Master,Pricelists,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+60,Sales,Master,Discount Rules,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+61,Sales,Master,Customer Price Lists,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+62,Sales,Transaction,Quotations,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+63,Sales,Transaction,Sales Orders,Yes,Yes,Yes,Yes,Yes,Yes,Yes
+64,Sales,Transaction,Deliveries,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+65,Sales,Transaction,Customer Invoices,Optional,Yes,Yes,Yes,Yes,Yes,Yes
+66,Sales,Transaction,Credit Notes,Optional,Yes,Yes,Yes,Yes,Yes,Yes
