@@ -3,7 +3,19 @@
 Extracts business data from an SAP Business ByDesign tenant and produces CSV files ready to
 import into Odoo.
 
-See `CLAUDE.md` for the full architecture, the 66-object registry, and current coverage status.
+## 👉 Start here
+
+| If you want to… | Read / open |
+|---|---|
+| **Understand the whole project** (technical or not) — what's done, which API gives what, sample data, what's left | **[`DATA_MIGRATION_GUIDE.md`](DATA_MIGRATION_GUIDE.md)** |
+| See **everything in one table** — every API call, records in/out, status | **`CONSOLIDATED_STATUS.csv`** |
+| Track progress against the client's 66-object requirement sheet | `PROJECT_STATUS.csv` |
+| Look up **field-by-field** mappings (SAP field → Odoo field) | `SAP_Field_Mapping.xlsx` (one tab per object) |
+| Understand the code architecture and SAP quirks | `CLAUDE.md` |
+
+**Current state:** 26 of 67 objects done (16 of 21 mandatory), 59,968 records pulled from SAP,
+11,194 rows written to Odoo import files. All numbers are regenerated from live data on every
+run — see `DATA_MIGRATION_GUIDE.md` §11 to reproduce them yourself.
 
 ## Setup
 
@@ -29,6 +41,8 @@ python -m src.extract_raw     # Stage 1: pull raw data from SAP -> output_raw/*.
 python -m src.transform_odoo  # Stage 2: map raw data to Odoo CSVs -> output_odoo/*.csv (offline)
 python -m src.validate        # Cross-check output_odoo/ against the 66-object registry
 python -m src.status_report   # Regenerate PROJECT_STATUS.csv from whatever's currently on disk
+python -m src.consolidated_report               # Rebuild CONSOLIDATED_STATUS.csv
+python -m src.generate_field_mapping_workbook   # Rebuild SAP_Field_Mapping.xlsx
 ```
 
 ## Team status tracking (`PROJECT_STATUS.csv`)

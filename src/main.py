@@ -5,6 +5,7 @@ from datetime import datetime
 from src.config import load_config
 from src.extract_raw import extract_all
 from src.sap_client import SAPODataClient
+from src.consolidated_report import build_rows as build_consolidated_rows
 from src.status_report import build_rows as build_status_rows, write_report as write_status_report
 from src.transform_odoo import TRANSFORMS
 from src.validate import validate
@@ -43,9 +44,18 @@ def main():
     rows = validate()
     covered = [r for r in rows if r[2]]
 
-    logger.info("=== Stage 4: write PROJECT_STATUS.csv ===")
+    logger.info("=== Stage 4: write status reports ===")
     status_path = write_status_report(build_status_rows())
-    logger.info("Wrote %s - share this with the team for a completed/pending breakdown", status_path)
+    logger.info("Wrote %s - per requirement-sheet object", status_path)
+
+    import csv as _csv
+    from src.consolidated_report import FIELDNAMES as CONSOLIDATED_FIELDNAMES, OUTPUT_PATH as CONSOLIDATED_PATH
+    consolidated = build_consolidated_rows()
+    with open(CONSOLIDATED_PATH, "w", newline="", encoding="utf-8") as f:
+        writer = _csv.DictWriter(f, fieldnames=CONSOLIDATED_FIELDNAMES)
+        writer.writeheader()
+        writer.writerows(consolidated)
+    logger.info("Wrote %s - one row per SAP API call, everything in one place", CONSOLIDATED_PATH)
 
     logger.info("=== Run summary ===")
     logger.info("Raw sources pulled from SAP:")

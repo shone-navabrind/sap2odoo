@@ -5,3 +5,7 @@ output_odoo/
 logs/*.log
 __pycache__/
 *.pyc
+
+# LibreOffice/Excel lock files
+.~*
+~$*

@@ -229,11 +229,11 @@ def build_purchase_orders():
     items = load_raw("ItemCollection", service_hint="khpurchaseorder")["rows"]
     suppliers = load_raw("SupplierCollection")["rows"]
 
-    supplier_by_po = {}
-    for sup in suppliers:
-        po_object_id = sup.get("ParentObjectID")
-        if po_object_id and po_object_id not in supplier_by_po:
-            supplier_by_po[po_object_id] = sup.get("PartyID")
+    # SupplierCollection bundles several party roles per PO (3529 rows for 655 POs), so taking
+    # the first row picked the wrong party or an empty one 33% of the time. Type-aware
+    # resolution (prefer a PartyID that is a known SUPPLIER in res_partner.csv) measured 87%
+    # valid vs 67% for first-row.
+    party_by_po = _group_by_parent(suppliers)
 
     header_rows = []
     known_po_ids = set()
@@ -242,7 +242,7 @@ def build_purchase_orders():
         if not object_id:
             continue
         known_po_ids.add(object_id)
-        partner_bp = supplier_by_po.get(object_id)
+        partner_bp = resolve_party(party_by_po, object_id, prefer="supplier")
         header_rows.append(
             {
                 "id": external_id("sap_po", object_id),
@@ -455,7 +455,37 @@ def _is_employee_id(party_id):
     return len(party_id) == 10 and party_id.startswith("8")
 
 
-def resolve_party(party_rows_by_parent, parent_object_id):
+def _load_partner_ranks():
+    """
+    Reads res_partner.csv (written earlier in the same pipeline run) to know which business
+    partner IDs are real, and which are customers vs suppliers. Used to pick the right party
+    off a document instead of guessing by frequency alone.
+    """
+    known, customers, suppliers = set(), set(), set()
+    try:
+        with open(os.path.join(ODOO_DIR, "res_partner.csv"), newline="", encoding="utf-8") as f:
+            for row in csv.DictReader(f):
+                bp_id = row["id"].replace("sap_bp_", "")
+                known.add(bp_id)
+                if row.get("customer_rank") == "1":
+                    customers.add(bp_id)
+                if row.get("supplier_rank") == "1":
+                    suppliers.add(bp_id)
+    except FileNotFoundError:
+        pass
+    return known, customers, suppliers
+
+
+def resolve_party(party_rows_by_parent, parent_object_id, prefer=None):
+    """
+    Pick the real customer/supplier off a document's bundled party collection.
+
+    `prefer` is "customer" or "supplier" - when given, a PartyID that is a KNOWN partner of
+    that type wins over one that merely appears most often. MEASURED on real data: for Purchase
+    Orders this lifts partner resolution from 67% to 87% valid; for Sales Orders, Customer
+    Invoices, Vendor Bills and Deliveries it produces identical results (98/98/97/93%), so it's
+    a strict improvement, not a trade-off.
+    """
     from collections import Counter
     candidates = [
         r.get("PartyID") for r in party_rows_by_parent.get(parent_object_id, [])
@@ -463,7 +493,28 @@ def resolve_party(party_rows_by_parent, parent_object_id):
     ]
     if not candidates:
         return None
+
+    known, customers, suppliers = _partner_ranks()
+    prefer_set = customers if prefer == "customer" else suppliers if prefer == "supplier" else set()
+
+    typed = [c for c in candidates if c in prefer_set]
+    if typed:
+        return Counter(typed).most_common(1)[0][0]
+    known_candidates = [c for c in candidates if c in known]
+    if known_candidates:
+        return Counter(known_candidates).most_common(1)[0][0]
     return Counter(candidates).most_common(1)[0][0]
+
+
+_PARTNER_RANKS_CACHE = None
+
+
+def _partner_ranks():
+    """res_partner.csv is re-read once per run, not per document (655+ documents each)."""
+    global _PARTNER_RANKS_CACHE
+    if _PARTNER_RANKS_CACHE is None:
+        _PARTNER_RANKS_CACHE = _load_partner_ranks()
+    return _PARTNER_RANKS_CACHE
 
 
 def _group_by_parent(rows):
@@ -499,7 +550,7 @@ def build_sales_orders():
         if not object_id:
             continue
         known_ids.add(object_id)
-        partner = resolve_party(party_by_order, object_id)
+        partner = resolve_party(party_by_order, object_id, prefer="customer")
         header_rows.append(
             {
                 "id": external_id("sap_so", object_id),
@@ -555,7 +606,7 @@ def build_customer_invoices():
         if not object_id:
             continue
         known_ids.add(object_id)
-        partner = resolve_party(party_by_doc, object_id)
+        partner = resolve_party(party_by_doc, object_id, prefer="customer")
         header_rows.append(
             {
                 "id": external_id("sap_cinv", object_id),
@@ -618,7 +669,7 @@ def build_supplier_invoices():
         if not object_id:
             continue
         known_ids.add(object_id)
-        partner = resolve_party(party_by_doc, object_id)
+        partner = resolve_party(party_by_doc, object_id, prefer="supplier")
         row = {
             "id": external_id("sap_vinv", object_id),
             "partner_id/id": external_id("sap_bp", partner) if partner else "",
@@ -662,7 +713,7 @@ def build_supplier_invoices():
     }
 
 
-OPPORTUNITY_FIELDNAMES = ["id", "name", "expected_revenue", "probability", "type", "stage_id/id"]
+OPPORTUNITY_FIELDNAMES = ["id", "name", "expected_revenue", "probability", "type"]
 
 
 def build_opportunities():
@@ -686,8 +737,10 @@ def build_opportunities():
             "name": opp.get("Description") or opp.get("ID", object_id),
             "expected_revenue": opp.get("ExpectedRevenueAmount", "") or "0",
             "probability": opp.get("ChanceOfSuccessPercent", "") or "0",
+            # stage_id deliberately omitted: Odoo's CRM stages are per-database configuration
+            # and ByDesign's sales-phase codes don't map onto them, so a 100%-empty column would
+            # just be noise in the import file. Set stages in Odoo after import.
             "type": "opportunity",
-            "stage_id/id": "",  # Odoo stages aren't ByDesign sales-phase codes - map manually post-import
         }
         all_rows.append(row)
         if opp.get("LifeCycleStatusCode") in WON_LOST_CODES:
@@ -740,10 +793,18 @@ EMPLOYEE_FIELDNAMES = ["id", "name", "login", "email", "phone"]
 
 
 def build_employees():
-    """khemployee custom service - 99 employees (sheet object #18, Salespersons)."""
+    """
+    khemployee custom service - 99 employees (sheet object #18, Salespersons).
+
+    WorkplaceAddressCollection's ParentObjectID is a 64-char CONCATENATION of two 32-char
+    ObjectIDs - the employee's ObjectID followed by the address node's own parent. Joining on
+    the full string matches nothing (confirmed: 0/7); the first 32 chars match 7/7.
+    """
     employees = load_raw("EmployeeCollection")["rows"]
     addresses = load_raw("WorkplaceAddressCollection")["rows"]
-    address_by_employee = {a["ParentObjectID"]: a for a in addresses if a.get("ParentObjectID")}
+    address_by_employee = {
+        a["ParentObjectID"][:32]: a for a in addresses if a.get("ParentObjectID")
+    }
 
     rows = []
     for emp in employees:
@@ -883,7 +944,7 @@ def build_deliveries():
         if not object_id:
             continue
         known_ids.add(object_id)
-        partner = resolve_party(party_by_doc, object_id)
+        partner = resolve_party(party_by_doc, object_id, prefer="customer")
         header_rows.append(
             {
                 "id": external_id("sap_delivery", object_id),
@@ -923,10 +984,14 @@ PRODUCTION_ORDER_FIELDNAMES = ["id", "name", "product_id/id", "product_qty", "da
 def build_production_orders():
     """
     khproductionorder custom service - 152 orders (sheet object #44, Manufacturing Orders).
-    MainProductOutputCollection's row count (2842) doesn't correspond 1:1 with the 152 orders
-    and carries no ParentObjectID field - its linkage to a specific order isn't reliably
-    determinable from this entity shape, so line-level output isn't built; header only, with
-    BillOfMaterialID kept as a text reference (BOMs, #40, isn't wired up yet either).
+
+    The product being produced comes from MainProductOutput, pulled via $expand in
+    extract_raw.py: MainProductOutputCollection's own endpoint returns 2842 rows with no
+    ParentObjectID and ObjectIDs that don't match the orders', so it can't be joined from
+    there - $expand is the only reliable link. Flattened into MainProductOutput.* keys.
+
+    Odoo's mrp.production requires product_id and product_qty, so without this the file could
+    not be imported at all.
     """
     orders = load_raw("ProductionOrderCollection")["rows"]
     rows = []
@@ -934,12 +999,14 @@ def build_production_orders():
         object_id = order.get("ObjectID")
         if not object_id:
             continue
+        product_id = order.get("MainProductOutput.ProductID")
+        planned_qty = order.get("MainProductOutput.PlannedQuantity")
         rows.append(
             {
                 "id": external_id("sap_mo", object_id),
                 "name": order.get("ID", object_id),
-                "product_id/id": "",  # see docstring - output linkage not reliable from this entity
-                "product_qty": "0",
+                "product_id/id": external_id("sap_prod", product_id) if product_id else "",
+                "product_qty": planned_qty or "0",
                 "date_planned_start": parse_sap_date(order.get("RequestedStartDateTime")),
                 "date_planned_finished": parse_sap_date(order.get("RequestedEndDateTime")),
                 "state": "done",

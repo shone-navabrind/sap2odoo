@@ -46,6 +46,31 @@ def parse_metadata(xml_text):
     return fields_by_entity_set
 
 
+def _flatten_expanded(row):
+    """
+    Flatten an $expand response so the raw dump stays a flat table.
+
+    An expanded navigation property arrives as a nested object (or {"results": [...]} for a
+    to-many nav). Its fields become "NavProp.Field" keys. Unexpanded navs arrive as
+    {"__deferred": ...} and carry no data, so they're dropped.
+    """
+    flat = {}
+    for key, value in row.items():
+        if not isinstance(value, dict):
+            flat[key] = value
+            continue
+        if "__deferred" in value:
+            continue
+        nested = value
+        if "results" in nested and isinstance(nested["results"], list):
+            nested = nested["results"][0] if nested["results"] else {}
+        for sub_key, sub_value in nested.items():
+            if sub_key == "__metadata" or isinstance(sub_value, dict):
+                continue
+            flat[f"{key}.{sub_key}"] = sub_value
+    return flat
+
+
 class SAPODataClient:
     def __init__(self, config: Config):
         self.config = config
@@ -72,8 +97,16 @@ class SAPODataClient:
             response.raise_for_status()
         return response
 
-    def get_entity_set(self, service, entity_set, select=None, filter_expr=None):
-        """Fetch every row of an OData entity set, paginating with $skip/$top."""
+    def get_entity_set(self, service, entity_set, select=None, filter_expr=None, expand=None):
+        """
+        Fetch every row of an OData entity set, paginating with $skip/$top.
+
+        `expand` pulls a navigation property inline. Needed where a child collection can't be
+        joined from its own top-level endpoint - e.g. khproductionorder's
+        MainProductOutputCollection has no ParentObjectID and its ObjectIDs don't match the
+        order's, so $expand=MainProductOutput is the only way to link a production order to the
+        product it produces.
+        """
         url = f"{self.config.sap_base_url}/{service}/{entity_set}"
         page_size = self.config.page_size
         skip = 0
@@ -88,6 +121,8 @@ class SAPODataClient:
                 params["$select"] = ",".join(select)
             if filter_expr:
                 params["$filter"] = filter_expr
+            if expand:
+                params["$expand"] = expand
 
             response = self._get(url, params)
             if response.status_code == 404:
@@ -146,11 +181,16 @@ class SAPODataClient:
         logger.info("%s/%s: %d fields from %s", service, entity_set, len(fields), source)
         return fields
 
-    def get_entity_set_all_fields(self, service, entity_set, chunk_size=8):
+    def get_entity_set_all_fields(self, service, entity_set, chunk_size=8, expand=None):
         """
         Fetch every field SAP declares for an entity set, without deciding upfront which
         ones matter. Used for raw extraction (src/extract_raw.py) so field mapping decisions
         happen AFTER seeing real data, not before.
+
+        `expand` (CRUD entities only) pulls a navigation property inline and flattens it into
+        "NavProp.Field" keys, so the raw dump stays a flat table. $select is dropped when
+        expanding, since the expanded paths would have to be listed there too and CRUD entities
+        have no field-count limit anyway.
 
         Two different kinds of ByDesign entity set have been seen so far:
         1. BI/OLAP aggregate query results (e.g. the *_Q0001QueryResults analytics entities):
@@ -183,6 +223,9 @@ class SAPODataClient:
 
         if not is_olap_entity:
             # Plain CRUD - no drill-down limit, so no need to chunk or find a merge key at all.
+            if expand:
+                rows = self.get_entity_set(service, entity_set, expand=expand)
+                return [_flatten_expanded(r) for r in rows], all_fields
             return self.get_entity_set(service, entity_set, select=fields), all_fields
 
         key_field = next((f for f in fields if "UUID" in f), None)

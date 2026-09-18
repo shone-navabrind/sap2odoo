@@ -64,7 +64,10 @@ SOURCES = [
     ("sap/byd/odata/cust/v1/khoutbounddelivery", "OutboundDeliveryCollection"),  # 130 deliveries
     ("sap/byd/odata/cust/v1/khoutbounddelivery", "ItemCollection"),
     ("sap/byd/odata/cust/v1/khoutbounddelivery", "BuyerPartyCollection"),
-    ("sap/byd/odata/cust/v1/khproductionorder", "ProductionOrderCollection"),  # 152 production orders
+    # MainProductOutput is expanded inline because MainProductOutputCollection can't be joined
+    # from its own endpoint (no ParentObjectID, and its ObjectIDs don't match the order's) -
+    # $expand is the only way to know which product a production order produces.
+    ("sap/byd/odata/cust/v1/khproductionorder", "ProductionOrderCollection", "MainProductOutput"),  # 152 production orders
     ("sap/byd/odata/cust/v1/khproductionorder", "MainProductOutputCollection"),
     ("sap/byd/odata/cust/v1/khproductionorder", "OperationCollection"),
 
@@ -104,10 +107,13 @@ def extract_all(client, output_dir):
     os.makedirs(output_dir, exist_ok=True)
     summary = []
 
-    for service, entity_set in SOURCES:
-        logger.info("Raw extracting %s/%s ...", service, entity_set)
+    for source in SOURCES:
+        # A source is (service, entity_set) or (service, entity_set, expand) - see SOURCES.
+        service, entity_set = source[0], source[1]
+        expand = source[2] if len(source) > 2 else None
+        logger.info("Raw extracting %s/%s%s ...", service, entity_set, f" (expand={expand})" if expand else "")
         try:
-            rows, declared_fields = client.get_entity_set_all_fields(service, entity_set)
+            rows, declared_fields = client.get_entity_set_all_fields(service, entity_set, expand=expand)
         except Exception:
             logger.exception("FAILED raw extraction: %s/%s", service, entity_set)
             summary.append((service, entity_set, "FAILED", 0))

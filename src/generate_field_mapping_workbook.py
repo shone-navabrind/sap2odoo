@@ -87,15 +87,16 @@ FIELD_MAP = {
     18: {  # Salespersons
         "ObjectID": ("id (external ID key)", "res.users", ""),
         "FormattedName": ("name", "res.users", ""),
-        "Email": ("email / login", "res.users", "From WorkplaceAddressCollection, joined by ParentObjectID"),
-        "Phone": ("phone", "res.users", "From WorkplaceAddressCollection"),
+        "Email": ("email / login", "res.users", "From WorkplaceAddressCollection. ParentObjectID there is a 64-char CONCATENATION of two ObjectIDs - joined on its first 32 chars (full-string join matched 0/7). Only 7 of 99 employees have a workplace address in SAP"),
+        "Phone": ("phone", "res.users", "From WorkplaceAddressCollection, same 32-char join"),
+        "Mobile": ("(not mapped)", "res.users", "Available in WorkplaceAddressCollection; Odoo res.users has no mobile field (res.partner does)"),
     },
     20: {  # Opportunities (Open #21 / Closed #22 share this map, split by LifeCycleStatusCode)
         "ObjectID": ("id (external ID key)", "crm.lead", ""),
         "Description": ("name", "crm.lead", ""),
         "ExpectedRevenueAmount": ("expected_revenue", "crm.lead", ""),
         "ChanceOfSuccessPercent": ("probability", "crm.lead", ""),
-        "LifeCycleStatusCode": ("(filter only, not mapped)", "crm.lead", "1/2=Open, 4/5=Won/Lost - used to split crm_lead_open.csv / crm_lead_closed.csv"),
+        "LifeCycleStatusCode": ("(filter only, not mapped)", "crm.lead", "1/2=Open, 4/5=Won/Lost - used to split crm_lead_open.csv / crm_lead_closed.csv. Odoo stage_id is NOT set: CRM stages are per-database config and ByDesign's sales-phase codes don't map onto them"),
     },
     21: {},  # Open Opportunities - same as #20
     22: {},  # Closed Opportunities - same as #20
@@ -123,6 +124,9 @@ FIELD_MAP = {
         "RequestedStartDateTime": ("date_planned_start", "mrp.production", ""),
         "RequestedEndDateTime": ("date_planned_finished", "mrp.production", ""),
         "BillOfMaterialID": ("(not mapped)", "mrp.production", "Referenced but no component/qty data attached on this tenant - see CLAUDE.md"),
+        "MainProductOutput.ProductID": ("product_id/id", "mrp.production", "Pulled via $expand=MainProductOutput - MainProductOutputCollection's own endpoint has no ParentObjectID and its ObjectIDs don't match the order's, so $expand is the only reliable link"),
+        "MainProductOutput.PlannedQuantity": ("product_qty", "mrp.production", "Via $expand=MainProductOutput"),
+        "MainProductOutput.PlannedQuantityUnitCode": ("(not mapped)", "mrp.production", "Via $expand; Odoo takes the qty in the product's own UoM"),
     },
     50: {  # Purchase Orders
         "ObjectID": ("id (external ID key)", "purchase.order / purchase.order.line", ""),
@@ -130,7 +134,7 @@ FIELD_MAP = {
         "CreationDateTime": ("date_order", "purchase.order", ""),
         "CurrencyCode": ("currency_id/id", "purchase.order", ""),
         "TotalNetAmount": ("amount_total", "purchase.order", ""),
-        "PartyID": ("partner_id/id", "purchase.order", "From SupplierCollection, joined by ParentObjectID"),
+        "PartyID": ("partner_id/id", "purchase.order", "From SupplierCollection (3529 rows for 655 POs - bundles several party roles). Resolved type-aware: prefers a PartyID that is a known SUPPLIER in res_partner.csv. Measured 91% valid vs 67% when taking the first row"),
         "ParentObjectID": ("order_id/id", "purchase.order.line", "ItemCollection side"),
         "ProductID": ("product_id/id", "purchase.order.line", ""),
         "Description": ("name", "purchase.order.line", ""),
