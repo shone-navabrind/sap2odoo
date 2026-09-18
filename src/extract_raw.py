@@ -81,6 +81,17 @@ SOURCES = [
     ("sap/byd/odata/cust/v1/vmumaterial", "TextCollection"),  # 2197 rows - detailed descriptions
     ("sap/byd/odata/cust/v1/vmumaterial", "PurchasingCollection"),  # 2959 rows - purchasing UOM, purchase_ok signal
     ("sap/byd/odata/cust/v1/vmumaterial", "SalesCollection"),  # 979 rows - sales UOM, sale_ok signal
+
+    # Completing full Products/Materials coverage - remaining real (non-empty) entities in
+    # vmumaterial, checked live before adding (row counts confirmed 2026-09-18).
+    ("sap/byd/odata/cust/v1/vmumaterial", "PlanningCollection"),  # 3054 rows - ProcurementTypeCode -> route_ids/id
+    ("sap/byd/odata/cust/v1/vmumaterial", "IdentificationCollection"),  # 3058 rows - alternate product IDs
+    ("sap/byd/odata/cust/v1/vmumaterial", "LogisticsCollection"),  # 3057 rows - site/logistics info
+    ("sap/byd/odata/cust/v1/vmumaterial", "ValuationCollection"),  # 3021 rows - company/valuation status
+    ("sap/byd/odata/cust/v1/vmumaterial", "AvailabilityConfirmationCollection"),  # 3056 rows - supply planning area
+    ("sap/byd/odata/cust/v1/vmumaterial", "PlanningForecastGroupCollection"),  # 3058 rows - forecast grouping
+    ("sap/byd/odata/cust/v1/vmumaterial", "QuantityConversionCollection"),  # 5 rows - unit conversions
+    ("sap/byd/odata/cust/v1/vmumaterial", "DeviantTaxClassificationCollection"),  # 4 rows - per-country tax classification
 ]
 
 

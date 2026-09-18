@@ -95,6 +95,10 @@ check "Material sales data returns" \
   "${SAP_BASE_URL}/sap/byd/odata/cust/v1/vmumaterial/SalesCollection?\$top=3&\$select=ParentObjectID,SalesMeasureUnitCode&sap-client=${SAP_CLIENT}" \
   '"d":{"results":['
 
+check "Material planning data (procurement type) returns" \
+  "${SAP_BASE_URL}/sap/byd/odata/cust/v1/vmumaterial/PlanningCollection?\$top=3&\$select=ParentObjectID,ProcurementTypeCode&sap-client=${SAP_CLIENT}" \
+  '"d":{"results":['
+
 echo
 echo "=== 12 more cust/v1 custom services (user-imported, 2026-09-15) ==="
 

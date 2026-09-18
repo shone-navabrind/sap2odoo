@@ -150,20 +150,41 @@ FIELD_MAP = {
         "Quantity": ("quantity", "account.move.line", ""),
         "NetUnitPriceAmount": ("price_unit", "account.move.line", ""),
     },
-    57: {  # Products
+    57: {  # Products - full field coverage across 15 entities (172 total SAP fields, checked
+           # 2026-09-18). Keys are (entity_set, field) where the same field name means something
+           # different in another entity for this object; plain field name otherwise.
         "ObjectID": ("id (external ID key)", "product.template", ""),
         "InternalID": ("default_code", "product.template", "Also used as the id if present"),
-        "Description": ("name", "product.template", ""),
+        ("MaterialCollection", "Description"): ("name", "product.template", ""),
+        ("ProductCategoryCollection", "Description"): ("(not mapped)", "product.category", "This is the CATEGORY's own description, mapped separately to product.category.name on sheet #58 - not the product's name"),
+        ("PlanningForecastGroupCollection", "Description"): ("(no core Odoo field)", "product.template", "A second, forecast-specific grouping distinct from the real category - not used"),
         "UUID": ("(join key)", "product.template", "Links to vmumaterialvaluationdata's MaterialUUID"),
         "BaseMeasureUnitCode": ("uom_id/id", "product.template", ""),
         "Text": ("description", "product.template", "TextCollection where TypeCode=10006 (Detailed Description)"),
         "TypeCode": ("(filter only, not mapped)", "product.template", "TextCollection - only TypeCode=10006 rows are used"),
         "PurchasingMeasureUnitCode": ("uom_po_id/id", "product.template", "PurchasingCollection; presence also sets purchase_ok=True"),
         "SalesMeasureUnitCode": ("(presence signal, not mapped)", "product.template", "SalesCollection; presence sets sale_ok=True"),
-        "ProductCategoryInternalID": ("categ_id/id", "product.template", "ProductCategoryCollection"),
+        ("ProductCategoryCollection", "ProductCategoryInternalID"): ("categ_id/id", "product.template", ""),
+        ("PlanningForecastGroupCollection", "ProductCategoryInternalID"): ("(no core Odoo field)", "product.template", "Forecast grouping, not the real category - see ProductCategoryCollection instead"),
         "MaterialUUID": ("(join key)", "product.template", "vmumaterialvaluationdata's MaterialValuationDataCollection"),
         "Amount": ("standard_price", "product.template", "ValuationPriceCollection, latest by StartDate"),
         "StartDate": ("(used to pick latest price, not mapped)", "product.template", "ValuationPriceCollection"),
+        "IdentifiedStockTypeCode": ("tracking", "product.template", "'01' (Batch) -> 'lot', else 'none' - real distinct value on only 1/3058 materials on this tenant"),
+        ("PlanningCollection", "ProcurementTypeCode"): ("route_ids/id", "product.template", "'2' External Procurement -> purchase_stock.route_warehouse0_buy, '1' In-house Production -> mrp.route_warehouse0_manufacture. ASSUMES purchase_stock/mrp modules installed in target Odoo"),
+        # Real SAP data extracted (see raw_sources) but with NO corresponding core product.template
+        # field - captured for completeness, not fabricated into something they aren't:
+        "SiteID": ("(no core Odoo field)", "product.template", "LogisticsCollection - site-specific, not a product attribute"),
+        "SiteName": ("(no core Odoo field)", "product.template", "LogisticsCollection"),
+        "CompanyID": ("(no core Odoo field)", "product.template", "ValuationCollection - which company valuates this material; would need multi-company setup to use"),
+        "BusinessResidenceID": ("(no core Odoo field)", "product.template", "ValuationCollection"),
+        "SupplyPlanningAreaID": ("(no core Odoo field)", "product.template", "PlanningCollection/AvailabilityConfirmationCollection - MRP config, not a product.template field"),
+        "SupplyPlanningAreaDescription": ("(no core Odoo field)", "product.template", "PlanningCollection/AvailabilityConfirmationCollection"),
+        "SafetyStockQuantity": ("(no core Odoo field)", "product.template", "PlanningCollection - belongs to stock.warehouse.orderpoint in Odoo, a separate model/master this pipeline doesn't build"),
+        "ProcurementLeadDuration": ("(no core Odoo field)", "product.template", "PlanningCollection"),
+        ("IdentificationCollection", "ProductID"): ("(no core Odoo field)", "product.template", "Alternate/internal ID, redundant with default_code (only 'Internal ID' type present on this tenant)"),
+        "CorrespondingQuantity": ("(no core Odoo field)", "product.template", "QuantityConversionCollection - unit conversion factor, only 5 rows on this tenant"),
+        "CountryCode": ("(no core Odoo field)", "product.template", "DeviantTaxClassificationCollection - per-country tax override; needs Taxes master #2, still pending. Only 4 rows on this tenant"),
+        "TaxTypeCode": ("(no core Odoo field)", "product.template", "DeviantTaxClassificationCollection"),
     },
     58: {  # Product Categories
         "ProductCategoryInternalID": ("id (external ID key)", "product.category", ""),
@@ -330,12 +351,18 @@ def build_workbook():
         entities = _load_raw_entities(obj.raw_sources)
         for entity_name, fields, rows in entities:
             for field in sorted(fields):
-                mapping = field_map.get(field)
+                # (entity, field) is checked first since the same field name can mean different
+                # things in different entities (e.g. ProductCategoryInternalID appears in both
+                # ProductCategoryCollection - the real category - and PlanningForecastGroupCollection
+                # - an unrelated forecast grouping); plain field name is the fallback for
+                # unambiguous fields.
+                mapping = field_map.get((entity_name, field), field_map.get(field))
                 odoo_field = mapping[0] if mapping else "(not mapped)"
                 odoo_model = mapping[1] if mapping else obj.odoo_model
                 note = mapping[2] if mapping else ""
                 ws.append([entity_name, field, _sample_value(rows, field), odoo_field, odoo_model, note])
-                fill = UNMAPPED_FILL if odoo_field == "(not mapped)" else MAPPED_FILL
+                is_unmapped = odoo_field.startswith("(") if odoo_field else True
+                fill = UNMAPPED_FILL if is_unmapped else MAPPED_FILL
                 for col in range(1, len(header_row) + 1):
                     ws.cell(row=ws.max_row, column=col).fill = fill
 

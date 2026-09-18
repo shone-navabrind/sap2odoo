@@ -289,7 +289,8 @@ def build_purchase_orders():
 
 PRODUCT_FIELDNAMES = [
     "id", "name", "default_code", "description", "type", "categ_id/id", "uom_id/id",
-    "uom_po_id/id", "standard_price", "purchase_ok", "sale_ok", "active",
+    "uom_po_id/id", "standard_price", "purchase_ok", "sale_ok", "tracking", "route_ids/id",
+    "active",
 ]
 
 
@@ -316,6 +317,28 @@ def build_products():
     recent = current cost), not filtered by currency/type - single-currency tenant assumption,
     documented as a known limitation if that's wrong.
 
+    Also mapped (added after checking every remaining real entity in vmumaterial, 2026-09-18):
+      IdentifiedStockTypeCode (MaterialCollection)  -> tracking ('01'=Batch -> 'lot', else 'none';
+                                                          SerialNumberProfileCode is 100% "No
+                                                          Serial Number Assignment" on this
+                                                          tenant - zero variation, no signal, so
+                                                          not used for tracking)
+      PlanningCollection.ProcurementTypeCode        -> route_ids/id (real 107/93 split between
+                                                          External Procurement and In-house
+                                                          Production in a 200-row sample; maps to
+                                                          Odoo's standard purchase_stock/mrp route
+                                                          external IDs - ASSUMES those modules are
+                                                          installed in the target Odoo)
+
+    Checked and extracted but with NO corresponding core Odoo product.template field, so NOT
+    mapped (real SAP data, just nothing sensible to map it to without extra modules/masters):
+    IdentificationCollection (alternate IDs, redundant with default_code), LogisticsCollection
+    (site/logistics, not a product attribute), ValuationCollection (company/valuation status),
+    AvailabilityConfirmationCollection (supply planning area config), PlanningForecastGroupCollection
+    (a second, forecast-specific category grouping distinct from ProductCategoryCollection),
+    QuantityConversionCollection (unit conversion factors, only 5 rows), DeviantTaxClassificationCollection
+    (per-country tax override, only 4 rows - needs Taxes master #2, still pending).
+
     NOT available on this tenant (checked live, zero rows): GlobalTradeItemNumberCollection
     (barcode/GTIN), SalesTextCollection/PurchasingTextCollection (channel-specific descriptions),
     QuantityCharacteristicCollection (would have carried weight/dimensions if populated),
@@ -328,6 +351,7 @@ def build_products():
     purchasing = load_raw("PurchasingCollection")["rows"]
     sales = load_raw("SalesCollection")["rows"]
     categories = load_raw("ProductCategoryCollection")["rows"]
+    planning = load_raw("PlanningCollection")["rows"]
 
     prices_by_valuation_id = {}
     for price in prices:
@@ -371,6 +395,17 @@ def build_products():
         if parent:
             category_by_material[parent] = c.get("ProductCategoryInternalID", "")
 
+    procurement_type_by_material = {}
+    for p in planning:
+        parent = p.get("ParentObjectID")
+        if parent and parent not in procurement_type_by_material:
+            procurement_type_by_material[parent] = p.get("ProcurementTypeCode", "")
+
+    ROUTE_BY_PROCUREMENT_TYPE = {
+        "2": "purchase_stock.route_warehouse0_buy",  # External Procurement
+        "1": "mrp.route_warehouse0_manufacture",  # In-house Production
+    }
+
     rows = []
     for material in materials:
         object_id = material.get("ObjectID")
@@ -380,6 +415,7 @@ def build_products():
         base_uom = material.get("BaseMeasureUnitCode", "")
         purchase_uom = purchase_uom_by_material.get(object_id)
         category_code = category_by_material.get(object_id)
+        procurement_type = procurement_type_by_material.get(object_id)
         rows.append(
             {
                 "id": external_id("sap_prod", material.get("InternalID") or object_id),
@@ -395,6 +431,8 @@ def build_products():
                 "standard_price": price_by_material_uuid.get(material_uuid, ""),
                 "purchase_ok": "True" if object_id in purchase_uom_by_material else "False",
                 "sale_ok": "True" if object_id in sale_uom_by_material else "False",
+                "tracking": "lot" if material.get("IdentifiedStockTypeCode") == "01" else "none",
+                "route_ids/id": ROUTE_BY_PROCUREMENT_TYPE.get(procurement_type, ""),
                 "active": "True",
             }
         )
