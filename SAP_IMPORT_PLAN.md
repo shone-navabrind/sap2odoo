@@ -11,14 +11,18 @@ Services -> Import**, then upload the `.xml` file named below from
 `byd-api-samples-main/Custom OData Services/`. After importing, run
 `python -m src.probe_services` to confirm it went live, then `python -m src.main`.
 
-## Current state: 18 of 47 services are live
+## Current state: 24 of 47 services are live
 
 Already imported and returning data:
 
 ```
+  khcustomer
   khcustomerinvoice
+  khcustomerinvoicerequest
   khcustomerquote
   khemployee
+  khgoodsandactivityconfirmation
+  khhousebankaccount
   khhousebankstatement
   khlocation
   khopportunity
@@ -28,6 +32,8 @@ Already imported and returning data:
   khpurchaseorder
   khsalesarrangement
   khsalesorder
+  khserviceproduct
+  khsupplier
   khsupplierinvoice
   tmserviceconfirmation
   tmserviceorder
@@ -35,50 +41,6 @@ Already imported and returning data:
   vmumaterial
   vmumaterialvaluationdata
 ```
-
-## Priority 1 - Import first - closes a mandatory gap or replaces a weak source
-
-### `khcustomer.xml`
-
-- **Would complete:** #17 Customers (MANDATORY)
-- **Why:** Full customer master: 37 header fields plus bank details, tax numbers, tax exemptions, relationships and addresses. Today Customers is built from an analytics report that returns only 44 rows and cannot be filtered.
-- **Exposes:** 21 entity sets, 202 fields total
-- **Largest entity sets:** `CustomerCollection` (37 fields), `RelationshipCollection` (26 fields), `PostalAddressCollection` (22 fields), `AttachmentFolderCollection` (19 fields), `BankDetailsCollection` (18 fields)
-
-### `khsupplier.xml`
-
-- **Would complete:** #46 Vendors (MANDATORY)
-- **Why:** Full supplier master, same shape as khcustomer (19 header fields, bank details, addresses, notes). Replaces the analytics-report source for Vendors.
-- **Exposes:** 20 entity sets, 160 fields total
-- **Largest entity sets:** `CurrentDefaultPostalAddressCollection` (22 fields), `SupplierCollection` (19 fields), `AttachmentFolderCollection` (19 fields), `BankDetailsCollection` (18 fields), `NoteCollection` (11 fields)
-
-### `khcustomerinvoicerequest.xml`
-
-- **Would complete:** #8 Open Customer Invoices (MANDATORY)
-- **Why:** Customer invoice REQUESTS - invoices raised but not yet cleared. This is the closest thing ByDesign has to Odoo's 'open invoice' concept, which the posted-invoice service does not expose at all.
-- **Exposes:** 14 entity sets, 133 fields total
-- **Largest entity sets:** `CustomerInvoiceRequestCollection` (34 fields), `ItemCollection` (21 fields), `AttachmentFolderCollection` (19 fields), `ItemAttachmentFolderCollection` (19 fields), `ItemBusinessTransactionDocumentReferenceCollection` (9 fields)
-
-### `khserviceproduct.xml`
-
-- **Would complete:** #57 Products (MANDATORY)
-- **Why:** Service products - a SEPARATE product master from materials. These are missing from product_template.csv entirely today.
-- **Exposes:** 16 entity sets, 133 fields total
-- **Largest entity sets:** `AttachmentFolderCollection` (19 fields), `SalesCollection` (16 fields), `ServiceProductCollection` (12 fields), `TextCollection` (11 fields), `PurchasingTextCollection` (11 fields)
-
-### `khgoodsandactivityconfirmation.xml`
-
-- **Would complete:** #31 Inventory Adjustments, #33 Stock Moves History, #30 Lot/Serial Numbers
-- **Why:** Inventory changes: InventoryChangeItem (20 fields), SerialNumber and IdentifiedStock. The only source found for stock movements, inventory adjustments and lot/serial numbers.
-- **Exposes:** 13 entity sets, 94 fields total
-- **Largest entity sets:** `InventoryChangeItemCollection` (20 fields), `GoodsAndActivityConfirmationCollection` (15 fields), `TextCollection` (11 fields), `ItemTextCollection` (11 fields), `OwnerPartyCollection` (9 fields)
-
-### `khhousebankaccount.xml`
-
-- **Would complete:** #5 Banks (MANDATORY)
-- **Why:** Real house bank master - HouseBankAccount (18 fields), HouseBank, BankDirectoryEntry with national bank IDs. Banks is currently derived from fields buried inside the business-partner records.
-- **Exposes:** 6 entity sets, 54 fields total
-- **Largest entity sets:** `HouseBankAccountCollection` (18 fields), `BankDirectoryEntryCollection` (12 fields), `HouseBankCollection` (7 fields), `BankDirectoryEntryBranchCollection` (7 fields), `NationalBankIdentificationCollection` (6 fields)
 
 ## Priority 2 - Import next - closes an optional object or materially improves an existing one
 

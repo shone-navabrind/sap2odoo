@@ -62,8 +62,11 @@ REGISTRY = [
     ObjectSpec(3, "Accounts", "Master", "Fiscal Positions", False, "account.fiscal.position", "account_fiscal_position", "pending_mapping", "No matching data source found"),
     ObjectSpec(4, "Accounts", "Master", "Payment Terms", True, "account.payment.term", "account_payment_term", "built", "REAL DATA: found inside CashDiscountTermsCollection on the already-imported khcustomerinvoice/khsupplierinvoice services (no new upload needed) - deduplicated code list",
                raw_sources=("khcustomerinvoice__CashDiscountTermsCollection.json", "khsupplierinvoice__CashDiscountTermsCollection.json")),
-    ObjectSpec(5, "Accounts", "Master", "Banks", True, "res.bank", "res_bank", "built", "From bank fields inside RPBUPCSD/RPBUPSPP (bpm_businesspartnerdata_analytics.svc) - 8 banks, 90 partner bank accounts confirmed",
-               raw_sources=("bpm_businesspartnerdata_analytics.svc__RPBUPCSD_Q0001QueryResults.json", "bpm_businesspartnerdata_analytics.svc__RPBUPSPP_Q0001QueryResults.json")),
+    ObjectSpec(5, "Accounts", "Master", "Banks", True, "res.bank", "res_bank", "built",
+               "REAL DATA: khhousebankaccount/BankDirectoryEntryCollection - the actual bank directory (10 banks with "
+               "country, city and bank standard ID), replacing the previous approach of scraping bank NAMES out of "
+               "business-partner records. Partner bank accounts (88) come from khcustomer/khsupplier BankDetailsCollection.",
+               raw_sources=("khhousebankaccount__BankDirectoryEntryCollection.json", "khcustomer__BankDetailsCollection.json", "khsupplier__BankDetailsCollection.json")),
     ObjectSpec(6, "Accounts", "Master", "Cost Centers", False, "account.analytic.account", "account_analytic_account_cc", "built", "14 records from standard OData v1 service costcentre, entity set CostCentreCollection. Imported as analytic accounts under the SAP Cost Centers analytic plan.",
                raw_sources=("costcentre__CostCentreCollection.json",)),
     ObjectSpec(7, "Accounts", "Master", "Analytic Accounts", False, "account.analytic.account", "account_analytic_account", "pending_mapping"),
@@ -91,8 +94,14 @@ REGISTRY = [
     ObjectSpec(16, "Common", "Master", "Attachments/Documents", False, "ir.attachment", "ir_attachment", "pending_mapping", "SAP attachments are typically binary content on GOS/DMS - needs a per-record download pass, not a flat OData select"),
 
     # --- CRM ---
-    ObjectSpec(17, "CRM", "Master", "Customers", True, "res.partner", "res_partner", "built", "REAL DATA: bpm_businesspartnerdata_analytics.svc, 44 accounts confirmed",
-               raw_sources=("bpm_businesspartnerdata_analytics.svc__RPBUPCSD_Q0001QueryResults.json", "bpm_businesspartnerdata_analytics.svc__RPBUPATAXNUMBERS_Q0001QueryResults.json")),
+    ObjectSpec(17, "CRM", "Master", "Customers", True, "res.partner", "res_partner", "built",
+               "REAL DATA: khcustomer custom service (plain CRUD) - 44 customers with full address, tax number, bank "
+               "detail and contact-person data. Replaced the bpm_businesspartnerdata_analytics.svc report, which had to "
+               "be fetched in field-chunks and merged on a key SAP does not guarantee unique (44 keys vs 50 rows), so "
+               "some fields were an arbitrary sample. Verified before switching: the CRUD source returns a strict "
+               "superset - all 271 previous external IDs plus 17 more - so no document reference broke. Contact persons "
+               "(36) now populate res_partner_contact.csv from RelationshipCollection; they were empty before.",
+               raw_sources=("khcustomer__CustomerCollection.json", "khcustomer__PostalAddressCollection.json", "khcustomer__TaxNumberCollection.json", "khcustomer__RelationshipCollection.json")),
     ObjectSpec(18, "CRM", "Master", "Salespersons", True, "res.users", "res_users_salesperson", "built", "REAL DATA: khemployee custom service, 99 employees (output file is res_users.csv - see FILENAME_OVERRIDES)",
                raw_sources=("khemployee__EmployeeCollection.json", "khemployee__WorkplaceAddressCollection.json")),
     ObjectSpec(19, "CRM", "Master", "Activities", False, "mail.activity", "mail_activity", "pending_mapping"),
@@ -160,8 +169,11 @@ REGISTRY = [
     ObjectSpec(45, "Manufacturing", "Transaction", "Production History", False, "mrp.production", "mrp_production_history", "pending_mapping"),
 
     # --- Purchase ---
-    ObjectSpec(46, "Purchase", "Master", "Vendors", True, "res.partner", "res_partner", "built", "REAL DATA: bpm_businesspartnerdata_analytics.svc, 229 suppliers confirmed",
-               raw_sources=("bpm_businesspartnerdata_analytics.svc__RPBUPSPP_Q0001QueryResults.json", "bpm_businesspartnerdata_analytics.svc__RPBUPATAXNUMBERS_Q0001QueryResults.json")),
+    ObjectSpec(46, "Purchase", "Master", "Vendors", True, "res.partner", "res_partner", "built",
+               "REAL DATA: khsupplier custom service (plain CRUD) - 250 suppliers, up from the 229 the analytics report "
+               "returned, with 248 addresses, 82 bank accounts and 43 tax numbers. Same reasoning as #17: the analytics "
+               "route sampled non-key fields (229 keys vs 237 rows); plain CRUD needs no chunking at all.",
+               raw_sources=("khsupplier__SupplierCollection.json", "khsupplier__CurrentDefaultPostalAddressCollection.json", "khsupplier__TaxNumberCollection.json", "khsupplier__BankDetailsCollection.json")),
     ObjectSpec(47, "Purchase", "Master", "Vendor Pricelists", False, "product.supplierinfo", "product_supplierinfo", "built",
                "REAL DATA: vmumaterial/SupplierInformationCollection - 34 material-to-supplier links with the supplier's own "
                "part number and lead time. Already extracted but read by no transform until now. No price column exists on "
@@ -174,7 +186,12 @@ REGISTRY = [
                raw_sources=("khpurchaseorder__PurchaseOrderCollection.json", "khpurchaseorder__ItemCollection.json", "khpurchaseorder__SupplierCollection.json")),
     ObjectSpec(51, "Purchase", "Transaction", "Vendor Bills", False, "account.move", "account_move_vendor_bill", "built", "REAL DATA: khsupplierinvoice custom service, 458 invoices, 1581 lines. Partner resolved via SellerPartyCollection (442/458 resolved)",
                raw_sources=("khsupplierinvoice__SupplierInvoiceCollection.json", "khsupplierinvoice__ItemCollection.json", "khsupplierinvoice__SellerPartyCollection.json")),
-    ObjectSpec(52, "Purchase", "Transaction", "Vendor Credit Notes", False, "account.move", "account_move_vendor_credit", "pending_mapping"),
+    ObjectSpec(52, "Purchase", "Transaction", "Vendor Credit Notes", False, "account.move", "account_move_vendor_credit", "built",
+               "REAL DATA: ByDesign has no separate credit-memo entity - credit memos sit in the ordinary invoice table "
+               "and are identified by TypeCodeText. khsupplierinvoice/SupplierInvoiceCollection holds 9 rows typed "
+               "'Credit Memo', mapped to Odoo move_type in_refund. No new extraction was needed; the data had been on "
+               "disk all along and nothing had looked at the type column.",
+               raw_sources=("khsupplierinvoice__SupplierInvoiceCollection.json", "khsupplierinvoice__SellerPartyCollection.json")),
 
     # --- Quality ---
     ObjectSpec(53, "Quality", "Master", "Quality Teams", False, "quality.alert.team", "quality_alert_team", "not_in_bydesign", "QM module is not part of standard ByDesign; confirmed by cross-checking the tenant's full 573-entry Design Data Sources catalog - zero matches for 'quality'. Confirm true source system with user"),
@@ -183,7 +200,7 @@ REGISTRY = [
     ObjectSpec(56, "Quality", "Transaction", "Inspection Results", False, "quality.check", "quality_check_inspection", "not_in_bydesign"),
 
     # --- Sales ---
-    ObjectSpec(57, "Sales", "Master", "Products", True, "product.template", "product_template", "built", "REAL DATA, FULL FIELD COVERAGE: all 15 real (non-empty) per-material entities in vmumaterial/vmumaterialvaluationdata checked (78 entity sets total exist; 172 distinct SAP fields across the 15 real ones) - MaterialCollection (base), TextCollection (detailed description, 2172/3058), PurchasingCollection/SalesCollection (UOM + purchase_ok/sale_ok), ProductCategoryCollection (category, 3058/3058 resolved), PlanningCollection (ProcurementTypeCode -> route_ids/id, real 107/93 Buy/Manufacture split), IdentificationCollection/LogisticsCollection/ValuationCollection/AvailabilityConfirmationCollection/PlanningForecastGroupCollection/QuantityConversionCollection/DeviantTaxClassificationCollection (extracted, no corresponding core Odoo product.template field - see SAP_Field_Mapping.xlsx sheet 57 for exactly which), vmumaterialvaluationdata (cost price, 994/3058). No barcode/weight/dimension data exists on this tenant (GlobalTradeItemNumberCollection and QuantityCharacteristicCollection both confirmed 0 rows live) - not fabricated, left blank.",
+    ObjectSpec(57, "Sales", "Master", "Products", True, "product.template", "product_template", "built", "REAL DATA, FULL FIELD COVERAGE: all 15 real (non-empty) per-material entities in vmumaterial/vmumaterialvaluationdata checked (78 entity sets total exist; 172 distinct SAP fields across the 15 real ones) - MaterialCollection (base), TextCollection (detailed description, 2172/3058), PurchasingCollection/SalesCollection (UOM + purchase_ok/sale_ok), ProductCategoryCollection (category, 3058/3058 resolved), PlanningCollection (ProcurementTypeCode -> route_ids/id, real 107/93 Buy/Manufacture split), IdentificationCollection/LogisticsCollection/ValuationCollection/AvailabilityConfirmationCollection/PlanningForecastGroupCollection/QuantityConversionCollection/DeviantTaxClassificationCollection (extracted, no corresponding core Odoo product.template field - see SAP_Field_Mapping.xlsx sheet 57 for exactly which), vmumaterialvaluationdata (cost price, 994/3058). No barcode/weight/dimension data exists on this tenant (GlobalTradeItemNumberCollection and QuantityCharacteristicCollection both confirmed 0 rows live) - not fabricated, left blank. SERVICE PRODUCTS ADDED 2026-09-18: khserviceproduct is a completely separate master from vmumaterial's materials (ByDesign splits them; Odoo does not), contributing 7 more rows typed 'service' - they were absent from the output entirely before that service was imported.",
                raw_sources=("vmumaterial__MaterialCollection.json", "vmumaterial__TextCollection.json", "vmumaterial__PurchasingCollection.json", "vmumaterial__SalesCollection.json", "vmumaterial__ProductCategoryCollection.json", "vmumaterial__PlanningCollection.json", "vmumaterial__IdentificationCollection.json", "vmumaterial__LogisticsCollection.json", "vmumaterial__ValuationCollection.json", "vmumaterial__AvailabilityConfirmationCollection.json", "vmumaterial__PlanningForecastGroupCollection.json", "vmumaterial__QuantityConversionCollection.json", "vmumaterial__DeviantTaxClassificationCollection.json", "vmumaterialvaluationdata__MaterialValuationDataCollection.json", "vmumaterialvaluationdata__ValuationPriceCollection.json")),
     ObjectSpec(58, "Sales", "Master", "Product Categories", True, "product.category", "product_category", "built", "REAL DATA: vmumaterial's ProductCategoryCollection, already-imported service, no new upload needed - deduplicated from 3058 material rows to distinct categories",
                raw_sources=("vmumaterial__ProductCategoryCollection.json",)),
@@ -198,7 +215,11 @@ REGISTRY = [
                raw_sources=("khoutbounddelivery__OutboundDeliveryCollection.json", "khoutbounddelivery__ItemCollection.json", "khoutbounddelivery__BuyerPartyCollection.json")),
     ObjectSpec(65, "Sales", "Transaction", "Customer Invoices", False, "account.move", "account_move_customer_invoice", "built", "REAL DATA: khcustomerinvoice custom service, 524 invoices, 623 lines. Partner resolved via BuyerPartyCollection (513/524 resolved)",
                raw_sources=("khcustomerinvoice__CustomerInvoiceCollection.json", "khcustomerinvoice__ItemCollection.json", "khcustomerinvoice__BuyerPartyCollection.json")),
-    ObjectSpec(66, "Sales", "Transaction", "Credit Notes", False, "account.move", "account_move_credit_note", "pending_mapping"),
+    ObjectSpec(66, "Sales", "Transaction", "Credit Notes", False, "account.move", "account_move_credit_note", "built",
+               "REAL DATA: khcustomerinvoicerequest/CustomerInvoiceRequestCollection, the 21 rows typed 'Manual Credit "
+               "Memo Request', mapped to Odoo move_type out_refund. This entity names the customer directly via "
+               "BuyerPartyID, so none of the party-resolution guesswork other document types need applies here.",
+               raw_sources=("khcustomerinvoicerequest__CustomerInvoiceRequestCollection.json",)),
 
     # --- Added: relational data not on the sheet but required for the above to import cleanly ---
     ObjectSpec(0, "Common", "Master", "Currency Exchange Rates", False, "res.currency.rate", "res_currency_rate", "pending_mapping", "Odoo ships currencies/countries out of the box, but NOT historical FX rates - needed for FY20-21 through FY25-26 transactional data to post at the right value"),

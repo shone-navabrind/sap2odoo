@@ -26,14 +26,14 @@ Think of it as three steps:
 | | Count |
 |---|---|
 | Objects on the client's requirement sheet | **66** (+1 we added: currency exchange rates) |
-| ✅ Done — real data extracted and converted | **31** |
-| ⏳ Not done — no usable SAP source found yet | **22** |
+| ✅ Done — real data extracted and converted | **33** |
+| ⏳ Not done — no usable SAP source found yet | **20** |
 | 🚫 Impossible — this SAP system has no such data | **14** |
 | **Mandatory objects done** | **19 of 21** |
-| Records pulled out of SAP | **206,499** |
-| Records written into Odoo import files | **13,446** (36 files) |
-| SAP entity sets extracted | **195** |
-| SAP data fields examined | **1,894** |
+| Records pulled out of SAP | **228,550** |
+| Records written into Odoo import files | **13,538** (39 files) |
+| SAP entity sets extracted | **256** |
+| SAP data fields examined | **2,452** |
 
 > The Odoo record count is lower than the SAP count on purpose. Many SAP records are
 > supporting/lookup rows (for example 3,529 "which supplier is on this purchase order" link
@@ -41,22 +41,35 @@ Think of it as three steps:
 
 ### What changed on 2026-09-18
 
-The single biggest finding: **SAP publishes a catalog of its own APIs, and we had not been
-using it.** A plain `GET /sap/byd/odata/` returns every service the login is allowed to call.
-Earlier work had assumed no such catalog existed and tried guessing service names (100 guesses,
-0 hits). Reading SAP's own Postman example files — which had been sitting unopened in the
-project folder — revealed the catalog endpoint.
+Two rounds of work happened on this date.
 
-Consequences, all verified against the live system:
+**Round 1 — SAP publishes a catalog of its own APIs, and we had not been using it.** A plain
+`GET /sap/byd/odata/` returns every service the login may call. Earlier work assumed no such
+catalog existed and guessed service names (100 guesses, 0 hits). SAP's own Postman example files,
+sitting unopened in the project folder, revealed the catalog endpoint. Result: **1,485 SAP data
+sources catalogued and searchable** (`SERVICE_CATALOG.csv`), and **Chart of Accounts, Taxes and
+Open Customer Invoices** — three mandatory objects previously called impossible — became done.
+225 live data sets that were never being requested are now extracted.
 
-- **1,485 SAP data sources are now catalogued and searchable** (`SERVICE_CATALOG.csv`), each with
-  its business description. Finding a data source is now a search, not a guess.
-- **Chart of Accounts, Taxes and Open Customer Invoices** — three mandatory objects previously
-  marked impossible — are now done, from sources found in that catalog.
-- **We were only reading a fraction of what SAP offered.** 225 live data sets were never being
-  requested, and 132 of them held real data. They are now extracted: the record count went from
-  59,968 to 206,499.
-- **BOMs are now definitively ruled out** rather than merely "not found yet" — see §3.
+**Round 2 — the client imported six more SAP service files.** That took the tenant from 18 to 24
+of the 47 available services, and closed or materially improved six objects:
+
+| Object | Before | After |
+|---|---|---|
+| #17 Customers / #46 Vendors *(mandatory)* | 271 partners from a report that **sampled** some fields | **288** partners from plain data tables, no sampling, with addresses, tax numbers and bank accounts |
+| Contact persons | 0 | **36** (new file `res_partner_contact.csv`) |
+| #5 Banks *(mandatory)* | 8 bank names scraped out of customer records | **10** from SAP's real bank directory |
+| #57 Products *(mandatory)* | 3,058 materials | **3,065** — service products were a separate SAP master we could not previously see |
+| #52 Vendor Credit Notes | not done | **9** |
+| #66 Credit Notes | not done | **21** |
+
+The credit notes needed no new data at all: ByDesign has no separate credit-memo table — credit
+memos sit inside the ordinary invoice tables, marked by a type column nothing had looked at.
+
+**Still blocked, and why it is not a code problem:** `khgoodsandactivityconfirmation` imported
+successfully, but its two most important tables return **HTTP 500 from SAP itself** on even a
+two-row request. That is a fault in SAP's own service, so Stock Moves (#33) and Lot/Serial (#30)
+stay open despite the import. Worth raising with SAP support or re-importing that one file.
 
 ---
 
@@ -90,20 +103,20 @@ The client's sheet marks **21 objects as mandatory**. Status:
 | 1 | Chart of Accounts | `account.account` | `account_account.csv` | 148 |
 | 2 | Taxes | `account.tax` | `account_tax.csv` | 60 |
 | 4 | Payment Terms | `account.payment.term` | `account_payment_term.csv` | 16 |
-| 5 | Banks | `res.bank` | `res_bank.csv` | 8 |
+| 5 | Banks | `res.bank` | `res_bank.csv` | 10 |
 | 8 | Open Customer Invoices | `account.move` | `account_move_open_customer.csv` | 189 |
 | 9 | Open Vendor Bills | `account.move` | `account_move_open_vendor.csv` | 265 |
-| 17 | Customers | `res.partner` | `res_partner.csv` | 271 |
+| 17 | Customers | `res.partner` | `res_partner.csv` | 288 |
 | 18 | Salespersons | `res.users` | `res_users.csv` | 99 |
 | 21 | Open Opportunities | `crm.lead` | `crm_lead_open.csv` | 8 |
 | 27 | Warehouses | `stock.warehouse` | `stock_warehouse.csv` | 1 |
 | 28 | Locations | `stock.location` | `stock_location.csv` | 20 |
 | 29 | UOM | `uom.uom` | `uom_uom.csv` | 23 |
 | 42 | Work Centers | `mrp.workcenter` | `mrp_workcenter.csv` | 18 |
-| 46 | Vendors | `res.partner` | `res_partner.csv` | 271 |
+| 46 | Vendors | `res.partner` | `res_partner.csv` | 288 |
 | 50 | Purchase Orders | `purchase.order` | `purchase_order.csv` + `_line.csv` | 655 + 1,861 |
-| 57 | Products | `product.template` | `product_template.csv` | 3,058 |
-| 58 | Product Categories | `product.category` | `product_category.csv` | 30 |
+| 57 | Products | `product.template` | `product_template.csv` | 3,065 |
+| 58 | Product Categories | `product.category` | `product_category.csv` | 32 |
 | 59 | Pricelists | `product.pricelist` | `product_pricelist.csv` | 35 |
 | 63 | Sales Orders | `sale.order` | `sale_order.csv` + `_line.csv` | 196 + 263 |
 
@@ -435,28 +448,39 @@ the numbers in this document can be reproduced end to end. The last full run com
 
 Everything below is an action **in SAP**, not in this code. The code side is not the bottleneck.
 
-### A. Import more service definition files — this is the main lever
+### A. Import more service definition files
 
-29 of the 47 service files in `byd-api-samples-main/Custom OData Services/` have not been
-imported into SAP yet. Each one that goes in unlocks more objects.
-
-**How:** in SAP → **Application and User Management → OData Services → Custom OData Services →
-Import**, upload the `.xml`, then tell us. `SAP_IMPORT_PLAN.md` lists all 29 in priority order,
-with what each one unlocks and how many fields it exposes. The six worth doing first:
+**24 of the 47** files in `byd-api-samples-main/Custom OData Services/` are imported. 23 remain.
+`SAP_IMPORT_PLAN.md` lists them all with what each unlocks. The eight worth doing:
 
 | File | Unlocks |
 |---|---|
-| `khcustomer.xml` | Customers (#17) properly — 202 fields instead of a 44-row report |
-| `khsupplier.xml` | Vendors (#46) properly — 160 fields |
-| `khcustomerinvoicerequest.xml` | Strengthens Open Customer Invoices (#8) |
-| `khgoodsandactivityconfirmation.xml` | Inventory Adjustments (#31), Stock Moves (#33), Lot/Serial (#30) |
-| `khhousebankaccount.xml` | Banks (#5) from the real bank master, not scraped from partner records |
-| `khserviceproduct.xml` | Service products — a whole product master currently missing |
+| `khbusinesspartnerrelationship.xml` | Contact persons for #17 Customers / #46 Vendors **(mandatory)** |
+| `khinbounddelivery.xml` | #32 Stock Transfers, #64 Deliveries (only outbound is covered today) |
+| `khgoodsandserviceacknowledgement.xml` | #33 Stock Moves History |
+| `khcustomerreturn.xml` | More of #66 Credit Notes |
+| `khproject.xml` | #7 Analytic Accounts |
+| `khprofitcentre.xml` | #7 Analytic Accounts |
+| `khlead.xml` | #19 Activities |
+| `khserviceproductvaluationdata.xml` | Cost rates for the 7 service products in #57 **(mandatory)** |
 
-### B. Grant the integration user three authorisations
+The other 15 are org-structure and supporting detail, and are not blocking any sheet object on
+their own.
 
-Three services **are already imported and live** but every read returns
-`RBAM_ERROR: Not Authorized`. This is a role change, not an import:
+**How:** SAP → **Application and User Management → OData Services → Custom OData Services →
+Import**, upload the `.xml`, then tell us. Note the list screen is paginated — the count in the
+UI is not the whole story. `python -m src.probe_services` asks the tenant directly.
+
+### B. Fix one broken service
+
+`khgoodsandactivityconfirmation` is imported and active, but `InventoryChangeItemCollection` and
+`GoodsAndActivityConfirmationCollection` return **HTTP 500 Internal Server Error** from SAP on
+even a two-row request. Everything else on that service works. Try re-importing the file; if it
+still fails, it is an SAP support issue. This is what blocks Stock Moves (#33) and Lot/Serial (#30).
+
+### C. Grant the integration user three authorisations
+
+Live but returning `RBAM_ERROR: Not Authorized` on every read — a role change, not an import:
 
 | Service | Object | Grant access to |
 |---|---|---|
@@ -464,7 +488,7 @@ Three services **are already imported and live** but every read returns
 | `tmserviceorder` | Service Orders | the **Service Orders** work center |
 | `tmservicerequest` | Service Requests | the **Service Requests** work center |
 
-### C. Two decisions only the client can make
+### D. Two decisions only the client can make
 
 1. **BOMs (#40, mandatory).** Not available over the API at all — confirmed against all 1,485
    published data sets and all 609 data sets in the service files. Either switch on the PBOM
@@ -473,7 +497,7 @@ Three services **are already imported and live** but every read returns
 2. **Equipment (#34, mandatory).** ByDesign has no maintenance module. Confirm where this data
    really lives, or agree it is out of scope.
 
-### D. Nice to have
+### E. Nice to have
 
 **Currency exchange rates** have no source anywhere — not in the 1,485 published data sets, not
 in the 573-row report catalogue, not in SAP's own example collections. These are usually

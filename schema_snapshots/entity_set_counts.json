@@ -1,28 +1,130 @@
 [
   {
+    "service": "khcustomer",
+    "entity_set": "CustomerCollection",
+    "count": 44,
+    "field_count": 37
+  },
+  {
+    "service": "khcustomer",
+    "entity_set": "RelationshipCollection",
+    "count": 36,
+    "field_count": 26
+  },
+  {
+    "service": "khcustomer",
+    "entity_set": "PostalAddressCollection",
+    "count": 44,
+    "field_count": 22
+  },
+  {
+    "service": "khcustomer",
+    "entity_set": "BankDetailsCollection",
+    "count": 8,
+    "field_count": 18
+  },
+  {
+    "service": "khcustomer",
+    "entity_set": "NoteCollection",
+    "count": 0,
+    "field_count": 11
+  },
+  {
+    "service": "khcustomer",
+    "entity_set": "EmployeeResponsibleCollection",
+    "count": 0,
+    "field_count": 10
+  },
+  {
+    "service": "khcustomer",
+    "entity_set": "AddressUsageCollection",
+    "count": 48,
+    "field_count": 6
+  },
+  {
+    "service": "khcustomer",
+    "entity_set": "TaxExemptionCollection",
+    "count": 0,
+    "field_count": 6
+  },
+  {
+    "service": "khcustomer",
+    "entity_set": "TaxNumberCollection",
+    "count": 34,
+    "field_count": 5
+  },
+  {
+    "service": "khcustomer",
+    "entity_set": "RoleCollection",
+    "count": 62,
+    "field_count": 5
+  },
+  {
+    "service": "khcustomer",
+    "entity_set": "IdentificationCollection",
+    "count": 0,
+    "field_count": 4
+  },
+  {
+    "service": "khcustomer",
+    "entity_set": "CommunicationPreferenceCollection",
+    "count": 38,
+    "field_count": 4
+  },
+  {
+    "service": "khcustomer",
+    "entity_set": "EMailCollection",
+    "count": 0,
+    "field_count": 4
+  },
+  {
+    "service": "khcustomer",
+    "entity_set": "FacsimileCollection",
+    "count": 0,
+    "field_count": 4
+  },
+  {
+    "service": "khcustomer",
+    "entity_set": "MobilePhoneCollection",
+    "count": 1,
+    "field_count": 4
+  },
+  {
+    "service": "khcustomer",
+    "entity_set": "ConventionalPhoneCollection",
+    "count": 1,
+    "field_count": 4
+  },
+  {
+    "service": "khcustomer",
+    "entity_set": "AddressInformationCollection",
+    "count": 44,
+    "field_count": 4
+  },
+  {
+    "service": "khcustomer",
+    "entity_set": "NationalBankIdentificationCollection",
+    "count": 4,
+    "field_count": 3
+  },
+  {
+    "service": "khcustomer",
+    "entity_set": "WebSiteCollection",
+    "count": 1,
+    "field_count": 3
+  },
+  {
+    "service": "khcustomer",
+    "entity_set": "FormattedAddressCollection",
+    "count": 5,
+    "field_count": 3
+  },
+  {
     "service": "khcustomerinvoice",
     "entity_set": "ItemAttachmentFolderCollection",
     "count": null,
     "error": "HTTP 400: {\"error\":{\"code\":\"\",\"message\":{\"lang\":\"en\",\"value\":\"The Data Services Request has been understood but is not supported by the processor\"}}}",
     "field_count": 19
-  },
-  {
-    "service": "khcustomerinvoice",
-    "entity_set": "ItemPriceAndTaxCalculationCollection",
-    "count": 623,
-    "field_count": 8
-  },
-  {
-    "service": "khcustomerinvoice",
-    "entity_set": "BusinessTransactionDocumentReferenceCollection",
-    "count": 31,
-    "field_count": 7
-  },
-  {
-    "service": "khcustomerinvoice",
-    "entity_set": "ItemBusinessTransactionDocumentReferenceCollection",
-    "count": 870,
-    "field_count": 7
   },
   {
     "service": "khcustomerinvoice",
@@ -32,44 +134,87 @@
   },
   {
     "service": "khcustomerinvoice",
-    "entity_set": "InvolvedPartyCollection",
-    "count": 3144,
-    "field_count": 6
-  },
-  {
-    "service": "khcustomerinvoice",
     "entity_set": "ExternalPaymentCollection",
     "count": 0,
     "field_count": 5
   },
   {
-    "service": "khcustomerinvoice",
-    "entity_set": "PriceAndTaxCalculationCollection",
-    "count": 524,
+    "service": "khcustomerinvoicerequest",
+    "entity_set": "CustomerInvoiceRequestCollection",
+    "count": 720,
+    "field_count": 34
+  },
+  {
+    "service": "khcustomerinvoicerequest",
+    "entity_set": "ItemCollection",
+    "count": 887,
+    "field_count": 21
+  },
+  {
+    "service": "khcustomerinvoicerequest",
+    "entity_set": "ItemAttachmentFolderCollection",
+    "count": null,
+    "error": "HTTP 400: {\"error\":{\"code\":\"\",\"message\":{\"lang\":\"en\",\"value\":\"The Data Services Request has been understood but is not supported by the processor\"}}}",
+    "field_count": 19
+  },
+  {
+    "service": "khcustomerinvoicerequest",
+    "entity_set": "ItemBusinessTransactionDocumentReferenceCollection",
+    "count": 414,
+    "field_count": 9
+  },
+  {
+    "service": "khcustomerinvoicerequest",
+    "entity_set": "PaymentControlCollection",
+    "count": 603,
+    "field_count": 7
+  },
+  {
+    "service": "khcustomerinvoicerequest",
+    "entity_set": "PaymentControlExternalPaymentCollection",
+    "count": 0,
+    "field_count": 5
+  },
+  {
+    "service": "khcustomerinvoicerequest",
+    "entity_set": "CashDiscountTermsCollection",
+    "count": 593,
+    "field_count": 5
+  },
+  {
+    "service": "khcustomerinvoicerequest",
+    "entity_set": "SalesUnitPartyCollection",
+    "count": 5755,
     "field_count": 4
   },
   {
-    "service": "khcustomerinvoice",
+    "service": "khcustomerinvoicerequest",
     "entity_set": "BuyerPartyNameCollection",
     "count": 1410,
     "field_count": 2
   },
   {
-    "service": "khcustomerinvoice",
+    "service": "khcustomerinvoicerequest",
     "entity_set": "BuyerPartyFormattedAddressCollection",
     "count": 1420,
     "field_count": 2
   },
   {
-    "service": "khcustomerinvoice",
-    "entity_set": "InvolvedPartyDisplayNameCollection",
+    "service": "khcustomerinvoicerequest",
+    "entity_set": "EmployeeResponsibleNameCollection",
     "count": 1410,
     "field_count": 2
   },
   {
-    "service": "khcustomerinvoice",
-    "entity_set": "InvolvedPartyFormattedAddressCollection",
-    "count": 1420,
+    "service": "khcustomerinvoicerequest",
+    "entity_set": "SalesUnitNameCollection",
+    "count": 1410,
+    "field_count": 2
+  },
+  {
+    "service": "khcustomerinvoicerequest",
+    "entity_set": "BillToPartyNameCollection",
+    "count": 1410,
     "field_count": 2
   },
   {
@@ -298,279 +443,133 @@
   },
   {
     "service": "khemployee",
-    "entity_set": "OrganisationalCentreAssignmentCollection",
-    "count": 1710,
-    "field_count": 18
-  },
-  {
-    "service": "khemployee",
-    "entity_set": "EmployeeAssignmentCollection",
-    "count": 90,
-    "field_count": 12
-  },
-  {
-    "service": "khemployee",
-    "entity_set": "AssignedIdentityCollection",
-    "count": 557,
-    "field_count": 9
-  },
-  {
-    "service": "khemployee",
     "entity_set": "CurrentResponsibleManagerCollection",
     "count": 0,
     "field_count": 9
   },
   {
-    "service": "khemployee",
-    "entity_set": "JobAssignmentCollection",
-    "count": 90,
-    "field_count": 7
-  },
-  {
-    "service": "khemployee",
-    "entity_set": "EmployeeTypeCollection",
-    "count": 184,
-    "field_count": 5
-  },
-  {
-    "service": "khemployee",
-    "entity_set": "ReportingLineUnitNameByValidityCollection",
-    "count": 3,
-    "field_count": 5
-  },
-  {
-    "service": "khemployee",
-    "entity_set": "JobNameByValidityCollection",
-    "count": 12,
-    "field_count": 4
-  },
-  {
-    "service": "khemployee",
-    "entity_set": "WorkplaceAddressInformationCollection",
-    "count": 7,
-    "field_count": 3
-  },
-  {
-    "service": "khemployee",
-    "entity_set": "CurrentFunctionalUnitCollection",
-    "count": 16,
-    "field_count": 3
-  },
-  {
-    "service": "khemployee",
-    "entity_set": "WorkplaceAddressFormattedAddressCollection",
-    "count": 7,
-    "field_count": 3
-  },
-  {
-    "service": "khemployee",
-    "entity_set": "CompanyNameCollection",
-    "count": 5,
-    "field_count": 3
-  },
-  {
-    "service": "khemployee",
-    "entity_set": "BusinessResidenceNameCollection",
-    "count": 3,
-    "field_count": 3
-  },
-  {
-    "service": "khemployee",
-    "entity_set": "PositionCollection",
-    "count": 90,
-    "field_count": 2
-  },
-  {
-    "service": "khemployee",
-    "entity_set": "CurrentCompanyCollection",
-    "count": 4,
-    "field_count": 2
-  },
-  {
-    "service": "khemployee",
-    "entity_set": "CurrentBusinessResidenceCollection",
-    "count": 2,
-    "field_count": 2
-  },
-  {
-    "service": "khemployee",
-    "entity_set": "CurrentReportingLineUnitCollection",
-    "count": 2,
-    "field_count": 2
-  },
-  {
-    "service": "khlocation",
-    "entity_set": "LogisticsAreaCollection",
-    "count": 16,
+    "service": "khgoodsandactivityconfirmation",
+    "entity_set": "InventoryChangeItemCollection",
+    "count": null,
+    "error": "HTTP 500: <HTML><HEAD> <TITLE>500 SAP Internal Server Error</TITLE> </HEAD><BODY> <H1>500 SAP Internal Server Error</H1> ",
     "field_count": 20
   },
   {
-    "service": "khopportunity",
-    "entity_set": "ItemCollection",
-    "count": 16,
-    "field_count": 14
+    "service": "khgoodsandactivityconfirmation",
+    "entity_set": "GoodsAndActivityConfirmationCollection",
+    "count": null,
+    "error": "HTTP 500: <HTML><HEAD> <TITLE>500 SAP Internal Server Error</TITLE> </HEAD><BODY> <H1>500 SAP Internal Server Error</H1> ",
+    "field_count": 15
   },
   {
-    "service": "khopportunity",
-    "entity_set": "DocumentReferenceCollection",
-    "count": 3,
-    "field_count": 14
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "CampaignCollection",
-    "count": 3,
+    "service": "khgoodsandactivityconfirmation",
+    "entity_set": "TextCollection",
+    "count": null,
+    "error": "HTTP 500: <HTML><HEAD> <TITLE>500 SAP Internal Server Error</TITLE> </HEAD><BODY> <H1>500 SAP Internal Server Error</H1> ",
     "field_count": 11
+  },
+  {
+    "service": "khgoodsandactivityconfirmation",
+    "entity_set": "ItemTextCollection",
+    "count": null,
+    "error": "HTTP 500: <HTML><HEAD> <TITLE>500 SAP Internal Server Error</TITLE> </HEAD><BODY> <H1>500 SAP Internal Server Error</H1> ",
+    "field_count": 11
+  },
+  {
+    "service": "khgoodsandactivityconfirmation",
+    "entity_set": "OwnerPartyCollection",
+    "count": 438,
+    "field_count": 9
+  },
+  {
+    "service": "khgoodsandactivityconfirmation",
+    "entity_set": "CustodianPartyCollection",
+    "count": 438,
+    "field_count": 5
+  },
+  {
+    "service": "khgoodsandactivityconfirmation",
+    "entity_set": "ItemChangeQuantityCollection",
+    "count": 2541,
+    "field_count": 4
+  },
+  {
+    "service": "khgoodsandactivityconfirmation",
+    "entity_set": "LogisticsAreaCollection",
+    "count": 16,
+    "field_count": 4
+  },
+  {
+    "service": "khgoodsandactivityconfirmation",
+    "entity_set": "SupplyPlanningAreaCollection",
+    "count": 1,
+    "field_count": 4
+  },
+  {
+    "service": "khgoodsandactivityconfirmation",
+    "entity_set": "IdentifiedStockCollection",
+    "count": 165,
+    "field_count": 3
+  },
+  {
+    "service": "khgoodsandactivityconfirmation",
+    "entity_set": "SerialNumberCollection",
+    "count": 0,
+    "field_count": 3
+  },
+  {
+    "service": "khgoodsandactivityconfirmation",
+    "entity_set": "LocationCollection",
+    "count": 4,
+    "field_count": 3
+  },
+  {
+    "service": "khgoodsandactivityconfirmation",
+    "entity_set": "PermanentEstablishmentCollection",
+    "count": 2,
+    "field_count": 2
+  },
+  {
+    "service": "khhousebankaccount",
+    "entity_set": "HouseBankAccountCollection",
+    "count": 0,
+    "field_count": 18
+  },
+  {
+    "service": "khhousebankaccount",
+    "entity_set": "BankDirectoryEntryCollection",
+    "count": 10,
+    "field_count": 12
+  },
+  {
+    "service": "khhousebankaccount",
+    "entity_set": "HouseBankCollection",
+    "count": 8,
+    "field_count": 7
+  },
+  {
+    "service": "khhousebankaccount",
+    "entity_set": "BankDirectoryEntryBranchCollection",
+    "count": 0,
+    "field_count": 7
+  },
+  {
+    "service": "khhousebankaccount",
+    "entity_set": "NationalBankIdentificationCollection",
+    "count": 4,
+    "field_count": 6
+  },
+  {
+    "service": "khhousebankaccount",
+    "entity_set": "DescriptionCollection",
+    "count": 12,
+    "field_count": 4
   },
   {
     "service": "khopportunity",
     "entity_set": "TextCollection",
     "count": 0,
     "field_count": 11
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "ProspectPartyPostalAddressCollection",
-    "count": 740,
-    "field_count": 8
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "ExternalPartyCollection",
-    "count": 41,
-    "field_count": 7
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "ProspectPartyCollection",
-    "count": 41,
-    "field_count": 7
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "CompetitorCollection",
-    "count": 41,
-    "field_count": 5
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "SalesBusinessAreaCollection",
-    "count": 13,
-    "field_count": 5
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "ProspectPartyContactCollection",
-    "count": 10,
-    "field_count": 5
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "SalesUnitCollection",
-    "count": 41,
-    "field_count": 4
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "EmployeeResponsibleCollection",
-    "count": 41,
-    "field_count": 4
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "ExternalPartyNameCollection",
-    "count": 1410,
-    "field_count": 2
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "CompetitorWebSiteCollection",
-    "count": 43,
-    "field_count": 2
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "CompetitorNameCollection",
-    "count": 1410,
-    "field_count": 2
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "SalesUnitNameCollection",
-    "count": 1410,
-    "field_count": 2
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "EmployeeResponsibleNameCollection",
-    "count": 1410,
-    "field_count": 2
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "ProspectPartyContactFormattedAddressCollection",
-    "count": 1420,
-    "field_count": 2
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "ProspectPartyContactTelephoneCollection",
-    "count": 224,
-    "field_count": 2
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "ProspectPartyContactEmailCollection",
-    "count": 208,
-    "field_count": 2
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "ProspectPartyContactNameCollection",
-    "count": 1410,
-    "field_count": 2
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "ProspectPartyWebSiteCollection",
-    "count": 43,
-    "field_count": 2
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "ProspectPartyFormattedAddressCollection",
-    "count": 1420,
-    "field_count": 2
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "ProspectPartyTelephoneCollection",
-    "count": 224,
-    "field_count": 2
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "ProspectPartyEmailCollection",
-    "count": 208,
-    "field_count": 2
-  },
-  {
-    "service": "khopportunity",
-    "entity_set": "ProspectPartyNameCollection",
-    "count": 1410,
-    "field_count": 2
-  },
-  {
-    "service": "khoutbounddelivery",
-    "entity_set": "ArrivalPeriodCollection",
-    "count": 238,
-    "field_count": 6
-  },
-  {
-    "service": "khoutbounddelivery",
-    "entity_set": "ShippingPeriodCollection",
-    "count": 238,
-    "field_count": 6
   },
   {
     "service": "khoutbounddelivery",
@@ -585,244 +584,16 @@
     "field_count": 4
   },
   {
-    "service": "khoutbounddelivery",
-    "entity_set": "ItemDeliveryQuantityCollection",
-    "count": 157,
-    "field_count": 4
-  },
-  {
-    "service": "khoutbounddelivery",
-    "entity_set": "ItemSalesOrderReferenceCollection",
-    "count": 473,
-    "field_count": 4
-  },
-  {
-    "service": "khoutbounddelivery",
-    "entity_set": "ProductRecipientPartyCollection",
-    "count": 520,
-    "field_count": 4
-  },
-  {
-    "service": "khoutbounddelivery",
-    "entity_set": "PickupPeriodCollection",
-    "count": 238,
-    "field_count": 4
-  },
-  {
-    "service": "khoutbounddelivery",
-    "entity_set": "SellerPartyCollection",
-    "count": 520,
-    "field_count": 3
-  },
-  {
-    "service": "khoutbounddelivery",
-    "entity_set": "FreightForwarderPartyCollection",
-    "count": 520,
-    "field_count": 3
-  },
-  {
-    "service": "khoutbounddelivery",
-    "entity_set": "ItemLogisticsRequestResponsiblePartyCollection",
-    "count": 471,
-    "field_count": 3
-  },
-  {
-    "service": "khoutbounddelivery",
-    "entity_set": "ShipFromLocationCollection",
-    "count": 260,
-    "field_count": 3
-  },
-  {
-    "service": "khoutbounddelivery",
-    "entity_set": "ProductRecipientDisplayNameCollection",
-    "count": 1410,
-    "field_count": 2
-  },
-  {
-    "service": "khoutbounddelivery",
-    "entity_set": "ProductRecipientFormattedAddressCollection",
-    "count": 1420,
-    "field_count": 2
-  },
-  {
     "service": "khpayment",
     "entity_set": "HouseBankAccountCollection",
     "count": 0,
     "field_count": 16
   },
   {
-    "service": "khpayment",
-    "entity_set": "CompanyNameCollection",
-    "count": 5,
-    "field_count": 2
-  },
-  {
     "service": "khproductionorder",
     "entity_set": "NotesCollection",
     "count": 0,
     "field_count": 11
-  },
-  {
-    "service": "khproductionorder",
-    "entity_set": "ProductionLotCollection",
-    "count": 145,
-    "field_count": 2
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "ItemAccountAssignmentDetailsCollection",
-    "count": 284,
-    "field_count": 31
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "DeliveryPostalAddressCollection",
-    "count": 740,
-    "field_count": 13
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "NotesCollection",
-    "count": 112,
-    "field_count": 11
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "SupplierPostalAddressCollection",
-    "count": 740,
-    "field_count": 11
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "ItemBusinessTransactionDocumentReferenceCollection",
-    "count": 2400,
-    "field_count": 7
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "BusinessTransactionDocumentReferenceCollection",
-    "count": 1351,
-    "field_count": 7
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "DeliveryAddressNameCollection",
-    "count": 1367,
-    "field_count": 6
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "ItemShipToLocationCollection",
-    "count": 5571,
-    "field_count": 5
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "ApproverPartyCollection",
-    "count": 3529,
-    "field_count": 4
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "BuyerPartyCollection",
-    "count": 3529,
-    "field_count": 4
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "BillToPartyCollection",
-    "count": 3529,
-    "field_count": 4
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "EmployeeResponsibleCollection",
-    "count": 3529,
-    "field_count": 4
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "PurchasingUnitCollection",
-    "count": 3529,
-    "field_count": 4
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "ItemEndBuyerPartyCollection",
-    "count": 5533,
-    "field_count": 3
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "PaymentTermsCollection",
-    "count": 605,
-    "field_count": 3
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "ApproverPartyNameCollection",
-    "count": 1410,
-    "field_count": 2
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "SupplierFormattedAddressCollection",
-    "count": 1420,
-    "field_count": 2
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "BuyerPartyNameCollection",
-    "count": 1410,
-    "field_count": 2
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "BillToPartyNameCollection",
-    "count": 1410,
-    "field_count": 2
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "EmployeeResponsibleNameCollection",
-    "count": 1410,
-    "field_count": 2
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "PurchasingUnitNameCollection",
-    "count": 1410,
-    "field_count": 2
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "SupplierNameCollection",
-    "count": 1410,
-    "field_count": 2
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "ItemAccountAssignmentCollection",
-    "count": 281,
-    "field_count": 2
-  },
-  {
-    "service": "khpurchaseorder",
-    "entity_set": "DeliveryAddressCollection",
-    "count": 1477,
-    "field_count": 1
-  },
-  {
-    "service": "khsalesarrangement",
-    "entity_set": "SalesOrganisationNameByValidityCollection",
-    "count": 17,
-    "field_count": 4
-  },
-  {
-    "service": "khsalesorder",
-    "entity_set": "PriceComponentCollection",
-    "count": 2748,
-    "field_count": 20
   },
   {
     "service": "khsalesorder",
@@ -830,30 +601,6 @@
     "count": null,
     "error": "HTTP 400: {\"error\":{\"code\":\"\",\"message\":{\"lang\":\"en\",\"value\":\"The Data Services Request has been understood but is not supported by the processor\"}}}",
     "field_count": 19
-  },
-  {
-    "service": "khsalesorder",
-    "entity_set": "DocumentReferenceCollection",
-    "count": 169,
-    "field_count": 18
-  },
-  {
-    "service": "khsalesorder",
-    "entity_set": "ProductRecipientPartyDetailsCollection",
-    "count": 1477,
-    "field_count": 17
-  },
-  {
-    "service": "khsalesorder",
-    "entity_set": "ItemPriceComponentCollection",
-    "count": 3704,
-    "field_count": 16
-  },
-  {
-    "service": "khsalesorder",
-    "entity_set": "ProductRecipientPartyPostalAddressCollection",
-    "count": 740,
-    "field_count": 12
   },
   {
     "service": "khsalesorder",
@@ -869,69 +616,9 @@
   },
   {
     "service": "khsalesorder",
-    "entity_set": "ItemPriceAndTaxCalculationCollection",
-    "count": 260,
-    "field_count": 10
-  },
-  {
-    "service": "khsalesorder",
-    "entity_set": "ItemDocumentReferenceCollection",
-    "count": 201,
-    "field_count": 9
-  },
-  {
-    "service": "khsalesorder",
-    "entity_set": "ItemScheduleLineCollection",
-    "count": 516,
-    "field_count": 7
-  },
-  {
-    "service": "khsalesorder",
-    "entity_set": "PaymentControlCollection",
-    "count": 196,
-    "field_count": 7
-  },
-  {
-    "service": "khsalesorder",
-    "entity_set": "ProductRecipientPartyNameCollection",
-    "count": 1367,
-    "field_count": 6
-  },
-  {
-    "service": "khsalesorder",
-    "entity_set": "PricingTermsCollection",
-    "count": 196,
-    "field_count": 6
-  },
-  {
-    "service": "khsalesorder",
-    "entity_set": "RequestedFulfillmentPeriodCollection",
-    "count": 361,
-    "field_count": 6
-  },
-  {
-    "service": "khsalesorder",
-    "entity_set": "ProductRecipientPartyCollection",
-    "count": 1557,
-    "field_count": 6
-  },
-  {
-    "service": "khsalesorder",
     "entity_set": "ExternalPaymentCollection",
     "count": 0,
     "field_count": 5
-  },
-  {
-    "service": "khsalesorder",
-    "entity_set": "SalesUnitPartyCollection",
-    "count": 1557,
-    "field_count": 4
-  },
-  {
-    "service": "khsalesorder",
-    "entity_set": "ItemVendorPartyCollection",
-    "count": 2333,
-    "field_count": 4
   },
   {
     "service": "khsalesorder",
@@ -941,52 +628,208 @@
     "field_count": 4
   },
   {
-    "service": "khsalesorder",
-    "entity_set": "ProductRecipientPartyFormattedAddressCollection",
-    "count": 1420,
-    "field_count": 3
+    "service": "khserviceproduct",
+    "entity_set": "SalesCollection",
+    "count": 6,
+    "field_count": 16
   },
   {
-    "service": "khsalesorder",
-    "entity_set": "PriceAndTaxCalculationCollection",
-    "count": 194,
-    "field_count": 3
+    "service": "khserviceproduct",
+    "entity_set": "ServiceProductCollection",
+    "count": 7,
+    "field_count": 12
   },
   {
-    "service": "khsalesorder",
-    "entity_set": "ItemProductRecipientPartyCollection",
-    "count": 2333,
-    "field_count": 3
+    "service": "khserviceproduct",
+    "entity_set": "TextCollection",
+    "count": 0,
+    "field_count": 11
   },
   {
-    "service": "khsalesorder",
-    "entity_set": "ItemShipFromLocationCollection",
-    "count": 515,
-    "field_count": 3
+    "service": "khserviceproduct",
+    "entity_set": "PurchasingTextCollection",
+    "count": 0,
+    "field_count": 11
   },
   {
-    "service": "khsalesorder",
-    "entity_set": "BuyerPartyNameCollection",
-    "count": 1410,
+    "service": "khserviceproduct",
+    "entity_set": "SalesTextCollection",
+    "count": 0,
+    "field_count": 11
+  },
+  {
+    "service": "khserviceproduct",
+    "entity_set": "DeviantTaxClassificationCollection",
+    "count": 1,
+    "field_count": 8
+  },
+  {
+    "service": "khserviceproduct",
+    "entity_set": "ProductCategoryCollection",
+    "count": 7,
+    "field_count": 7
+  },
+  {
+    "service": "khserviceproduct",
+    "entity_set": "CustomerInformationCollection",
+    "count": 0,
+    "field_count": 7
+  },
+  {
+    "service": "khserviceproduct",
+    "entity_set": "QuantityConversionCollection",
+    "count": 0,
+    "field_count": 6
+  },
+  {
+    "service": "khserviceproduct",
+    "entity_set": "PurchasingCollection",
+    "count": 4,
+    "field_count": 5
+  },
+  {
+    "service": "khserviceproduct",
+    "entity_set": "ValuationCollection",
+    "count": 7,
+    "field_count": 5
+  },
+  {
+    "service": "khserviceproduct",
+    "entity_set": "WithholdingTaxClassificationCollection",
+    "count": 0,
+    "field_count": 5
+  },
+  {
+    "service": "khserviceproduct",
+    "entity_set": "IdentificationCollection",
+    "count": 7,
+    "field_count": 4
+  },
+  {
+    "service": "khserviceproduct",
+    "entity_set": "SalesOrganisationNameByValidityCollection",
+    "count": 17,
+    "field_count": 4
+  },
+  {
+    "service": "khserviceproduct",
+    "entity_set": "CompanyCurrentNameCollection",
+    "count": 5,
     "field_count": 2
   },
   {
-    "service": "khsalesorder",
-    "entity_set": "SalesUnitPartyNameCollection",
-    "count": 1410,
-    "field_count": 2
+    "service": "khsupplier",
+    "entity_set": "CurrentDefaultPostalAddressCollection",
+    "count": 248,
+    "field_count": 22
   },
   {
-    "service": "khsalesorder",
-    "entity_set": "ItemVendorNameCollection",
-    "count": 1410,
-    "field_count": 2
+    "service": "khsupplier",
+    "entity_set": "SupplierCollection",
+    "count": 250,
+    "field_count": 19
   },
   {
-    "service": "khsalesorder",
-    "entity_set": "ItemVendorFormattedAddressCollection",
-    "count": 1420,
-    "field_count": 2
+    "service": "khsupplier",
+    "entity_set": "BankDetailsCollection",
+    "count": 82,
+    "field_count": 18
+  },
+  {
+    "service": "khsupplier",
+    "entity_set": "NoteCollection",
+    "count": 0,
+    "field_count": 11
+  },
+  {
+    "service": "khsupplier",
+    "entity_set": "PurchasingDataCollection",
+    "count": 237,
+    "field_count": 11
+  },
+  {
+    "service": "khsupplier",
+    "entity_set": "WithholdingTaxClassificationCollection",
+    "count": 11,
+    "field_count": 7
+  },
+  {
+    "service": "khsupplier",
+    "entity_set": "TaxExemptionCollection",
+    "count": 1,
+    "field_count": 6
+  },
+  {
+    "service": "khsupplier",
+    "entity_set": "TaxNumberCollection",
+    "count": 43,
+    "field_count": 5
+  },
+  {
+    "service": "khsupplier",
+    "entity_set": "RoleCollection",
+    "count": 758,
+    "field_count": 5
+  },
+  {
+    "service": "khsupplier",
+    "entity_set": "CurrentDefaultCommunicationPreferenceCollection",
+    "count": 47,
+    "field_count": 4
+  },
+  {
+    "service": "khsupplier",
+    "entity_set": "CurrentDefaultEMailCollection",
+    "count": 3,
+    "field_count": 4
+  },
+  {
+    "service": "khsupplier",
+    "entity_set": "CurrentDefaultFacsimileCollection",
+    "count": 0,
+    "field_count": 4
+  },
+  {
+    "service": "khsupplier",
+    "entity_set": "CurrentDefaultMobilePhoneCollection",
+    "count": 8,
+    "field_count": 4
+  },
+  {
+    "service": "khsupplier",
+    "entity_set": "CurrentDefaultConventionalPhoneCollection",
+    "count": 8,
+    "field_count": 4
+  },
+  {
+    "service": "khsupplier",
+    "entity_set": "CurrentDefaultAddressInformationCollection",
+    "count": 248,
+    "field_count": 4
+  },
+  {
+    "service": "khsupplier",
+    "entity_set": "IdentificationCollection",
+    "count": 0,
+    "field_count": 4
+  },
+  {
+    "service": "khsupplier",
+    "entity_set": "NationalBankIdentificationCollection",
+    "count": 4,
+    "field_count": 3
+  },
+  {
+    "service": "khsupplier",
+    "entity_set": "CurrentDefaultWebSiteCollection",
+    "count": 1,
+    "field_count": 3
+  },
+  {
+    "service": "khsupplier",
+    "entity_set": "CurrentDefaultFormattedAddressCollection",
+    "count": 0,
+    "field_count": 3
   },
   {
     "service": "khsupplierinvoice",
@@ -994,78 +837,6 @@
     "count": null,
     "error": "HTTP 400: {\"error\":{\"code\":\"\",\"message\":{\"lang\":\"en\",\"value\":\"The Data Services Request has been understood but is not supported by the processor\"}}}",
     "field_count": 19
-  },
-  {
-    "service": "khsupplierinvoice",
-    "entity_set": "ItemTaxCalculationCollection",
-    "count": 777,
-    "field_count": 7
-  },
-  {
-    "service": "khsupplierinvoice",
-    "entity_set": "PurchaseOrderReferenceCollection",
-    "count": 1908,
-    "field_count": 6
-  },
-  {
-    "service": "khsupplierinvoice",
-    "entity_set": "ConfirmedInboundDeliveryReferenceCollection",
-    "count": 1908,
-    "field_count": 6
-  },
-  {
-    "service": "khsupplierinvoice",
-    "entity_set": "ExternalReferenceCollection",
-    "count": 1908,
-    "field_count": 5
-  },
-  {
-    "service": "khsupplierinvoice",
-    "entity_set": "ItemConfirmedInboundDeliveryReferenceCollection",
-    "count": 4082,
-    "field_count": 4
-  },
-  {
-    "service": "khsupplierinvoice",
-    "entity_set": "SupplierInvoiceExceptionCollection",
-    "count": 110,
-    "field_count": 4
-  },
-  {
-    "service": "khsupplierinvoice",
-    "entity_set": "ItemPurchaseOrderReferenceCollection",
-    "count": 4082,
-    "field_count": 4
-  },
-  {
-    "service": "khsupplierinvoice",
-    "entity_set": "BuyerPartyCollection",
-    "count": 3256,
-    "field_count": 3
-  },
-  {
-    "service": "khsupplierinvoice",
-    "entity_set": "BillToPartyCollection",
-    "count": 3256,
-    "field_count": 3
-  },
-  {
-    "service": "khsupplierinvoice",
-    "entity_set": "SupplierInvoiceExceptionReferenceCollection",
-    "count": 1908,
-    "field_count": 3
-  },
-  {
-    "service": "khsupplierinvoice",
-    "entity_set": "SellerPartyNameCollection",
-    "count": 1410,
-    "field_count": 2
-  },
-  {
-    "service": "khsupplierinvoice",
-    "entity_set": "SellerPartyAddressCollection",
-    "count": 1420,
-    "field_count": 2
   },
   {
     "service": "tmserviceconfirmation",
@@ -1337,12 +1108,6 @@
   },
   {
     "service": "vmumaterial",
-    "entity_set": "SupplierInformationCollection",
-    "count": 34,
-    "field_count": 8
-  },
-  {
-    "service": "vmumaterial",
     "entity_set": "CustomerInformationCollection",
     "count": 0,
     "field_count": 7
@@ -1373,44 +1138,8 @@
   },
   {
     "service": "vmumaterial",
-    "entity_set": "SalesOrganisationNameByValidityCollection",
-    "count": 17,
-    "field_count": 4
-  },
-  {
-    "service": "vmumaterial",
     "entity_set": "GlobalTradeItemNumberCollection",
     "count": 0,
     "field_count": 4
-  },
-  {
-    "service": "vmumaterial",
-    "entity_set": "BusinessResidenceCurrentNameCollection",
-    "count": 3,
-    "field_count": 2
-  },
-  {
-    "service": "vmumaterial",
-    "entity_set": "CompanyCurrentNameCollection",
-    "count": 5,
-    "field_count": 2
-  },
-  {
-    "service": "vmumaterialvaluationdata",
-    "entity_set": "ValuationLevelCollection",
-    "count": 3021,
-    "field_count": 13
-  },
-  {
-    "service": "vmumaterialvaluationdata",
-    "entity_set": "AccountDeterminationSpecificationCollection",
-    "count": 3021,
-    "field_count": 2
-  },
-  {
-    "service": "vmumaterialvaluationdata",
-    "entity_set": "InventoryValuationSpecificationCollection",
-    "count": 3021,
-    "field_count": 2
   }
 ]

@@ -194,7 +194,7 @@ the catch-all, and re-run `snapshot_metadata` rather than hand-capturing curl ou
 
 ## Odoo output today (`output_odoo/`)
 
-**36 files, 13,446 rows.** The authoritative, always-current list is `CONSOLIDATED_STATUS.csv`
+**39 files, 13,538 rows.** The authoritative, always-current list is `CONSOLIDATED_STATUS.csv`
 (one row per SAP API call) and `PROJECT_STATUS.csv` (one row per sheet object) - both regenerated
 from disk on every run. Highlights rather than a duplicate of those:
 
@@ -203,9 +203,11 @@ from disk on every run. Highlights rather than a duplicate of those:
 | `account_account.csv` | 148 | Chart of accounts, unioned from the six analytics reports that expose `CGLACCT`/`TGLACCT` (see `src/probe_gl_accounts.py`) |
 | `account_tax.csv` | 60 | `GLOTAXB01` "Taxes - Product Tax Details" - the only source carrying a tax RATE |
 | `account_move_open_customer.csv` | 189 | `FINDUEU04` Trade Receivables Payables Register - open items with outstanding balances |
-| `res_partner.csv` | 271 | `RPBUPCSD` (customers) + `RPBUPSPP` (suppliers), deduplicated by `CBP_UUID`, `vat` from `RPBUPATAXNUMBERS` |
-| `product_template.csv` | 3058 | All of `vmumaterial`'s real per-material entities; `standard_price` from `vmumaterialvaluationdata` (994/3058 priced) |
+| `res_partner.csv` | 288 | `khcustomer` + `khsupplier` (plain CRUD), with address/tax/bank children joined on `ParentObjectID[:32]` |
+| `res_partner_contact.csv` | 36 | `khcustomer/RelationshipCollection`, keyed by `InternalID1`/`InternalID2` |
+| `product_template.csv` | 3065 | All of `vmumaterial`'s real per-material entities; `standard_price` from `vmumaterialvaluationdata` (994/3058 priced) |
 | `stock_quant_adjustment.csv` | 1805 | `SCMINBU03` Inventory Balance, grouped material x logistics area x site |
+| `res_bank.csv` | 10 | `khhousebankaccount/BankDirectoryEntryCollection` - the real bank directory |
 | `stock_location.csv` | 20 | 4 sites from `khlocation/LocationCollection` plus their 16 storage areas from `LogisticsAreaCollection` |
 | `purchase_order.csv` / `_line.csv` | 655 / 1861 | `khpurchaseorder`; partner via type-aware party resolution (91% valid) |
 | `product_supplierinfo.csv` | 34 | `vmumaterial/SupplierInformationCollection` - supplier part numbers and lead times |
@@ -233,18 +235,30 @@ Applying the wrong parser to either one silently produces numbers wrong by 1000x
 
 When an analytics entity needs more fields than one `$select` allows, the chunks are merged on a
 business key. If that key is not unique within a chunk, the non-key fields of the surviving row
-are a *sample* rather than a complete join. `get_entity_set_all_fields()` now detects and logs
-this. It currently fires on Customers (44 keys vs 50 rows) and Vendors (229 vs 237) - so a
-handful of partners may show one of several addresses. The clean fix is to import `khcustomer`
-and `khsupplier`, which expose the same data as plain CRUD with no chunking at all
-(`SAP_IMPORT_PLAN.md`, priority 1).
+are a *sample* rather than a complete join. `get_entity_set_all_fields()` detects and logs this.
+
+**Resolved for Customers and Vendors (2026-09-18).** That warning used to fire on both (44 keys
+vs 50 rows; 229 vs 237). `khcustomer`/`khsupplier` are now imported and `build_res_partner()`
+reads those instead - plain CRUD, no chunking, so no sampling. The switch was verified as strictly
+additive first: the CRUD services return all 271 external IDs the analytics route produced plus
+17 more, so no document reference broke. The analytics rows are still read afterwards purely to
+backfill fields the CRUD services leave blank.
+
+The caveat still applies to any *other* analytics entity pulled without an explicit `select`.
+
+### Child entities join on `ParentObjectID[:32]`, not the whole string
+
+On the partner services SAP returns `ParentObjectID` as **two 32-character ObjectIDs
+concatenated**; only the first half is the parent. Measured: joining addresses on the full string
+matches 0 of 44, on the first 32 characters matches 44 of 44. `_join_by_parent()` in
+`src/transform_odoo.py` always slices. (The same trap was hit earlier on `res_users`.)
 
 ## Registry validation (`python -m src.validate`)
 
 Cross-checks `src/registry.py`'s 66+1 objects against what's actually in `output_odoo/`. Current
-state: **31/67 objects have real data, including 19 of the 21 mandatory ones.** 22 objects have a
+state: **33/67 objects have real data, including 19 of the 21 mandatory ones.** 20 objects have a
 decided Odoo target but no confirmed SAP source yet (`pending_mapping`); most are waiting on one
-of the 29 custom services still to be imported — `SAP_IMPORT_PLAN.md` says exactly which file
+of the 23 custom services still to be imported — `SAP_IMPORT_PLAN.md` says exactly which file
 closes which object. 14 objects (Engineering/PLM, Maintenance/PM, Quality/QM) are
 `not_in_bydesign` — standard ByDesign has no equivalent module.
 

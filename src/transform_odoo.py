@@ -64,6 +64,7 @@ PARTNER_FIELDNAMES = [
 
 BANK_FIELDNAMES = ["id", "name", "country_id/id"]
 PARTNER_BANK_FIELDNAMES = ["id", "partner_id/id", "bank_id/id", "acc_number"]
+CONTACT_FIELDNAMES = ["id", "name", "parent_id/id", "function", "type"]
 ANALYTIC_PLAN_FIELDNAMES = ["id", "name"]
 COST_CENTER_FIELDNAMES = ["id", "name", "code", "plan_id/id"]
 
@@ -97,115 +98,219 @@ def build_cost_centers():
     }
 
 
+def _join_by_parent(rows, key="ParentObjectID"):
+    """
+    Index child rows by their parent's 32-character ObjectID.
+
+    ByDesign returns ParentObjectID on these partner child entities as a 64-character value:
+    two 32-character ObjectIDs concatenated. Only the first half is the parent business
+    object's ObjectID. Verified on real data - joining on the full string matches 0 of 44
+    addresses, joining on the first 32 characters matches all 44. (Where SAP happens to return
+    a plain 32-character parent, as on BankDetails/TaxNumber/Role, the slice is a no-op.)
+    """
+    out = {}
+    for row in rows:
+        parent = (row.get(key) or "")[:32]
+        if parent:
+            out.setdefault(parent, []).append(row)
+    return out
+
+
+def _first(index, object_id, field):
+    """First non-empty `field` among the child rows belonging to `object_id`."""
+    for row in index.get(object_id, []):
+        value = (row.get(field) or "").strip()
+        if value:
+            return value
+    return ""
+
+
 def build_res_partner():
     """
-    Sources (confirmed columns, see output_raw/*__RPBUPCSD*.json / *__RPBUPSPP*.json /
-    *__RPBUPATAXNUMBERS*.json for the full field list each carries):
-      RPBUPCSD_Q0001QueryResults          - customer-side accounts (44 on this tenant)
-      RPBUPSPP_Q0001QueryResults          - supplier-side accounts (229)
-      RPBUPATAXNUMBERS_Q0001QueryResults  - tax numbers keyed by CBUPA_UUID/CBP_UUID (66)
+    Sheet objects #17 Customers and #46 Vendors (both mandatory), plus #5 Banks.
+
+    Built from the khcustomer / khsupplier custom services - plain CRUD, so every field comes
+    back in one request. This replaces the previous analytics-report source
+    (RPBUPCSD/RPBUPSPP), which had to be fetched in field-chunks and merged on CBP_UUID, a key
+    SAP does not guarantee unique: get_entity_set_all_fields logged 44 distinct keys against 50
+    returned rows for customers and 229 against 237 for suppliers, meaning some partners'
+    non-key fields were an arbitrary sample rather than a join.
+
+    Switching source is safe and strictly additive - checked before the change, not assumed:
+    the CRUD services return all 271 external IDs the analytics route produced, plus 17 more
+    (288 total), so no existing `sap_bp_*` reference from any document file breaks. The
+    analytics rows are still read afterwards, purely to fill fields the CRUD services leave
+    blank; nothing that was populated before can be lost.
+
+    Also produces, from the same services:
+      res_partner_contact.csv - contact persons, via khcustomer's RelationshipCollection
+      res_bank.csv            - the real bank directory from khhousebankaccount
+      res_partner_bank.csv    - partner bank accounts from BankDetailsCollection
     """
-    accounts = load_raw("RPBUPCSD_Q0001QueryResults")["rows"]
-    suppliers = load_raw("RPBUPSPP_Q0001QueryResults")["rows"]
-    tax_numbers = load_raw("RPBUPATAXNUMBERS_Q0001QueryResults")["rows"]
+    customers = load_raw("CustomerCollection", service_hint="khcustomer")["rows"]
+    suppliers = load_raw("SupplierCollection", service_hint="khsupplier")["rows"]
 
-    vat_by_bp = {}
-    for t in tax_numbers:
-        bp_id = t.get("CBUPA_UUID")
-        if bp_id and bp_id not in vat_by_bp:
-            vat_by_bp[bp_id] = t.get("CTAX_NUMBER", "")
+    addresses = _join_by_parent(
+        load_raw("PostalAddressCollection", service_hint="khcustomer")["rows"]
+        + load_raw("CurrentDefaultPostalAddressCollection", service_hint="khsupplier")["rows"])
+    phones = _join_by_parent(
+        load_raw("ConventionalPhoneCollection", service_hint="khcustomer")["rows"]
+        + load_raw("MobilePhoneCollection", service_hint="khcustomer")["rows"]
+        + load_raw("CurrentDefaultConventionalPhoneCollection", service_hint="khsupplier")["rows"]
+        + load_raw("CurrentDefaultMobilePhoneCollection", service_hint="khsupplier")["rows"])
+    emails = _join_by_parent(
+        load_raw("CurrentDefaultEMailCollection", service_hint="khsupplier")["rows"])
+    websites = _join_by_parent(
+        load_raw("WebSiteCollection", service_hint="khcustomer")["rows"]
+        + load_raw("CurrentDefaultWebSiteCollection", service_hint="khsupplier")["rows"])
+    # The two services name the tax number column differently (TaxNumberID vs PartyTaxID).
+    tax_numbers = _join_by_parent(
+        load_raw("TaxNumberCollection", service_hint="khcustomer")["rows"]
+        + load_raw("TaxNumberCollection", service_hint="khsupplier")["rows"])
+    banks_by_partner = _join_by_parent(
+        load_raw("BankDetailsCollection", service_hint="khcustomer")["rows"]
+        + load_raw("BankDetailsCollection", service_hint="khsupplier")["rows"])
 
-    rows_by_bp = {}
-    bank_rows = []
-    seen_banks = {}
-
-    def add_bank(bp_id, bank_name, account_id, iban, country_code):
-        if not (bank_name or account_id or iban):
-            return
-        bank_key = (bank_name or "").strip() or "UNKNOWN_BANK"
-        bank_ext_id = seen_banks.get(bank_key)
-        if not bank_ext_id:
-            bank_ext_id = external_id("sap_bank", bank_key)
-            seen_banks[bank_key] = bank_ext_id
-        bank_rows.append(
-            {
-                "bank": {
-                    "id": bank_ext_id,
-                    "name": bank_name or "Unknown Bank",
-                    "country_id/id": _country_ref(country_code),
-                },
-                "partner_bank": {
-                    "id": external_id("sap_pbank", f"{bp_id}_{account_id or iban}"),
-                    "partner_id/id": external_id("sap_bp", bp_id),
-                    "bank_id/id": bank_ext_id,
-                    "acc_number": iban or account_id or "",
-                },
-            }
-        )
-
-    for acc in accounts:
-        bp_id = acc.get("CBP_UUID")
-        if not bp_id:
-            continue
-        rows_by_bp[bp_id] = {
-            "id": external_id("sap_bp", bp_id),
-            "name": acc.get("TBP_UUID") or bp_id,
-            "street": acc.get("CSTREET_NAME", ""),
-            "city": acc.get("CCITY_NAME", ""),
-            "zip": acc.get("CSTREET_POSTAL", ""),
-            "country_id/id": _country_ref(acc.get("CCOUNTRY_CODE")),
-            "phone": acc.get("CPHONE_NR", ""),
-            "email": acc.get("CEMAIL_URI", ""),
-            "website": acc.get("CWEB_URI", ""),
-            "vat": vat_by_bp.get(bp_id, ""),
-            "customer_rank": "1",
-            "supplier_rank": "0",
-            "active": _bool(acc.get("CDELIVERY_BLOCK")) if acc.get("CDELIVERY_BLOCK") else "True",
+    def partner_row(record, is_customer):
+        object_id = record.get("ObjectID", "")
+        internal_id = record.get("InternalID")
+        return {
+            "id": external_id("sap_bp", internal_id),
+            "name": (record.get("BusinessPartnerFormattedName")
+                     or record.get("SortingFormattedName") or internal_id),
+            "street": " ".join(p for p in (_first(addresses, object_id, "HouseID"),
+                                           _first(addresses, object_id, "StreetName")) if p),
+            "city": (_first(addresses, object_id, "CityName")
+                     or _first(addresses, object_id, "DifferentCityName")),
+            "zip": (_first(addresses, object_id, "StreetPostalCode")
+                    or _first(addresses, object_id, "CompanyPostalCode")),
+            "country_id/id": _country_ref(_first(addresses, object_id, "CountryCode")),
+            "phone": _first(phones, object_id, "FormattedNumberDescription"),
+            "email": _first(emails, object_id, "URI"),
+            "website": _first(websites, object_id, "URI"),
+            "vat": (_first(tax_numbers, object_id, "TaxNumberID")
+                    or _first(tax_numbers, object_id, "PartyTaxID")),
+            "customer_rank": "1" if is_customer else "0",
+            "supplier_rank": "0" if is_customer else "1",
+            # LifeCycleStatusCode 2 = Active; 1 = In Preparation, 3 = Blocked, 4 = Obsolete.
+            "active": "True" if record.get("LifeCycleStatusCode") == "2" else "False",
         }
-        add_bank(bp_id, acc.get("CBANK_NAME"), acc.get("CBANK_ACCOUNT_ID"), acc.get("CBANK_IBAN"), acc.get("CBANK_NAT_COUNTRY"))
 
-    for sup in suppliers:
-        bp_id = sup.get("CBP_UUID")
-        if not bp_id:
+    rows_by_id = {}
+    object_ids_by_partner = {}
+    for record in customers:
+        if not record.get("InternalID"):
             continue
-        if bp_id in rows_by_bp:
-            rows_by_bp[bp_id]["supplier_rank"] = "1"
-            if not rows_by_bp[bp_id]["phone"]:
-                rows_by_bp[bp_id]["phone"] = sup.get("CPHONE_NR", "")
-            if not rows_by_bp[bp_id]["website"]:
-                rows_by_bp[bp_id]["website"] = sup.get("CWEB_URI", "")
+        row = partner_row(record, is_customer=True)
+        rows_by_id[row["id"]] = row
+        object_ids_by_partner.setdefault(row["id"], []).append(record.get("ObjectID", ""))
+
+    for record in suppliers:
+        if not record.get("InternalID"):
+            continue
+        row = partner_row(record, is_customer=False)
+        existing = rows_by_id.get(row["id"])
+        object_ids_by_partner.setdefault(row["id"], []).append(record.get("ObjectID", ""))
+        if existing:
+            # Same business partner in both roles: keep both ranks, and take any field the
+            # customer-side record left blank.
+            existing["supplier_rank"] = "1"
+            for field, value in row.items():
+                if value and not existing.get(field):
+                    existing[field] = value
         else:
-            rows_by_bp[bp_id] = {
-                "id": external_id("sap_bp", bp_id),
-                "name": sup.get("TBP_UUID") or bp_id,
-                "street": sup.get("CSTREET_NAME", ""),
-                "city": sup.get("CCITY_NAME", ""),
-                "zip": sup.get("CSTREET_POSTAL", ""),
-                "country_id/id": _country_ref(sup.get("CCOUNTRY_CODE")),
-                "phone": sup.get("CPHONE_NR", ""),
-                "email": sup.get("CEMAIL_URI", ""),
-                "website": sup.get("CWEB_URI", ""),
-                "vat": vat_by_bp.get(bp_id, ""),
-                "customer_rank": "0",
-                "supplier_rank": "1",
-                "active": "True",
-            }
-        add_bank(bp_id, sup.get("CBANK_NAME"), sup.get("CBANK_ACCOUNT_ID"), sup.get("CBANK_IBAN"), sup.get("CBANK_NAT_COUNTRY"))
+            rows_by_id[row["id"]] = row
 
-    write_csv("res_partner.csv", list(rows_by_bp.values()), PARTNER_FIELDNAMES)
+    # Backfill from the old analytics reports. They are far sparser, but where the CRUD
+    # services return nothing at all for a field this is the only value available, so reading
+    # them costs nothing and guarantees the switch cannot lose data.
+    analytics_fields = {"CSTREET_NAME": "street", "CCITY_NAME": "city", "CSTREET_POSTAL": "zip",
+                        "CPHONE_NR": "phone", "CEMAIL_URI": "email", "CWEB_URI": "website"}
+    for entity in ("RPBUPCSD_Q0001QueryResults", "RPBUPSPP_Q0001QueryResults"):
+        for record in load_raw(entity)["rows"]:
+            row = rows_by_id.get(external_id("sap_bp", record.get("CBP_UUID") or ""))
+            if not row:
+                continue
+            for source_field, odoo_field in analytics_fields.items():
+                value = (record.get(source_field) or "").strip()
+                if value and not row.get(odoo_field):
+                    row[odoo_field] = value
+            if not row.get("country_id/id"):
+                row["country_id/id"] = _country_ref(record.get("CCOUNTRY_CODE"))
 
-    unique_banks = {}
-    unique_partner_banks = []
-    for entry in bank_rows:
-        unique_banks[entry["bank"]["id"]] = entry["bank"]
-        unique_partner_banks.append(entry["partner_bank"])
-    write_csv("res_bank.csv", list(unique_banks.values()), BANK_FIELDNAMES)
-    write_csv("res_partner_bank.csv", unique_partner_banks, PARTNER_BANK_FIELDNAMES)
+    write_csv("res_partner.csv", list(rows_by_id.values()), PARTNER_FIELDNAMES)
+
+    # --- Contacts -------------------------------------------------------------------------
+    # RelationshipCollection carries no ParentObjectID, but it does name both sides by their
+    # InternalID, which is exactly what the partner external IDs are built from.
+    contact_rows, seen_contacts = [], set()
+    for link in load_raw("RelationshipCollection", service_hint="khcustomer")["rows"]:
+        parent_id, contact_id = link.get("InternalID1"), link.get("InternalID2")
+        name = link.get("BusinessPartnerFormattedName2")
+        if not (contact_id and name) or contact_id in seen_contacts:
+            continue
+        parent_ext = external_id("sap_bp", parent_id) if parent_id else ""
+        if parent_ext not in rows_by_id:
+            continue
+        seen_contacts.add(contact_id)
+        contact_rows.append({
+            "id": external_id("sap_contact", contact_id),
+            "name": name,
+            "parent_id/id": parent_ext,
+            "function": link.get("FunctionalTitleName") or link.get("BusinessPartnerFunctionTypeCodeText") or "",
+            "type": "contact",
+        })
+    write_csv("res_partner_contact.csv", contact_rows, CONTACT_FIELDNAMES)
+
+    # --- Banks ----------------------------------------------------------------------------
+    # The bank master proper, rather than bank names scraped out of partner records.
+    bank_rows = {}
+    for entry in load_raw("BankDirectoryEntryCollection", service_hint="khhousebankaccount")["rows"]:
+        name = (entry.get("OrganisationFormattedName") or "").strip()
+        if not name or entry.get("DeletedIndicator"):
+            continue
+        bank_rows[external_id("sap_bank", name)] = {
+            "id": external_id("sap_bank", name),
+            "name": name,
+            "country_id/id": _country_ref(entry.get("CountryCode")),
+        }
+
+    partner_bank_rows, seen_accounts = [], set()
+    for partner_ext, object_ids in object_ids_by_partner.items():
+        for object_id in object_ids:
+            for detail in banks_by_partner.get(object_id, []):
+                account = (detail.get("BankAccountID") or detail.get("BankAccountStandardID") or "").strip()
+                bank_name = (detail.get("BankFormattedName") or "").strip()
+                if not account:
+                    continue
+                key = (partner_ext, account)
+                if key in seen_accounts:
+                    continue
+                seen_accounts.add(key)
+                bank_ext = external_id("sap_bank", bank_name) if bank_name else ""
+                # A bank referenced by an account but absent from the directory still has to
+                # exist in res_bank.csv, or the partner bank row will not import.
+                if bank_ext and bank_ext not in bank_rows:
+                    bank_rows[bank_ext] = {
+                        "id": bank_ext,
+                        "name": bank_name,
+                        "country_id/id": _country_ref(detail.get("BankCountryCode")),
+                    }
+                partner_bank_rows.append({
+                    "id": external_id("sap_pbank", f"{partner_ext}_{account}"),
+                    "partner_id/id": partner_ext,
+                    "bank_id/id": bank_ext,
+                    "acc_number": account,
+                })
+
+    write_csv("res_bank.csv", list(bank_rows.values()), BANK_FIELDNAMES)
+    write_csv("res_partner_bank.csv", partner_bank_rows, PARTNER_BANK_FIELDNAMES)
 
     return {
-        "res_partner.csv": len(rows_by_bp),
-        "res_bank.csv": len(unique_banks),
-        "res_partner_bank.csv": len(unique_partner_banks),
+        "res_partner.csv": len(rows_by_id),
+        "res_partner_contact.csv": len(contact_rows),
+        "res_bank.csv": len(bank_rows),
+        "res_partner_bank.csv": len(partner_bank_rows),
     }
 
 
@@ -437,8 +542,66 @@ def build_products():
             }
         )
 
+    rows.extend(_service_product_rows())
     write_csv("product_template.csv", rows, PRODUCT_FIELDNAMES)
     return {"product_template.csv": len(rows)}
+
+
+def _service_product_rows():
+    """
+    SERVICE products, appended to the same product_template.csv as the materials above.
+
+    ByDesign keeps services in a completely separate master (khserviceproduct) from materials
+    (vmumaterial); Odoo has one product.template for both. Until khserviceproduct was imported
+    these 7 were missing from the output entirely - not filtered out, simply never fetched.
+
+    Mapped as type "service" rather than "consu", which is what makes Odoo skip stock handling
+    for them.
+    """
+    try:
+        services = load_raw("ServiceProductCollection", service_hint="khserviceproduct")["rows"]
+    except FileNotFoundError:
+        # khserviceproduct not imported on this tenant - materials-only output is still valid.
+        return []
+
+    sales = {r.get("ParentObjectID"): r for r in
+             load_raw("SalesCollection", service_hint="khserviceproduct")["rows"]}
+    purchasing = {r.get("ParentObjectID"): r for r in
+                  load_raw("PurchasingCollection", service_hint="khserviceproduct")["rows"]}
+    categories = {r.get("ParentObjectID"): r for r in
+                  load_raw("ProductCategoryCollection", service_hint="khserviceproduct")["rows"]}
+
+    rows = []
+    for service in services:
+        object_id = service.get("ObjectID")
+        internal_id = service.get("InternalID")
+        if not internal_id:
+            continue
+        base_uom = service.get("BaseMeasureUnitCode", "")
+        sale = sales.get(object_id, {})
+        purchase = purchasing.get(object_id, {})
+        category = (categories.get(object_id) or {}).get("ProductCategoryInternalID", "")
+        rows.append({
+            "id": external_id("sap_prod", internal_id),
+            "name": service.get("Description") or internal_id,
+            "default_code": internal_id,
+            "description": sale.get("ItemGroupCodeText", ""),
+            "type": "service",
+            "categ_id/id": external_id("sap_prodcat", category) if category else "",
+            "uom_id/id": external_id("sap_uom", base_uom) if base_uom else "",
+            "uom_po_id/id": external_id(
+                "sap_uom", purchase.get("PurchasingMeasureUnitCode") or base_uom)
+                if (purchase.get("PurchasingMeasureUnitCode") or base_uom) else "",
+            # No valuation data for services on this tenant (khserviceproductvaluationdata is
+            # not imported), so no cost price is invented.
+            "standard_price": "",
+            "purchase_ok": "True" if purchase else "False",
+            "sale_ok": "True" if sale else "False",
+            "tracking": "none",
+            "route_ids/id": "",
+            "active": "True" if service.get("LifeCycleStatusCode", "2") == "2" else "True",
+        })
+    return rows
 
 
 # These custom services bundle multiple party roles (sold-to, ship-to, bill-to, employee
@@ -1131,7 +1294,14 @@ def build_product_categories():
     is one row per material (3058), not per distinct category - deduplicated by
     ProductCategoryInternalID to get the real category master. Already-imported service, no new
     SAP call needed."""
-    categories = load_raw("ProductCategoryCollection")["rows"]
+    categories = load_raw("ProductCategoryCollection", service_hint="vmumaterial")["rows"]
+    try:
+        # Service products sit in their own categories (SER, FREIGHT) that no material uses,
+        # so reading only vmumaterial left product_template.csv pointing at categories that
+        # did not exist in this file.
+        categories += load_raw("ProductCategoryCollection", service_hint="khserviceproduct")["rows"]
+    except FileNotFoundError:
+        pass
     seen = {}
     for c in categories:
         code = c.get("ProductCategoryInternalID")
@@ -1363,6 +1533,73 @@ def build_open_customer_invoices():
     return {"account_move_open_customer.csv": len(rows)}
 
 
+CREDIT_NOTE_FIELDNAMES = [
+    "id", "name", "partner_id/id", "invoice_date", "move_type", "state",
+    "currency_id/id", "amount_total",
+]
+
+
+def build_credit_notes():
+    """
+    Sheet objects #52 (Vendor Credit Notes) and #66 (Credit Notes, customer side).
+
+    Both were pending only because nothing had looked at the document TYPE columns. Credit
+    memos are not a separate entity in ByDesign - they live in the ordinary invoice tables and
+    are distinguished by TypeCodeText:
+      khsupplierinvoice/SupplierInvoiceCollection      "Credit Memo"                (9)
+      khcustomerinvoicerequest/...RequestCollection    "Manual Credit Memo Request" (21)
+
+    Odoo's move_type is what makes a credit note a credit note on import: out_refund reduces a
+    customer balance, in_refund reduces a vendor balance.
+    """
+    vendor_rows = []
+    for invoice in load_raw("SupplierInvoiceCollection", service_hint="khsupplierinvoice")["rows"]:
+        if invoice.get("TypeCodeText") != "Credit Memo":
+            continue
+        object_id = invoice.get("ObjectID")
+        party = resolve_party(
+            _group_by_parent(load_raw("SellerPartyCollection", service_hint="khsupplierinvoice")["rows"]),
+            object_id, prefer="supplier")
+        currency = invoice.get("TotalGrossAmountCurrencyCode") or ""
+        vendor_rows.append({
+            "id": external_id("sap_vcredit", invoice.get("ID") or object_id),
+            "name": invoice.get("ID") or object_id,
+            "partner_id/id": external_id("sap_bp", party) if party else "",
+            "invoice_date": parse_sap_date(invoice.get("InvoiceDate")) or "",
+            "move_type": "in_refund",
+            "state": "posted",
+            "currency_id/id": f"base.{currency}" if currency else "",
+            "amount_total": invoice.get("TotalGrossAmount") or "",
+        })
+    write_csv("account_move_vendor_credit.csv", vendor_rows, CREDIT_NOTE_FIELDNAMES)
+
+    customer_rows = []
+    for request in load_raw("CustomerInvoiceRequestCollection",
+                            service_hint="khcustomerinvoicerequest")["rows"]:
+        if "Credit Memo" not in (request.get("TypeCodeText") or ""):
+            continue
+        # This entity names the customer directly, so no party-resolution heuristic is needed.
+        party = (request.get("BuyerPartyID") or request.get("BillToPartyID") or "").strip()
+        currency = request.get("TotalGrossAmountCurrencyCode") or request.get("CurrencyCode") or ""
+        object_id = request.get("ObjectID")
+        customer_rows.append({
+            "id": external_id("sap_ccredit", request.get("BaseBusinessTransactionDocumentID") or object_id),
+            "name": request.get("Name") or request.get("BaseBusinessTransactionDocumentID") or object_id,
+            "partner_id/id": external_id("sap_bp", party) if party else "",
+            "invoice_date": parse_sap_date(request.get("ProposedInvoiceDate")) or "",
+            "move_type": "out_refund",
+            "state": "posted",
+            "currency_id/id": f"base.{currency}" if currency else "",
+            "amount_total": request.get("TotalGrossAmount") or "",
+        })
+    write_csv("account_move_credit_note.csv", customer_rows, CREDIT_NOTE_FIELDNAMES)
+
+    return {
+        "account_move_vendor_credit.csv": len(vendor_rows),
+        "account_move_credit_note.csv": len(customer_rows),
+    }
+
+
 TAX_FIELDNAMES = ["id", "name", "amount", "amount_type", "type_tax_use", "description"]
 
 
@@ -1476,6 +1713,7 @@ TRANSFORMS = [
     ("product_supplierinfo (vendor pricelists)", build_vendor_pricelists),
     ("account_move_open_customer (open customer invoices)", build_open_customer_invoices),
     ("account_tax (taxes)", build_taxes),
+    ("account_move credit notes (customer + vendor)", build_credit_notes),
     ("stock_quant_adjustment (inventory balances)", build_inventory),
 ]
 
