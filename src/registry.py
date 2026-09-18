@@ -39,8 +39,26 @@ class ObjectSpec:
 
 REGISTRY = [
     # --- Accounts ---
-    ObjectSpec(1, "Accounts", "Master", "Chart of Accounts", True, "account.account", "account_account", "pending_mapping", "Data source confirmed to exist: 'G/L Account Master Data' (FINGLAU17); real OData service name not yet found"),
-    ObjectSpec(2, "Accounts", "Master", "Taxes", True, "account.tax", "account_tax", "pending_mapping", "No matching data source found in the Design Data Sources catalog - may need a different search term or doesn't exist as a standalone report"),
+    ObjectSpec(1, "Accounts", "Master", "Chart of Accounts", True, "account.account", "account_account", "built",
+               "REAL DATA: the G/L Account Master report (FINGLAU17) is live but declares a mandatory Chart of Accounts "
+               "variable with no default and no readable value list, so it returns 0 rows. Built instead by unioning the "
+               "six analytics reports that expose CGLACCT/TGLACCT without a blocking variable - see src/probe_gl_accounts.py, "
+               "which tested all 60 candidate reports. Covers every G/L account carrying postings; an account configured in "
+               "ByDesign but never posted to would not appear. account_type is derived from the account number band, each "
+               "band confirmed against the real account names (see ACCOUNT_TYPE_BANDS in src/transform_odoo.py).",
+               raw_sources=("fin_costandrevenue_analytics.svc__RPFINCACU04_Q0002QueryResults.json",
+                            "fin_audit_analytics.svc__RPFINGLAU02_Q0002QueryResults.json",
+                            "fin_generalledger_analytics.svc__RPFINFXAU05_Q0001QueryResults.json",
+                            "fin_generalledger_analytics.svc__RPFINFCDU02_Q0001QueryResults.json",
+                            "fin_audit_analytics.svc__RPFININVU03_Q0001QueryResults.json",
+                            "fin_audit_analytics.svc__RPFINGLAU02_Q0003QueryResults.json")),
+    ObjectSpec(2, "Accounts", "Master", "Taxes", True, "account.tax", "account_tax", "built",
+               "REAL DATA: 'Taxes - Product Tax Details' (GLOTAXB01) on fin_taxmanagement_analytics.svc - the only source on "
+               "this tenant carrying a tax RATE. Every custom service exposes tax codes on documents but never the percentage "
+               "behind them. Real Indian GST rates confirmed (18%, 9%, 28%, 2.5%, 0.075%) across Central/State/Interstate GST, "
+               "TCS, VAT, customs duty and cess. These are the taxes actually applied on documents, not the full configured "
+               "tax table - ByDesign publishes no tax-code master over OData. type_tax_use defaults to 'sale' and needs review.",
+               raw_sources=("fin_taxmanagement_analytics.svc__RPGLOTAXB01_Q0001QueryResults.json",)),
     ObjectSpec(3, "Accounts", "Master", "Fiscal Positions", False, "account.fiscal.position", "account_fiscal_position", "pending_mapping", "No matching data source found"),
     ObjectSpec(4, "Accounts", "Master", "Payment Terms", True, "account.payment.term", "account_payment_term", "built", "REAL DATA: found inside CashDiscountTermsCollection on the already-imported khcustomerinvoice/khsupplierinvoice services (no new upload needed) - deduplicated code list",
                raw_sources=("khcustomerinvoice__CashDiscountTermsCollection.json", "khsupplierinvoice__CashDiscountTermsCollection.json")),
@@ -49,7 +67,14 @@ REGISTRY = [
     ObjectSpec(6, "Accounts", "Master", "Cost Centers", False, "account.analytic.account", "account_analytic_account_cc", "built", "14 records from standard OData v1 service costcentre, entity set CostCentreCollection. Imported as analytic accounts under the SAP Cost Centers analytic plan.",
                raw_sources=("costcentre__CostCentreCollection.json",)),
     ObjectSpec(7, "Accounts", "Master", "Analytic Accounts", False, "account.analytic.account", "account_analytic_account", "pending_mapping"),
-    ObjectSpec(8, "Accounts", "Transaction", "Open Customer Invoices", True, "account.move", "account_move_open_customer", "pending_mapping", "INVESTIGATED: khcustomerinvoice's CustomerInvoiceCollection has NO payment-status field at all (only ReleaseStatusCode/ApprovalStatusCode/ConsistencyStatusCode, none of which indicate paid/unpaid). Tested joining khpayment's PaymentCollection.DocumentID against invoice IDs to derive payment status - only 37/524 (7%) overlapped, which is coincidental sequential-number collision, not a real link. Cannot be built from currently-available data; would need a different entity (e.g. a dunning/open-item report) not yet found"),
+    ObjectSpec(8, "Accounts", "Transaction", "Open Customer Invoices", True, "account.move", "account_move_open_customer", "built",
+               "REAL DATA: the 'dunning/open-item report not yet found' called for by the earlier investigation is ByDesign's "
+               "Trade Receivables Payables Register (FINDUEU04) on fin_receivablesar_analytics.svc - 189 still-unsettled "
+               "invoices with the invoice number, customer and outstanding balance. This replaces the abandoned approach of "
+               "deriving payment status from khcustomerinvoice, which has no payment-status field at all and whose ID-to-payment "
+               "join only ever reached 7% (sequential-number coincidence, not a real link). Note amount_total here is the "
+               "OUTSTANDING balance, not the original invoice total - that is what an opening-balance import needs.",
+               raw_sources=("fin_receivablesar_analytics.svc__RPFINDUEU04_Q0007QueryResults.json",)),
     ObjectSpec(9, "Accounts", "Transaction", "Open Vendor Bills", True, "account.move", "account_move_open_vendor", "built", "REAL DATA: same khsupplierinvoice source as #51, filtered on LifeCycleStatusCode (confirmed real/populated: excludes Paid=12, Canceled=9, Voided=7) - 265/458 open",
                raw_sources=("khsupplierinvoice__SupplierInvoiceCollection.json", "khsupplierinvoice__ItemCollection.json", "khsupplierinvoice__SellerPartyCollection.json")),
     ObjectSpec(10, "Accounts", "Transaction", "Customer Payments", False, "account.payment", "account_payment_customer", "built", "REAL DATA: khpayment custom service, 544 payments total - customer vs vendor split via partner_type column (looked up against res_partner's customer_rank/supplier_rank), combined with #11 in one account_payment.csv",
@@ -91,8 +116,17 @@ REGISTRY = [
                raw_sources=("khlocation__LocationCollection.json",)),
     ObjectSpec(29, "Inventory", "Master", "UOM", True, "uom.uom", "uom_uom", "built", "REAL DATA: vmumaterial's MaterialBaseMeasureUnitCodeCollection codelist, already-imported service, no new upload needed - 23 units",
                raw_sources=("vmumaterial__MaterialBaseMeasureUnitCodeCollection.json",)),
-    ObjectSpec(30, "Inventory", "Master", "Lot/Serial Numbers", False, "stock.lot", "stock_lot", "pending_mapping", "Data source confirmed: 'Serial Inventory' (SERIAL_INV), 'Batch Transaction' (SCMBATU01)"),
-    ObjectSpec(31, "Inventory", "Transaction", "Inventory Adjustments", False, "stock.quant", "stock_quant_adjustment", "pending_mapping", "Data source confirmed: 'Inventory Balance' (SCMINBU03)"),
+    ObjectSpec(30, "Inventory", "Master", "Lot/Serial Numbers", False, "stock.lot", "stock_lot", "pending_mapping",
+               "BLOCKED, deliberately not written: khproductionorder/ProductionLotCollection has 145 rows but exposes only "
+               "ObjectID and ID - no ParentObjectID and no product reference of any kind - so lots cannot be attached to a "
+               "product, and Odoo's stock.lot requires product_id. A file built from this would be 100% unimportable. "
+               "Fix is an import, not code: khgoodsandactivityconfirmation.xml carries SerialNumber and IdentifiedStock with "
+               "their material links (SAP_IMPORT_PLAN.md, priority 1)."),
+    ObjectSpec(31, "Inventory", "Transaction", "Inventory Adjustments", False, "stock.quant", "stock_quant_adjustment", "built",
+               "REAL DATA: 'Inventory Balance' (SCMINBU03) on scm_physicalinventory_analytics.svc, grouped by material x "
+               "logistics area x site - exactly Odoo's stock.quant grain. 1805 on-hand balances; location_id resolves to the "
+               "16 storage areas now written into stock_location.csv (1802/1805).",
+               raw_sources=("scm_physicalinventory_analytics.svc__RPSCMINBU03_Q0001QueryResults.json",)),
     ObjectSpec(32, "Inventory", "Transaction", "Stock Transfers", False, "stock.picking", "stock_picking_transfer", "pending_mapping"),
     ObjectSpec(33, "Inventory", "Transaction", "Stock Moves History", False, "stock.move", "stock_move_history", "pending_mapping"),
 
@@ -105,7 +139,18 @@ REGISTRY = [
     ObjectSpec(39, "Maintenance", "Transaction", "Maintenance History", False, "maintenance.request", "maintenance_request_history", "not_in_bydesign"),
 
     # --- Manufacturing ---
-    ObjectSpec(40, "Manufacturing", "Master", "BOMs", True, "mrp.bom", "mrp_bom", "pending_mapping", "Data source confirmed: 'Bill Of Operation Element Details' (SCMBOOELEMENTU01), several 'PBOM Mass Maintenance' sources - ByDesign does support this, scope confirmed real"),
+    ObjectSpec(40, "Manufacturing", "Master", "BOMs", True, "mrp.bom", "mrp_bom", "pending_mapping",
+               "NOT OBTAINABLE OVER ODATA FROM THIS TENANT - the strongest negative result in the project, and the one "
+               "mandatory object that genuinely cannot be closed from here. Searched for bom / 'bill of material' / "
+               "'production model' / recipe / component / routing / explosion across BOTH (a) all 1485 entity sets of all 48 "
+               "services the tenant publishes to this user (schema_snapshots/service_catalog.json, SERVICE_CATALOG.csv) and "
+               "(b) all 609 entity sets defined across all 47 custom service .xml files - zero matches in either. Importing "
+               "more custom services cannot produce it: no BOM service definition exists in the sample set. "
+               "The design-time catalog does list PBOM data sources (SCMPBOMU02 etc), but they are NOT published as OData on "
+               "this tenant - that catalog tracks report definitions, not published services. "
+               "khproductionorder REFERENCES a BOM via ProductionModelID/ProductionModelVersionID but never exposes its "
+               "components. Options for the user: expose the PBOM data sources via Business Configuration > Analytics, or "
+               "extract BOMs by a non-OData route (UI export / file download) and hand over a CSV."),
     ObjectSpec(41, "Manufacturing", "Master", "Routings", False, "mrp.routing.workcenter", "mrp_routing_workcenter", "pending_mapping", "Data source confirmed: 'Released Execution Production Model Operation' (SCM_REPM_OPER)"),
     ObjectSpec(42, "Manufacturing", "Master", "Work Centers", True, "mrp.workcenter", "mrp_workcenter", "built", "REAL DATA: derived from khproductionorder's OperationCollection (ResourceID/ResourceDescription), deduplicated - no dedicated Work Center master service found, but this data was already on hand (used for #44) - 18 distinct work centers",
                raw_sources=("khproductionorder__OperationCollection.json",)),
@@ -117,7 +162,12 @@ REGISTRY = [
     # --- Purchase ---
     ObjectSpec(46, "Purchase", "Master", "Vendors", True, "res.partner", "res_partner", "built", "REAL DATA: bpm_businesspartnerdata_analytics.svc, 229 suppliers confirmed",
                raw_sources=("bpm_businesspartnerdata_analytics.svc__RPBUPSPP_Q0001QueryResults.json", "bpm_businesspartnerdata_analytics.svc__RPBUPATAXNUMBERS_Q0001QueryResults.json")),
-    ObjectSpec(47, "Purchase", "Master", "Vendor Pricelists", False, "product.supplierinfo", "product_supplierinfo", "pending_mapping"),
+    ObjectSpec(47, "Purchase", "Master", "Vendor Pricelists", False, "product.supplierinfo", "product_supplierinfo", "built",
+               "REAL DATA: vmumaterial/SupplierInformationCollection - 34 material-to-supplier links with the supplier's own "
+               "part number and lead time. Already extracted but read by no transform until now. No price column exists on "
+               "this entity (ByDesign keeps supplier prices in price lists this tenant does not publish), so product_code and "
+               "delay are mapped and price is left for Odoo to default rather than fabricated.",
+               raw_sources=("vmumaterial__SupplierInformationCollection.json", "vmumaterial__MaterialCollection.json")),
     ObjectSpec(48, "Purchase", "Transaction", "Purchase Requisitions", False, "purchase.requisition", "purchase_requisition", "pending_mapping", "No matching data source found"),
     ObjectSpec(49, "Purchase", "Transaction", "RFQs", False, "purchase.order", "purchase_order_rfq", "pending_mapping", "Filter: purchase.order in draft/sent state"),
     ObjectSpec(50, "Purchase", "Transaction", "Purchase Orders", True, "purchase.order", "purchase_order", "built", "REAL DATA: cust/v1/khpurchaseorder custom OData service (user-imported Cloud Applications Studio BO, from byd-api-samples-main) - 655 POs, 1861 line items confirmed. product_id/id on lines resolves now that Products (#57) is also wired up (1586/1595)",

@@ -172,13 +172,25 @@ curl -s -u "${SAP_USERNAME}:${SAP_PASSWORD}" \
   | grep -q "RBAM_ERROR" && echo "  Confirmed still blocked (RBAM_ERROR) - needs broader authorization for SDK user" \
   || echo "  NOTE: no longer blocked - re-run this script's check-based test for it and wire it up"
 
+check "Service catalog lists the tenant's OData services" \
+  "${SAP_BASE_URL}/sap/byd/odata/" \
+  "fin_generalledger_analytics.svc"
+
+check "Chart of Accounts source returns G/L account numbers" \
+  "${SAP_BASE_URL}/sap/byd/odata/fin_generalledger_analytics.svc/RPFINFXAU05_Q0001QueryResults?\$select=CGLACCT,TGLACCT&\$top=1&\$format=json" \
+  "CGLACCT"
+
+check "Inventory balance report returns data" \
+  "${SAP_BASE_URL}/sap/byd/odata/scm_physicalinventory_analytics.svc/RPSCMINBU03_Q0001QueryResults?\$top=1&\$inlinecount=allpages&\$format=json" \
+  "__count"
+
 echo
-echo "=== Candidate services NOT yet confirmed for this tenant (informational only) ==="
-for svc in mdm_products so_salesorder po_purchaseorder bkacct_chartofaccounts bkacct_journal_entries; do
-  code=$(curl -s -o /dev/null -w "%{http_code}" -u "${SAP_USERNAME}:${SAP_PASSWORD}" \
-    "${SAP_BASE_URL}/sap/byd/odata/${svc}.svc/\$metadata?sap-client=${SAP_CLIENT}")
-  echo "  ${svc}.svc -> HTTP ${code}"
-done
+echo "=== Service discovery (informational) ==="
+echo "  The tenant publishes its own catalog - no name guessing needed:"
+echo "    GET \${SAP_BASE_URL}/sap/byd/odata/          # every service this user may call"
+echo "    GET \${SAP_BASE_URL}/sap/byd/odata/<svc>/    # that service's entity sets"
+echo "  python -m src.discover_catalog rebuilds schema_snapshots/service_catalog.json from these,"
+echo "  and python -m src.catalog_report writes the readable SERVICE_CATALOG.csv."
 
 echo
 echo "=== $pass passed, $fail failed ==="

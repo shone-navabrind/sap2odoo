@@ -132,13 +132,15 @@ def build_rows():
     # --- One row per SAP entity actually pulled -------------------------------------------
     for source in SOURCES:
         service, entity_set = source[0], source[1]
-        expand = source[2] if len(source) > 2 else None
+        options = source[2] if len(source) > 2 else {}
         filename = raw_filename(service, entity_set)
         payload = _read_raw(filename)
 
         url = f"{base_url}/{service}/{entity_set}"
-        if expand:
-            url += f"?$expand={expand}"
+        if options.get("expand"):
+            url += f"?$expand={options['expand']}"
+        elif options.get("select"):
+            url += f"?$select={','.join(options['select'])}"
 
         consumers = objects_by_raw_file.get(filename, [])
         if consumers:

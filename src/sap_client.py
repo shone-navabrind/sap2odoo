@@ -46,6 +46,25 @@ def parse_metadata(xml_text):
     return fields_by_entity_set
 
 
+def _olap_merge_key(fields):
+    """
+    Pick the field to merge an OLAP entity's field-chunks on, or None if there isn't one.
+
+    Chunks of an analytics query are separate GROUP BYs and come back with different row
+    counts, so they can only be recombined on a value that identifies a business object.
+
+    A *_UUID field is the safest choice and is preferred. Failing that, ByDesign's analytics
+    naming convention is used: dimensions ("characteristics") are prefixed C, their display
+    texts T, and measures ("key figures") F or K. Merging on a measure would be meaningless,
+    so only a C-prefixed dimension is considered - e.g. the G/L account master query has no
+    UUID at all and is keyed by CGLACCT, the account number.
+    """
+    uuid_field = next((f for f in fields if "UUID" in f), None)
+    if uuid_field:
+        return uuid_field
+    return next((f for f in fields if re.fullmatch(r"C[A-Z0-9_]+", f)), None)
+
+
 def _flatten_expanded(row):
     """
     Flatten an $expand response so the raw dump stays a flat table.
@@ -228,25 +247,30 @@ class SAPODataClient:
                 return [_flatten_expanded(r) for r in rows], all_fields
             return self.get_entity_set(service, entity_set, select=fields), all_fields
 
-        key_field = next((f for f in fields if "UUID" in f), None)
+        key_field = _olap_merge_key(fields)
         if key_field is None:
             chunks = [fields[i : i + chunk_size] for i in range(0, len(fields), chunk_size)]
             if len(chunks) == 1:
                 # Only one chunk needed - no cross-chunk merge ambiguity, so this is a plain fetch.
                 return self.get_entity_set(service, entity_set, select=chunks[0]), all_fields
+            # Nothing stable to merge on, and merging by row position is known-unsafe here.
+            # Return the first chunk only rather than a differently-shaped result that would
+            # silently corrupt every caller downstream.
             logger.warning(
-                "%s/%s: no *_UUID field found to merge %d chunks on - returning unmerged chunks",
-                service, entity_set, len(chunks),
+                "%s/%s: no merge key among %d fields - returning only the first %d fields",
+                service, entity_set, len(fields), len(chunks[0]),
             )
-            return [self.get_entity_set(service, entity_set, select=c) for c in chunks], all_fields
+            return self.get_entity_set(service, entity_set, select=chunks[0]), all_fields
 
         other_fields = [f for f in fields if f != key_field]
         chunks = [other_fields[i : i + chunk_size - 1] for i in range(0, len(other_fields), chunk_size - 1)] or [[]]
 
         merged_by_key = {}
+        widest_chunk = 0
         for chunk in chunks:
             select = [key_field] + chunk
             rows = self.get_entity_set(service, entity_set, select=select)
+            widest_chunk = max(widest_chunk, len(rows))
             for row in rows:
                 key_value = row.get(key_field)
                 if not key_value:
@@ -254,4 +278,17 @@ class SAPODataClient:
                 merged_by_key.setdefault(key_value, {})[key_field] = key_value
                 merged_by_key[key_value].update(row)
 
+        # If any chunk returned more rows than there are distinct key values, that chunk was
+        # grouped more finely than the key - so some of its rows overwrote each other and the
+        # merged result is an arbitrary one-per-key sample. Say so loudly rather than quietly
+        # publishing a lossy table.
+        if widest_chunk > len(merged_by_key):
+            logger.warning(
+                "%s/%s: merge key %s is not unique - %d distinct values but one chunk returned "
+                "%d rows, so non-key fields are a sample, not a complete join",
+                service, entity_set, key_field, len(merged_by_key), widest_chunk,
+            )
+
+        logger.info("%s/%s: merged %d chunks on %s -> %d rows",
+                    service, entity_set, len(chunks), key_field, len(merged_by_key))
         return list(merged_by_key.values()), all_fields

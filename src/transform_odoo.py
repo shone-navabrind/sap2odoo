@@ -758,32 +758,67 @@ def build_opportunities():
     }
 
 
-LOCATION_FIELDNAMES = ["id", "name"]
+LOCATION_FIELDNAMES = ["id", "name", "location_id/id", "usage"]
 
 
 WAREHOUSE_FIELDNAMES = ["id", "name", "code"]
 
 
+def logistics_area_key(site_id, area_id):
+    """
+    The external-ID key for a storage area, shared by stock_location.csv and
+    stock_quant_adjustment.csv.
+
+    The inventory report identifies a storage area as "<site>/<area>" ("71000/71000-3") while
+    khlocation gives the two parts separately (SiteID + ID). Deriving both sides from one
+    function is what makes the quants' location_id/id actually resolve.
+    """
+    return external_id("sap_loc", f"{site_id}/{area_id}")
+
+
 def build_locations():
     """
-    khlocation custom service - 4 locations (sheet objects #27/#28).
+    khlocation custom service - sheet objects #27 (Warehouses) and #28 (Locations).
+
+    Two levels: 4 top-level Locations (sites), plus the 16 LogisticsAreas inside them - the
+    actual storage bins ("RM Stores - Good", "FG Main Stores", "Quality Area") that inventory
+    balances are reported against. The areas were extracted but not mapped until now, which
+    left every stock quant pointing at a location that did not exist in the output.
+
     #27 Warehouses: ByDesign's own semantics for "this location tracks inventory" is the
-    InventoryManagedLocationIndicator flag - filtering on it gives real warehouse data with no
-    new SAP call needed (1/4 locations on this tenant is inventory-managed).
+    InventoryManagedLocationIndicator flag - filtering on it gives real warehouse data (1/4
+    locations on this tenant is inventory-managed).
     """
-    locations = load_raw("LocationCollection")["rows"]
-    rows = []
-    warehouse_rows = []
+    locations = load_raw("LocationCollection", service_hint="khlocation")["rows"]
+    areas = load_raw("LogisticsAreaCollection", service_hint="khlocation")["rows"]
+
+    rows, warehouse_rows = [], []
+    site_key_by_id = {}
     for loc in locations:
         object_id = loc.get("ObjectID")
         if not object_id:
             continue
         name = loc.get("Name") or loc.get("ID", object_id)
-        rows.append({"id": external_id("sap_loc", object_id), "name": name})
+        site_key = external_id("sap_loc", object_id)
+        site_key_by_id[loc.get("ID")] = site_key
+        rows.append({"id": site_key, "name": name, "location_id/id": "", "usage": "view"})
         if loc.get("InventoryManagedLocationIndicator"):
             warehouse_rows.append(
                 {"id": external_id("sap_wh", object_id), "name": name, "code": loc.get("ID", "")}
             )
+
+    for area in areas:
+        area_id, site_id = area.get("ID"), area.get("SiteID")
+        if not area_id or not site_id:
+            continue
+        rows.append({
+            "id": logistics_area_key(site_id, area_id),
+            "name": area.get("Description") or area_id,
+            "location_id/id": site_key_by_id.get(site_id, ""),
+            # Only inventory-managed areas hold stock; the rest are pass-through views.
+            "usage": "internal" if area.get("InventoryManagedIndicator") else "view",
+        })
+
     write_csv("stock_location.csv", rows, LOCATION_FIELDNAMES)
     write_csv("stock_warehouse.csv", warehouse_rows, WAREHOUSE_FIELDNAMES)
     return {"stock_location.csv": len(rows), "stock_warehouse.csv": len(warehouse_rows)}
@@ -1107,7 +1142,318 @@ def build_product_categories():
     return {"product_category.csv": len(rows)}
 
 
+ACCOUNT_FIELDNAMES = ["id", "code", "name", "account_type", "reconcile"]
+
+# The six reports that between them expose every G/L account in use on this tenant, as the
+# minimal cover computed by src/probe_gl_accounts.py over all 60 reports declaring CGLACCT.
+GL_ACCOUNT_SOURCES = [
+    ("fin_costandrevenue_analytics.svc", "RPFINCACU04_Q0002QueryResults"),
+    ("fin_audit_analytics.svc", "RPFINGLAU02_Q0002QueryResults"),
+    ("fin_generalledger_analytics.svc", "RPFINFXAU05_Q0001QueryResults"),
+    ("fin_generalledger_analytics.svc", "RPFINFCDU02_Q0001QueryResults"),
+    ("fin_audit_analytics.svc", "RPFININVU03_Q0001QueryResults"),
+    ("fin_audit_analytics.svc", "RPFINGLAU02_Q0003QueryResults"),
+]
+
+# Odoo requires an account_type on every account.account row, and this tenant publishes none:
+# the only two reports carrying a G/L account type characteristic (RPFINPRFU24) return 0 rows,
+# and the G/L Account Master report is blocked by a mandatory variable (see extract_raw.SOURCES).
+#
+# So the type is derived from the account number range. That is safe here because ByDesign's
+# numbering is strictly banded and every band is confirmed by the account NAMES actually present
+# in this tenant's data - e.g. 150000 "Accounts Payable-Domestic", 242000 "Accounts
+# Receivable-Domestic", 241000 "Inventory - Raw Material", 300001 "Domestic Sales",
+# 500010 "Salary", 700044 "GR/IR clearing". Each band below lists the account that confirms it.
+ACCOUNT_TYPE_BANDS = [
+    ("150", "liability_payable",    "150000 Accounts Payable-Domestic"),
+    ("151", "liability_payable",    "151000 Accounts Payable-International"),
+    ("16",  "liability_current",    "163455 IGST-Payable-Goa-RCM"),
+    ("20",  "asset_fixed",          "202001 Buildings - Administration"),
+    ("21",  "asset_fixed",          "212110 Acc Dep Buildings (accumulated depreciation)"),
+    ("22",  "asset_fixed",          "227130 CWIP_Building (capital work in progress)"),
+    ("241", "asset_current",        "241000 Inventory - Raw Material"),
+    ("242", "asset_receivable",     "242000 Accounts Receivable-Domestic"),
+    ("244", "asset_cash",           "244607 STATE BANK OF INDIA - VERNA"),
+    ("245", "asset_cash",           "245002 Current Account Corpn Bank"),
+    ("246", "asset_current",        "246000 Bills Receivable"),
+    ("25",  "asset_current",        "252500 Advances to Suppliers"),
+    ("3",   "income",               "300001 Domestic Sales"),
+    ("4",   "expense_direct_cost",  "490001 Raw Material (cost of goods)"),
+    ("5",   "expense",              "500010 Salary"),
+    ("7",   "liability_current",    "700044 GR/IR clearing-Unbills Payable"),
+]
+
+
+def _account_type(code):
+    """-> (account_type, the account name that confirms the band). Longest prefix wins."""
+    for prefix, account_type, evidence in sorted(ACCOUNT_TYPE_BANDS, key=lambda b: -len(b[0])):
+        if code.startswith(prefix):
+            return account_type, evidence
+    return "asset_current", ""
+
+
+def build_chart_of_accounts():
+    """
+    Sheet object #1 (Chart of Accounts, MANDATORY).
+
+    ByDesign's own "G/L Account Master Data" report declares a mandatory Chart of Accounts
+    variable with no default and no readable value list, so it returns nothing. Instead this
+    reads the six analytics reports that expose CGLACCT/TGLACCT without a blocking variable
+    and unions them - between them they cover every G/L account in use on this tenant.
+    See src/probe_gl_accounts.py for how those six were identified out of 60 candidates.
+
+    Consequence worth stating plainly: this is the set of accounts that actually carry
+    postings, not the full configured chart. An account defined in ByDesign but never posted
+    to would not appear here.
+    """
+    accounts = {}
+    for service, entity_set in GL_ACCOUNT_SOURCES:
+        payload = load_raw(entity_set, service_hint=service)
+        for row in payload["rows"]:
+            code = (row.get("CGLACCT") or "").strip()
+            if not code:
+                continue
+            name = (row.get("TGLACCT") or "").strip()
+            if code not in accounts or (name and not accounts[code]):
+                accounts[code] = name
+
+    rows = []
+    for code in sorted(accounts):
+        account_type, _ = _account_type(code)
+        rows.append({
+            "id": external_id("sap_account", code),
+            "code": code,
+            "name": accounts[code] or code,
+            "account_type": account_type,
+            # Odoo reconciles payables and receivables; nothing else by default.
+            "reconcile": "True" if account_type in ("asset_receivable", "liability_payable") else "False",
+        })
+    write_csv("account_account.csv", rows, ACCOUNT_FIELDNAMES)
+    return {"account_account.csv": len(rows)}
+
+
+SUPPLIERINFO_FIELDNAMES = [
+    "id", "partner_id/id", "product_tmpl_id/id", "product_code", "product_name", "delay",
+]
+
+
+def build_vendor_pricelists():
+    """
+    Sheet object #47 (Vendor Pricelists) -> product.supplierinfo.
+
+    vmumaterial's SupplierInformationCollection links a material to the supplier that provides
+    it, with that supplier's own part number and lead time. It was being extracted but never
+    read by any transform.
+
+    No price column exists on this entity - ByDesign keeps supplier prices in price lists this
+    tenant does not publish - so product_code/delay are mapped and price is left for Odoo to
+    default. That is the honest subset, not a fabricated price.
+    """
+    links = load_raw("SupplierInformationCollection", service_hint="vmumaterial")["rows"]
+    # product_template.csv keys products on InternalID (see build_products), not ObjectID.
+    product_by_object = {
+        m["ObjectID"]: m.get("InternalID")
+        for m in load_raw("MaterialCollection", service_hint="vmumaterial")["rows"]
+        if m.get("ObjectID")
+    }
+
+    rows = []
+    for link in links:
+        supplier_id = (link.get("SupplierID") or "").strip()
+        product_id = product_by_object.get(link.get("ParentObjectID"))
+        if not supplier_id or not product_id:
+            continue
+        # SupplierLeadTimeDuration arrives as an ISO-8601 duration ("P7D"); Odoo wants days.
+        duration = (link.get("SupplierLeadTimeDuration") or "").strip()
+        delay = duration[1:-1] if duration.startswith("P") and duration.endswith("D") else ""
+        rows.append({
+            "id": external_id("sap_supinfo", f"{supplier_id}_{product_id}"),
+            "partner_id/id": external_id("sap_bp", supplier_id),
+            "product_tmpl_id/id": external_id("sap_prod", product_id),
+            "product_code": link.get("SupplierPartNumber") or "",
+            "product_name": link.get("BusinessPartnerFormattedName") or "",
+            "delay": delay,
+        })
+    write_csv("product_supplierinfo.csv", rows, SUPPLIERINFO_FIELDNAMES)
+    return {"product_supplierinfo.csv": len(rows)}
+
+
+OPEN_INVOICE_FIELDNAMES = [
+    "id", "name", "partner_id/id", "invoice_date", "move_type", "state",
+    "currency_id/id", "amount_total",
+]
+
+
+def _parse_sap_measure(value):
+    """
+    "1.770,00 USD" -> "1770.00";  "2.813 NOS" -> "2813.00";  "160 PCS" -> "160.00".
+
+    ByDesign's analytics layer returns KEY FIGURES (the F*/K* fields) pre-formatted for display
+    in the report's locale, with the unit or currency appended - they are not numbers. This
+    tenant's locale is European: "." groups thousands, "," is the decimal separator. Confirmed
+    on real data from two different reports: amounts arrive as "1.770,00 USD" and quantities as
+    "20.000 NOS" / "160 PCS".
+
+    This does NOT apply to the C* dimension fields, which come back as raw values - the tax rate
+    dimension is literally "18.000000" and must be read as 18, not as 18 million. Use float()
+    directly for those.
+    """
+    text = (value or "").strip()
+    if not text:
+        return ""
+    number = text.split(" ")[0].replace(".", "").replace(",", ".")
+    try:
+        return f"{float(number):.2f}"
+    except ValueError:
+        return ""
+
+
+def _sap_amount_currency(value):
+    """The currency code trailing a formatted measure, e.g. "1.770,00 USD" -> "USD"."""
+    parts = (value or "").strip().split(" ")
+    return parts[1] if len(parts) > 1 else ""
+
+
+def _tax_rate(value):
+    """"18.000000" -> "18.0". A C* dimension, so it is a raw decimal, not a formatted measure."""
+    try:
+        return f"{float(value):g}"
+    except (TypeError, ValueError):
+        return ""
+
+
+def build_open_customer_invoices():
+    """
+    Sheet object #8 (Open Customer Invoices, MANDATORY).
+
+    ByDesign's "Trade Receivables Payables Register" is its open-items report: one row per
+    invoice that is still unsettled, with the invoice number, the customer and the amount
+    outstanding. This is the object that could not be built before - khcustomerinvoice exposes
+    no payment-status field whatsoever, and matching payments back to invoices by document ID
+    only ever reached 7%, which was coincidence rather than a join.
+
+    amount_total here is the OUTSTANDING balance, not the original invoice total, because that
+    is what the register reports and what an opening-balance import needs.
+    """
+    rows_in = load_raw("RPFINDUEU04_Q0007QueryResults",
+                       service_hint="fin_receivablesar_analytics.svc")["rows"]
+    known, _, _ = _partner_ranks()
+
+    rows = []
+    for item in rows_in:
+        invoice_id = (item.get("CIM_B_BTD_ID") or "").strip()
+        if not invoice_id:
+            continue
+        partner = (item.get("CIM_BP_UUID") or "").strip()
+        outstanding = item.get("FCOUTSTANDING_AMNT")
+        rows.append({
+            "id": external_id("sap_openinv", invoice_id),
+            "name": invoice_id,
+            "partner_id/id": external_id("sap_bp", partner) if partner in known else "",
+            "invoice_date": parse_sap_date(item.get("CIM_B_BTD_DATE")) or "",
+            "move_type": "out_invoice",
+            "state": "posted",
+            # The register formats amounts in their own currency, which can differ from the
+            # document currency in CIM_TRANSCURR - trust the amount's own suffix.
+            "currency_id/id": f"base.{_sap_amount_currency(outstanding)}"
+                              if _sap_amount_currency(outstanding) else "",
+            "amount_total": _parse_sap_measure(outstanding),
+        })
+    write_csv("account_move_open_customer.csv", rows, OPEN_INVOICE_FIELDNAMES)
+    return {"account_move_open_customer.csv": len(rows)}
+
+
+TAX_FIELDNAMES = ["id", "name", "amount", "amount_type", "type_tax_use", "description"]
+
+
+def build_taxes():
+    """
+    Sheet object #2 (Taxes, MANDATORY).
+
+    "Taxes - Product Tax Details" is the only source on this tenant that carries a tax RATE.
+    Every custom service exposes tax CODES on documents (khsupplierinvoice/ItemTaxCalculation,
+    khcustomerinvoice/ItemPriceAndTaxCalculation) but never the percentage behind them.
+
+    Rows are one per distinct tax combination the report groups by, so this is the set of taxes
+    actually applied in this tenant - not the full configured tax table, which ByDesign does not
+    publish over OData.
+    """
+    rows_in = load_raw("RPGLOTAXB01_Q0001QueryResults",
+                       service_hint="fin_taxmanagement_analytics.svc")["rows"]
+
+    taxes = {}
+    for item in rows_in:
+        rate = (item.get("CPRODTAX_RATE_PERCENT") or "").strip()
+        tax_type = (item.get("CRESULT_TAX_TYPE") or "").strip()
+        if not rate or not tax_type:
+            continue
+        region = (item.get("CCIV_LOCATION_REGION") or "").strip()
+        event = (item.get("CRESULT_TAX_EVENT") or "").strip()
+        key = (tax_type, rate, region)
+        if key in taxes:
+            continue
+        label = " ".join(p for p in (tax_type, f"{rate}%", region) if p)
+        taxes[key] = {
+            "id": external_id("sap_tax", "_".join(p for p in (tax_type, rate, region) if p)),
+            "name": label,
+            "amount": _tax_rate(rate),
+            "amount_type": "percent",
+            # ByDesign does not label a tax as sales-side or purchase-side on this report;
+            # "sale" is Odoo's default and the safer of the two to review after import.
+            "type_tax_use": "sale",
+            "description": event,
+        }
+    rows = sorted(taxes.values(), key=lambda t: t["name"])
+    write_csv("account_tax.csv", rows, TAX_FIELDNAMES)
+    return {"account_tax.csv": len(rows)}
+
+
+QUANT_FIELDNAMES = ["id", "product_id/id", "location_id/id", "inventory_quantity", "product_uom_id/id"]
+
+
+def build_inventory():
+    """
+    Sheet object #31 (Inventory Adjustments) -> stock.quant opening balances.
+
+    "Inventory Balance" grouped by material x logistics area x site, which is exactly Odoo's
+    stock.quant grain. TMATERIAL_UUID/TLOG_AREA_UUID carry the readable product and location
+    names behind the UUID keys.
+    """
+    rows_in = load_raw("RPSCMINBU03_Q0001QueryResults",
+                       service_hint="scm_physicalinventory_analytics.svc")["rows"]
+
+    rows = []
+    for item in rows_in:
+        product = (item.get("CMATERIAL_UUID") or "").strip()
+        quantity = _parse_sap_measure(item.get("FCENDING_QUANTITY"))
+        if not product or not quantity or float(quantity) == 0:
+            continue
+        # CLOG_AREA_UUID is "<site>/<area>", the same pair build_locations keys its storage
+        # areas on - external_id() normalises both to the identical external ID.
+        area = (item.get("CLOG_AREA_UUID") or item.get("CSITE_UUID") or "").strip()
+        unit = (item.get("CINV_UNIT") or "").strip()
+        rows.append({
+            "id": external_id("sap_quant", f"{product}_{area}"),
+            "product_id/id": external_id("sap_prod", product),
+            "location_id/id": external_id("sap_loc", area) if area else "",
+            "inventory_quantity": quantity,
+            "product_uom_id/id": external_id("sap_uom", unit) if unit else "",
+        })
+    write_csv("stock_quant_adjustment.csv", rows, QUANT_FIELDNAMES)
+    return {"stock_quant_adjustment.csv": len(rows)}
+
+
+# Sheet object #30 (Lot/Serial Numbers) has no usable source on this tenant and is deliberately
+# NOT written. khproductionorder/ProductionLotCollection holds 145 rows but exposes exactly two
+# fields - ObjectID and ID - with no ParentObjectID and no product reference of any kind, so the
+# lots cannot be attached to a product. Odoo's stock.lot requires product_id, so a file built
+# from this would be 100% unimportable while appearing in the status reports as "done".
+# The fix is an import, not code: khgoodsandactivityconfirmation.xml carries SerialNumber and
+# IdentifiedStock with their material links - see SAP_IMPORT_PLAN.md, priority 1.
+
+
 TRANSFORMS = [
+    ("account_account (chart of accounts)", build_chart_of_accounts),
     ("account_analytic_plan / account_analytic_account (cost centers)", build_cost_centers),
     ("res_partner / res_bank / res_partner_bank", build_res_partner),
     ("purchase_order / purchase_order_line", build_purchase_orders),
@@ -1127,6 +1473,10 @@ TRANSFORMS = [
     ("account_payment_term", build_payment_terms),
     ("uom_uom", build_uom),
     ("product_category", build_product_categories),
+    ("product_supplierinfo (vendor pricelists)", build_vendor_pricelists),
+    ("account_move_open_customer (open customer invoices)", build_open_customer_invoices),
+    ("account_tax (taxes)", build_taxes),
+    ("stock_quant_adjustment (inventory balances)", build_inventory),
 ]
 
 

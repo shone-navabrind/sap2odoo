@@ -30,14 +30,46 @@ catalog (`CRM`, `SRM`, `SCM`, `FIN`, `HCM` — ByDesign's real internal module a
 confirmed by the Technical IDs themselves) still produced **0/100 hits**. Further guessing has
 next to no expected value at this point.
 
-**What's actually needed:** the live OData service names, which live in a different ByDesign
-screen: **Application and User Management → Communication Arrangements**. Open the arrangement
-used by the integration user, then inspect **Edit → Service URLs** (or **Outbound Services**, in
-some tenant UIs) and copy/export URLs containing `/sap/byd/odata/`. Analytics services use a
-published `.svc` name; standard services can instead use `/sap/byd/odata/v1/<service>/$metadata`.
-The URL shown by the tenant is authoritative. Open its `$metadata` URL to find the exact entity-set
-names. This is the authoritative discovery path; the Design Data Sources catalog is not an OData
-publication catalog.
+> **Superseded on 2026-09-18 — see "The service catalog" below.** The paragraph above is kept
+> because its *negative* findings still hold (the Design Data Sources export is not an OData
+> publication catalog, and its Technical IDs are not service names), but its conclusion —
+> that service names had to be guessed or read out of the Communication Arrangements screen —
+> was wrong. The tenant publishes a live catalog, and one GET replaces all of that guessing.
+
+## The service catalog (2026-09-18): guessing is over
+
+The tenant answers a plain authenticated GET with a complete list of every OData service the
+current user may call:
+
+```
+GET {SAP_BASE_URL}/sap/byd/odata/            -> Atom feed of 48 <service>.svc links
+GET {SAP_BASE_URL}/sap/byd/odata/<svc>/      -> that service's entity sets (Atom or JSON)
+```
+
+`python -m src.discover_catalog` walks both and writes `schema_snapshots/service_catalog.json`:
+**48 services, 1485 entity sets.** `python -m src.catalog_report` joins each entity set to the
+business description from the Design Data Sources export and writes the readable
+`SERVICE_CATALOG.csv`; pass search terms to grep it (`python -m src.catalog_report "g/l account"`).
+
+This was found by reading SAP's own Postman collections in `byd-api-samples-main/Postman/`,
+which had been sitting in the repo unexamined. The two prior rounds of name-guessing (0/100)
+were unnecessary.
+
+**Analytics entity sets are named `RP<DataSourceID>_<Query>QueryResults`**, and `<DataSourceID>`
+is exactly the Technical ID column of the Design Data Sources export — so that 573-row CSV is
+now useful after all, as a description lookup rather than as a service catalog.
+
+**Every report is reachable twice**: through the catch-all `ana_businessanalytics_analytics.svc`
+(582 entity sets) and through its own module service (`fin_generalledger_analytics.svc` etc).
+Always use the module service — `$metadata` collapses to `ID` + `TotaledProperties` on the
+catch-all but resolves fully on the module services. `python -m src.snapshot_metadata` captures
+all of them into `schema_snapshots/`, which is where `get_entity_fields()` looks first.
+
+**Analytics reports can declare mandatory variables.** `RPFINGLAU17` ("G/L Account Master Data")
+has precisely the right fields but returns 0 rows and rejects any filter until a Chart of Accounts
+key is supplied, and the tenant exposes no way to read the valid keys. Where a report is blocked
+this way, check whether other reports carry the same characteristic without the variable — see
+`src/probe_gl_accounts.py`, which recovered all 122 G/L accounts in use from six unblocked reports.
 
 ## BREAKTHROUGH (2026-09-15): custom OData services via Cloud Applications Studio
 
@@ -103,8 +135,9 @@ exactly what SAP has, independent of any Odoo decisions made on top of them.
 Tenant: `my345654.sapbydesign.com`. Real OData path pattern (confirmed working):
 `{SAP_BASE_URL}/sap/byd/odata/<service_name>.svc/<EntitySet>` — a small named `.svc` service per
 business area with SAP-internal names (not S/4HANA's `/API_XXX_SRV/...`, and not a single
-flat catalog). There is no public catalog of these names; each has to be found and curl-verified
-(`test_sap_endpoints.sh`).
+flat catalog). The names do not have to be guessed: `GET {SAP_BASE_URL}/sap/byd/odata/` lists
+every one of them — see "The service catalog" above. `test_sap_endpoints.sh` still curl-verifies
+individual endpoints.
 
 **Confirmed working:** `bpm_businesspartnerdata_analytics.svc`, with 7 entity sets pulled in
 full:
@@ -146,39 +179,83 @@ are BI report-backed OData services and `$metadata` reflects some live, mutable 
 state on the SAP side, not a fixed data dictionary. **Consequence:** live `$metadata` cannot be
 trusted as the source of truth for "what fields exist."
 
-Fix: `schema_snapshots/bpm_businesspartnerdata_analytics.svc.metadata.xml` is a captured-known-good
-copy of the full metadata (from the user's original working curl). `get_entity_fields()` in
-`src/sap_client.py` prefers this snapshot over a live call when one exists for a service. The
-underlying data via named `$select` fields still works fine even when `$metadata` has collapsed —
-only the metadata *listing* is unstable, not the actual data access.
+Fix: `schema_snapshots/<service>.metadata.xml` holds a captured-known-good copy of the full
+metadata, and `get_entity_fields()` in `src/sap_client.py` prefers that snapshot over a live call
+whenever one exists. The underlying data via named `$select` fields still works fine even when
+`$metadata` has collapsed — only the metadata *listing* is unstable, not the actual data access.
+
+**Update 2026-09-18 — the collapse is not random.** `$metadata` collapses on the *catch-all*
+analytics services (`ana_businessanalytics_analytics.svc` with its 582 entity sets, and the two
+other aggregator services) and resolves correctly on the *per-module* services. Running
+`python -m src.snapshot_metadata` captured real field lists for **35 of 36** analytics services
+in one pass — 402 entity types, every one with its full property list. So the rule is now:
+address a report through its module service (`fin_generalledger_analytics.svc`), never through
+the catch-all, and re-run `snapshot_metadata` rather than hand-capturing curl output.
 
 ## Odoo output today (`output_odoo/`)
 
+**36 files, 13,446 rows.** The authoritative, always-current list is `CONSOLIDATED_STATUS.csv`
+(one row per SAP API call) and `PROJECT_STATUS.csv` (one row per sheet object) - both regenerated
+from disk on every run. Highlights rather than a duplicate of those:
+
 | File | Rows | Built from |
 |---|---|---|
+| `account_account.csv` | 148 | Chart of accounts, unioned from the six analytics reports that expose `CGLACCT`/`TGLACCT` (see `src/probe_gl_accounts.py`) |
+| `account_tax.csv` | 60 | `GLOTAXB01` "Taxes - Product Tax Details" - the only source carrying a tax RATE |
+| `account_move_open_customer.csv` | 189 | `FINDUEU04` Trade Receivables Payables Register - open items with outstanding balances |
 | `res_partner.csv` | 271 | `RPBUPCSD` (customers) + `RPBUPSPP` (suppliers), deduplicated by `CBP_UUID`, `vat` from `RPBUPATAXNUMBERS` |
-| `res_bank.csv` | 8 | Bank fields inside `RPBUPCSD`/`RPBUPSPP` |
-| `res_partner_bank.csv` | 90 | Same source, linking partners to their bank accounts |
-| `account_analytic_plan.csv` | 1 | Synthetic "SAP Cost Centers" plan (Odoo requires a plan for every analytic account) |
-| `account_analytic_account_cc.csv` | 14 | Standard OData v1 `costcentre` service, `CostCentreCollection` |
-| `purchase_order.csv` | 655 | `khpurchaseorder` custom service, `PurchaseOrderCollection` + `SupplierCollection` for the partner link |
-| `purchase_order_line.csv` | 1861 | `khpurchaseorder`'s `ItemCollection`; `product_id/id` resolves for 1586/1595 lines now that Products is wired up |
-| `product_template.csv` | 3058 | Full field coverage across all of `vmumaterial`'s real per-material entities: `MaterialCollection` (base), `TextCollection` (detailed description), `PurchasingCollection`/`SalesCollection` (UOM + purchase_ok/sale_ok), `ProductCategoryCollection` (category); `standard_price` from `vmumaterialvaluationdata`'s latest `ValuationPriceCollection` row (994/3058 priced). No barcode/weight fields exist on this tenant (checked live, 0 rows) - not fabricated. |
+| `product_template.csv` | 3058 | All of `vmumaterial`'s real per-material entities; `standard_price` from `vmumaterialvaluationdata` (994/3058 priced) |
+| `stock_quant_adjustment.csv` | 1805 | `SCMINBU03` Inventory Balance, grouped material x logistics area x site |
+| `stock_location.csv` | 20 | 4 sites from `khlocation/LocationCollection` plus their 16 storage areas from `LogisticsAreaCollection` |
+| `purchase_order.csv` / `_line.csv` | 655 / 1861 | `khpurchaseorder`; partner via type-aware party resolution (91% valid) |
+| `product_supplierinfo.csv` | 34 | `vmumaterial/SupplierInformationCollection` - supplier part numbers and lead times |
 
 Odoo CSV conventions: every row's `id` is an external ID (`sap_bp_<CBP_UUID>`,
 `sap_bank_<name>`); relation columns use Odoo's `field/id` syntax (`partner_id/id`,
 `bank_id/id`); countries use `base.<lowercase-iso2>` external IDs.
 
+### Reading analytics numbers: C* is raw, F*/K* is formatted
+
+A trap worth remembering. In an analytics report the `C*` dimension fields come back as raw
+values, but the `F*`/`K*` key figures come back **pre-formatted for display in the tenant's
+locale, with the unit or currency appended**. On this tenant that locale is European:
+
+| Field | Value as returned | Means |
+|---|---|---|
+| `CPRODTAX_RATE_PERCENT` (dimension) | `"18.000000"` | 18% - a plain decimal |
+| `FCOUTSTANDING_AMNT` (key figure) | `"1.770,00 USD"` | 1770.00 USD - "." groups thousands |
+| `FCENDING_QUANTITY` (key figure) | `"20.000 NOS"` | 20000 units |
+
+Applying the wrong parser to either one silently produces numbers wrong by 1000x. See
+`_parse_sap_measure()` and `_tax_rate()` in `src/transform_odoo.py`.
+
+### Known data-quality caveat: OLAP chunk merging can sample
+
+When an analytics entity needs more fields than one `$select` allows, the chunks are merged on a
+business key. If that key is not unique within a chunk, the non-key fields of the surviving row
+are a *sample* rather than a complete join. `get_entity_set_all_fields()` now detects and logs
+this. It currently fires on Customers (44 keys vs 50 rows) and Vendors (229 vs 237) - so a
+handful of partners may show one of several addresses. The clean fix is to import `khcustomer`
+and `khsupplier`, which expose the same data as plain CRUD with no chunking at all
+(`SAP_IMPORT_PLAN.md`, priority 1).
+
 ## Registry validation (`python -m src.validate`)
 
 Cross-checks `src/registry.py`'s 66+1 objects against what's actually in `output_odoo/`. Current
-state: **6/67 objects have real data** (Customers, Vendors, Banks, Cost Centers, Purchase
-Orders, Products). 47 objects have a decided Odoo target (model + filename) but no confirmed SAP
-source yet (`pending_mapping`) — 46 of those now have a matching `.xml` file sitting in
-`byd-api-samples-main/Custom OData Services/`, ready to import and wire up the same way Purchase
-Orders/Products were. 14 objects (Engineering/PLM, Maintenance/PM, Quality/QM) are flagged
-`not_in_bydesign` — standard ByDesign has no equivalent module, so these need the user to confirm
-whether that data lives in this SAP system at all before any extraction logic is written for them.
+state: **31/67 objects have real data, including 19 of the 21 mandatory ones.** 22 objects have a
+decided Odoo target but no confirmed SAP source yet (`pending_mapping`); most are waiting on one
+of the 29 custom services still to be imported — `SAP_IMPORT_PLAN.md` says exactly which file
+closes which object. 14 objects (Engineering/PLM, Maintenance/PM, Quality/QM) are
+`not_in_bydesign` — standard ByDesign has no equivalent module.
+
+The two mandatory objects still open:
+- **#40 BOMs** — searched every one of the 1485 entity sets the tenant publishes AND every one of
+  the 609 entity sets across all 47 custom service `.xml` files, for bom / "bill of material" /
+  "production model" / recipe / routing / explosion: **zero matches in either**. Importing more
+  services cannot produce it. Needs the PBOM data sources exposed via Business Configuration, or
+  a non-OData export.
+- **#34 Equipment** — ByDesign has no Preventive Maintenance module; equipment is modelled as a
+  serialized product instance, not master data. Verified three times.
 
 ## Team status report (`PROJECT_STATUS.csv`, `python -m src.status_report`)
 

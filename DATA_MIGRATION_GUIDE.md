@@ -26,17 +26,37 @@ Think of it as three steps:
 | | Count |
 |---|---|
 | Objects on the client's requirement sheet | **66** (+1 we added: currency exchange rates) |
-| ✅ Done — real data extracted and converted | **26** |
-| ⏳ Not done — no usable SAP source found yet | **27** |
+| ✅ Done — real data extracted and converted | **31** |
+| ⏳ Not done — no usable SAP source found yet | **22** |
 | 🚫 Impossible — this SAP system has no such data | **14** |
-| **Mandatory objects done** | **16 of 21** |
-| Records pulled out of SAP | **59,968** |
-| Records written into Odoo import files | **11,194** |
-| SAP data fields examined | **1,060** |
+| **Mandatory objects done** | **19 of 21** |
+| Records pulled out of SAP | **206,499** |
+| Records written into Odoo import files | **13,446** (36 files) |
+| SAP entity sets extracted | **195** |
+| SAP data fields examined | **1,894** |
 
 > The Odoo record count is lower than the SAP count on purpose. Many SAP records are
 > supporting/lookup rows (for example 3,529 "which supplier is on this purchase order" link
 > rows collapse into 655 purchase orders). Nothing is lost — see §6.
+
+### What changed on 2026-09-18
+
+The single biggest finding: **SAP publishes a catalog of its own APIs, and we had not been
+using it.** A plain `GET /sap/byd/odata/` returns every service the login is allowed to call.
+Earlier work had assumed no such catalog existed and tried guessing service names (100 guesses,
+0 hits). Reading SAP's own Postman example files — which had been sitting unopened in the
+project folder — revealed the catalog endpoint.
+
+Consequences, all verified against the live system:
+
+- **1,485 SAP data sources are now catalogued and searchable** (`SERVICE_CATALOG.csv`), each with
+  its business description. Finding a data source is now a search, not a guess.
+- **Chart of Accounts, Taxes and Open Customer Invoices** — three mandatory objects previously
+  marked impossible — are now done, from sources found in that catalog.
+- **We were only reading a fraction of what SAP offered.** 225 live data sets were never being
+  requested, and 132 of them held real data. They are now extracted: the record count went from
+  59,968 to 206,499.
+- **BOMs are now definitively ruled out** rather than merely "not found yet" — see §3.
 
 ---
 
@@ -52,47 +72,72 @@ An object is marked **done** only when all four of these are true:
 If any step fails, it is **not** marked done. There is no partial credit and nothing is
 described as finished that isn't.
 
+A worked example of that rule: **Lot/Serial Numbers** looked done — SAP returns 145 production
+lot records. But those records carry only an ID and nothing linking them to a product, and Odoo
+cannot import a lot without a product. So no file is produced and the object stays "not done",
+rather than shipping 145 rows that would fail on import.
+
 ---
 
 ## 3. Mandatory objects — the critical list
 
 The client's sheet marks **21 objects as mandatory**. Status:
 
-### ✅ Done — 16 of 21
+### ✅ Done — 19 of 21
 
-| # | Object | Odoo model | Odoo file | Rows | SAP source |
-|---|---|---|---|---|---|
-| 4 | Payment Terms | `account.payment.term` | `account_payment_term.csv` | 16 | khcustomerinvoice + khsupplierinvoice |
-| 5 | Banks | `res.bank` | `res_bank.csv` | 8 | bpm_businesspartnerdata_analytics |
-| 9 | Open Vendor Bills | `account.move` | `account_move_open_vendor.csv` | 265 | khsupplierinvoice |
-| 17 | Customers | `res.partner` | `res_partner.csv` | 271 | bpm_businesspartnerdata_analytics |
-| 18 | Salespersons | `res.users` | `res_users.csv` | 99 | khemployee |
-| 21 | Open Opportunities | `crm.lead` | `crm_lead_open.csv` | 8 | khopportunity |
-| 27 | Warehouses | `stock.warehouse` | `stock_warehouse.csv` | 1 | khlocation |
-| 28 | Locations | `stock.location` | `stock_location.csv` | 4 | khlocation |
-| 29 | UOM | `uom.uom` | `uom_uom.csv` | 23 | vmumaterial |
-| 42 | Work Centers | `mrp.workcenter` | `mrp_workcenter.csv` | 18 | khproductionorder |
-| 46 | Vendors | `res.partner` | `res_partner.csv` | 271 | bpm_businesspartnerdata_analytics |
-| 50 | Purchase Orders | `purchase.order` | `purchase_order.csv` + `_line.csv` | 655 + 1,861 | khpurchaseorder |
-| 57 | Products | `product.template` | `product_template.csv` | 3,058 | vmumaterial + vmumaterialvaluationdata |
-| 58 | Product Categories | `product.category` | `product_category.csv` | 30 | vmumaterial |
-| 59 | Pricelists | `product.pricelist` | `product_pricelist.csv` | 35 | khsalesarrangement |
-| 63 | Sales Orders | `sale.order` | `sale_order.csv` + `_line.csv` | 196 + 263 | khsalesorder |
+| # | Object | Odoo model | Odoo file | Rows |
+|---|---|---|---|---|
+| 1 | Chart of Accounts | `account.account` | `account_account.csv` | 148 |
+| 2 | Taxes | `account.tax` | `account_tax.csv` | 60 |
+| 4 | Payment Terms | `account.payment.term` | `account_payment_term.csv` | 16 |
+| 5 | Banks | `res.bank` | `res_bank.csv` | 8 |
+| 8 | Open Customer Invoices | `account.move` | `account_move_open_customer.csv` | 189 |
+| 9 | Open Vendor Bills | `account.move` | `account_move_open_vendor.csv` | 265 |
+| 17 | Customers | `res.partner` | `res_partner.csv` | 271 |
+| 18 | Salespersons | `res.users` | `res_users.csv` | 99 |
+| 21 | Open Opportunities | `crm.lead` | `crm_lead_open.csv` | 8 |
+| 27 | Warehouses | `stock.warehouse` | `stock_warehouse.csv` | 1 |
+| 28 | Locations | `stock.location` | `stock_location.csv` | 20 |
+| 29 | UOM | `uom.uom` | `uom_uom.csv` | 23 |
+| 42 | Work Centers | `mrp.workcenter` | `mrp_workcenter.csv` | 18 |
+| 46 | Vendors | `res.partner` | `res_partner.csv` | 271 |
+| 50 | Purchase Orders | `purchase.order` | `purchase_order.csv` + `_line.csv` | 655 + 1,861 |
+| 57 | Products | `product.template` | `product_template.csv` | 3,058 |
+| 58 | Product Categories | `product.category` | `product_category.csv` | 30 |
+| 59 | Pricelists | `product.pricelist` | `product_pricelist.csv` | 35 |
+| 63 | Sales Orders | `sale.order` | `sale_order.csv` + `_line.csv` | 196 + 263 |
 
-### ⏳ Not done — 4 of 21, and why
+**The three newly solved this round:**
+
+- **#1 Chart of Accounts (148 accounts).** SAP's dedicated "G/L Account Master Data" report is
+  live but refuses to run: it demands a "Chart of Accounts" value that the system gives us no way
+  to look up. We worked around it by testing all 60 reports that carry a G/L account number and
+  finding six that answer without that restriction. Together they cover every account the company
+  actually posts to — real accounts with real names ("Accounts Payable-Domestic",
+  "Inventory - Raw Material", "Domestic Sales", "Salary"). *Caveat:* an account configured in SAP
+  but never posted to would not appear.
+- **#2 Taxes (60 tax rates).** Found in "Taxes - Product Tax Details" — the only place in the
+  whole system that carries a tax **rate** rather than just a tax code. Real Indian GST at 18%,
+  9%, 28%, 2.5% and so on, across Central/State/Interstate GST, TCS, VAT, customs duty and cess.
+  *Caveat:* whether each tax applies to sales or purchases is not stated by SAP, so every row is
+  marked "sale" and needs a review pass before import.
+- **#8 Open Customer Invoices (189 invoices).** The previous attempt failed because SAP's invoice
+  API has no paid/unpaid field at all. The answer was a different report entirely — the
+  "Trade Receivables Payables Register", SAP's open-items list — which gives the invoice number,
+  the customer and the amount still outstanding. *Note:* the amount is the **outstanding
+  balance**, not the original invoice total, which is what an opening-balance import needs.
+
+### ⏳ Not done — 1 of 21
 
 | # | Object | Why it isn't done |
 |---|---|---|
-| 1 | Chart of Accounts | No SAP service on this tenant exposes G/L account master data. We searched the tenant's full 573-entry report catalogue and tested 100 candidate service names — zero hits. **Needs:** the real service name from SAP's *Communication Arrangements* screen. |
-| 2 | Taxes | Same as above. Invoices carry tax *amounts*, but there is no master list of tax codes/rates anywhere we can reach. |
-| 8 | Open Customer Invoices | The invoice data **is** extracted (524 invoices). But SAP's customer-invoice API carries **no payment-status field at all**, so we cannot tell which are still unpaid. We tested joining payments to invoices by ID — only 7% matched, which is coincidence, not a real link. |
-| 40 | BOMs | Production orders reference 27 bill-of-material IDs, but with **no component or quantity data attached**. A BOM without components is an empty shell, so we did not produce a fake file. |
+| 40 | BOMs | **Confirmed unavailable over the API.** We searched for bom / "bill of material" / "production model" / recipe / routing / explosion across *both* all 1,485 data sets the system publishes *and* all 609 data sets defined in all 47 importable service files. Zero matches in either. Production orders reference a BOM by ID but never expose its components. Importing more services cannot fix this. **Options:** switch on the PBOM data sources in SAP's Business Configuration, or export BOMs from the SAP screens as a file. |
 
 ### 🚫 Impossible — 1 of 21
 
 | # | Object | Why |
 |---|---|---|
-| 34 | Equipment | SAP Business ByDesign has no Plant Maintenance module. Verified twice: (a) zero matches across the tenant's 573-entry report catalogue, (b) the client imported three Service Order/Request services at our request and none contain equipment master data — they only reference a product + serial number. **This needs a client decision** on where equipment data actually lives. |
+| 34 | Equipment | SAP Business ByDesign has no Plant Maintenance module. Verified three times: (a) zero matches across the tenant's 573-entry report catalogue, (b) zero matches across all 1,485 published data sets, (c) the client imported three Service Order/Request services at our request and none contain equipment master data — they only reference a product + serial number. **This needs a client decision** on where equipment data actually lives. |
 
 ---
 
@@ -327,13 +372,15 @@ elsewhere — a strict improvement, not a trade-off.
 
 ---
 
-## 9. The three report files, and which to use
+## 9. The report files, and which to use
 
 | File | One row per | Use it when you want to… |
 |---|---|---|
+| **`SAP_IMPORT_PLAN.md`** | Service file to import | Know **what to do next in SAP** — which files to import and what each unlocks |
 | **`CONSOLIDATED_STATUS.csv`** | SAP API call | See **everything in one place** — API URL, records in, records out, sample data, status |
 | `PROJECT_STATUS.csv` | Requirement-sheet object | Report progress against the client's 66-object list |
 | `SAP_Field_Mapping.xlsx` | Object (one tab each) | Look up **field-level** detail: every SAP field and its Odoo field |
+| `SERVICE_CATALOG.csv` | SAP data source | Search all 1,485 data sources SAP publishes, by name or description |
 
 `CONSOLIDATED_STATUS.csv` columns: Status, Sheet #, Object Name, Odoo Module,
 Master/Transaction, Mandatory, SAP Service, SAP Entity, SAP API URL, SAP Records, SAP Fields,
@@ -386,16 +433,61 @@ the numbers in this document can be reproduced end to end. The last full run com
 
 ## 12. What has to happen next
 
-**Blocked on the client / SAP administrator — we cannot solve these with code:**
+Everything below is an action **in SAP**, not in this code. The code side is not the bottleneck.
 
-1. **Chart of Accounts and Taxes (both mandatory).** Someone with SAP admin access needs to open
-   **Application and User Management → Communication Arrangements** and send us the service URLs
-   containing `/sap/byd/odata/`. None of the 47 sample service files covers accounting master data.
-2. **Equipment (mandatory).** Confirm where this data actually lives — it is not in ByDesign.
-3. **Quotations (#62).** The service is imported and live, but the SAP user is **not authorised**
-   to read it (`RBAM_ERROR`). An administrator needs to grant access.
-4. **Open Customer Invoices (#8).** Decide how "open" should be determined, given SAP's customer
-   invoice API exposes no payment status.
+### A. Import more service definition files — this is the main lever
 
-**We can do without help, once the above is unblocked:** wire up each newly-available service
-using the same process, which now takes roughly an hour per object.
+29 of the 47 service files in `byd-api-samples-main/Custom OData Services/` have not been
+imported into SAP yet. Each one that goes in unlocks more objects.
+
+**How:** in SAP → **Application and User Management → OData Services → Custom OData Services →
+Import**, upload the `.xml`, then tell us. `SAP_IMPORT_PLAN.md` lists all 29 in priority order,
+with what each one unlocks and how many fields it exposes. The six worth doing first:
+
+| File | Unlocks |
+|---|---|
+| `khcustomer.xml` | Customers (#17) properly — 202 fields instead of a 44-row report |
+| `khsupplier.xml` | Vendors (#46) properly — 160 fields |
+| `khcustomerinvoicerequest.xml` | Strengthens Open Customer Invoices (#8) |
+| `khgoodsandactivityconfirmation.xml` | Inventory Adjustments (#31), Stock Moves (#33), Lot/Serial (#30) |
+| `khhousebankaccount.xml` | Banks (#5) from the real bank master, not scraped from partner records |
+| `khserviceproduct.xml` | Service products — a whole product master currently missing |
+
+### B. Grant the integration user three authorisations
+
+Three services **are already imported and live** but every read returns
+`RBAM_ERROR: Not Authorized`. This is a role change, not an import:
+
+| Service | Object | Grant access to |
+|---|---|---|
+| `khcustomerquote` | #62 Quotations | the **Sales Quotes** work center |
+| `tmserviceorder` | Service Orders | the **Service Orders** work center |
+| `tmservicerequest` | Service Requests | the **Service Requests** work center |
+
+### C. Two decisions only the client can make
+
+1. **BOMs (#40, mandatory).** Not available over the API at all — confirmed against all 1,485
+   published data sets and all 609 data sets in the service files. Either switch on the PBOM
+   data sources under **Business Configuration → Analytics**, or export BOMs from the SAP screens
+   and hand over a file.
+2. **Equipment (#34, mandatory).** ByDesign has no maintenance module. Confirm where this data
+   really lives, or agree it is out of scope.
+
+### D. Nice to have
+
+**Currency exchange rates** have no source anywhere — not in the 1,485 published data sets, not
+in the 573-row report catalogue, not in SAP's own example collections. These are usually
+maintained directly in Odoo instead.
+
+---
+
+## 13. Verifying any claim in this document
+
+Every number here comes from a file on disk and can be re-derived:
+
+```bash
+python -m src.validate            # object-by-object coverage
+python -m src.coverage_gap        # what SAP has that we are not yet using
+python -m src.probe_services      # which service files are live in SAP
+python -m src.catalog_report bom  # search all 1485 SAP data sources for a term
+```
