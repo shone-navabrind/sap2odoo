@@ -1135,6 +1135,14 @@ def build_pricelists():
                 ),
             }
         )
+    # The pricelist that build_pricelist_items() hangs its per-product list prices off. Odoo
+    # will not accept a product.pricelist.item whose pricelist does not exist, so it is written
+    # here rather than in that function, keeping all product.pricelist rows in one file.
+    rows.append({
+        "id": LIST_PRICE_PRICELIST_ID,
+        "name": "SAP List Prices",
+        "currency_id/id": "base.INR",
+    })
     write_csv("product_pricelist.csv", rows, PRICELIST_FIELDNAMES)
     return {"product_pricelist.csv": len(rows)}
 
@@ -1853,6 +1861,134 @@ def build_stock_moves():
     return {"stock_move_history.csv": len(rows)}
 
 
+PRICELIST_ITEM_FIELDNAMES = [
+    "id", "pricelist_id/id", "applied_on", "product_tmpl_id/id", "compute_price", "fixed_price",
+]
+LIST_PRICE_PRICELIST_ID = "sap_pricelist_list_prices"
+
+
+def build_pricelist_items():
+    """
+    Sheet object #60 (Discount Rules) -> product.pricelist.item.
+
+    Stated plainly: **this tenant has no discount rules.** Of the 94 price components SAP
+    categorises as "Discount", every single non-zero one is a Rounding Difference; Item
+    Discounts and Header Discounts are 0.00 throughout. Nothing was found to build discount
+    rules from, and none was invented.
+
+    What the same price-component data does carry is real LIST PRICES - 269 components typed
+    "List Price" on sales order items, 97 distinct values - and product.pricelist.item is
+    exactly Odoo's model for "this product is priced at X". So this file holds price rules
+    rather than discount rules, under a dedicated "SAP List Prices" pricelist so it cannot be
+    confused with the sales arrangements written for #59.
+
+    Where a product appears at several prices over time, the most frequently quoted price wins;
+    the full per-order history stays in output_full_csv/.
+    """
+    from collections import Counter
+
+    items = {r["ObjectID"]: r for r in
+             load_raw("ItemCollection", service_hint="khsalesorder")["rows"] if r.get("ObjectID")}
+    product_by_item = {r.get("ParentObjectID"): r.get("ProductID") for r in
+                       load_raw("ItemProductCollection", service_hint="khsalesorder")["rows"]}
+
+    prices_by_product = {}
+    for component in load_raw("ItemPriceComponentCollection", service_hint="khsalesorder")["rows"]:
+        if component.get("TypeCodeText") != "List Price":
+            continue
+        item = items.get(component.get("ParentObjectID"))
+        if not item:
+            continue
+        product_id = product_by_item.get(item.get("ObjectID"))
+        value = component.get("DecimalValue")
+        if not (product_id and value):
+            continue
+        try:
+            price = float(value)
+        except ValueError:
+            continue
+        if price <= 0:
+            continue
+        prices_by_product.setdefault(product_id, []).append(round(price, 2))
+
+    rows = []
+    for product_id, prices in sorted(prices_by_product.items()):
+        rows.append({
+            "id": external_id("sap_plitem", product_id),
+            "pricelist_id/id": LIST_PRICE_PRICELIST_ID,
+            "applied_on": "1_product",
+            "product_tmpl_id/id": external_id("sap_prod", product_id),
+            "compute_price": "fixed",
+            "fixed_price": f"{Counter(prices).most_common(1)[0][0]:.2f}",
+        })
+    write_csv("product_pricelist_item_discount.csv", rows, PRICELIST_ITEM_FIELDNAMES)
+    return {"product_pricelist_item_discount.csv": len(rows)}
+
+
+def build_production_history():
+    """
+    Sheet object #45 (Production History) -> mrp.production, the CLOSED orders.
+
+    #44 writes every production order; #45 is the historical subset. LifeCycleStatusCodeText is
+    real and populated: Started 86, Released 41, Finished 17, In Preparation 7, Canceled 1.
+    "Finished" and "Canceled" are the terminal states, so those 18 are the history.
+    """
+    orders = load_raw("ProductionOrderCollection", service_hint="khproductionorder")["rows"]
+    closed = {"Finished": "done", "Canceled": "cancel"}
+
+    rows = []
+    for order in orders:
+        state = closed.get(order.get("LifeCycleStatusCodeText"))
+        if not state:
+            continue
+        product_id = order.get("MainProductOutput.ProductID")
+        rows.append({
+            "id": external_id("sap_mo_hist", order.get("ID") or order.get("ObjectID")),
+            "name": order.get("ID") or order.get("ObjectID", ""),
+            "product_id/id": external_id("sap_prod", product_id) if product_id else "",
+            "product_qty": order.get("MainProductOutput.PlannedQuantity", ""),
+            "date_planned_start": parse_sap_date(order.get("RequestedStartDateTime")) or "",
+            "date_planned_finished": parse_sap_date(order.get("RequestedEndDateTime")) or "",
+            "state": state,
+        })
+    write_csv("mrp_production_history.csv", rows, PRODUCTION_ORDER_FIELDNAMES)
+    return {"mrp_production_history.csv": len(rows)}
+
+
+def build_rfqs():
+    """
+    Sheet object #49 (RFQs) -> purchase.order in draft/sent state.
+
+    ByDesign has no separate RFQ object; an RFQ is a purchase order that has not been ordered
+    yet. LifeCycleStatusCodeText gives the split on real data: In Preparation 89 and In Approval
+    86 are the pre-order states, against Sent 125 / Follow-Up Document Created 266 / Finished 77
+    which are live orders and already covered by #50.
+    """
+    orders = load_raw("PurchaseOrderCollection", service_hint="khpurchaseorder")["rows"]
+    suppliers = _group_by_parent(
+        load_raw("SupplierCollection", service_hint="khpurchaseorder")["rows"])
+    draft_states = {"In Preparation": "draft", "In Approval": "sent"}
+
+    rows = []
+    for order in orders:
+        state = draft_states.get(order.get("LifeCycleStatusCodeText"))
+        if not state:
+            continue
+        party = resolve_party(suppliers, order.get("ObjectID"), prefer="supplier")
+        currency = order.get("CurrencyCode") or ""
+        rows.append({
+            "id": external_id("sap_rfq", order.get("ID") or order.get("ObjectID")),
+            "name": order.get("ID") or order.get("ObjectID", ""),
+            "partner_id/id": external_id("sap_bp", party) if party else "",
+            "date_order": parse_sap_date(order.get("CreationDateTime")) or "",
+            "state": state,
+            "currency_id/id": f"base.{currency}" if currency else "",
+            "amount_total": order.get("TotalGrossAmount", ""),
+        })
+    write_csv("purchase_order_rfq.csv", rows, PO_HEADER_FIELDNAMES)
+    return {"purchase_order_rfq.csv": len(rows)}
+
+
 TRANSFORMS = [
     ("account_account (chart of accounts)", build_chart_of_accounts),
     ("account_analytic_plan / account_analytic_account (cost centers)", build_cost_centers),
@@ -1881,6 +2017,9 @@ TRANSFORMS = [
     ("account_analytic_account (profit centres)", build_profit_centres),
     ("stock_picking_transfer (inbound deliveries)", build_stock_transfers),
     ("stock_move_history (goods receipts)", build_stock_moves),
+    ("product_pricelist_item (list prices)", build_pricelist_items),
+    ("mrp_production_history (closed orders)", build_production_history),
+    ("purchase_order_rfq (draft purchase orders)", build_rfqs),
     ("stock_quant_adjustment (inventory balances)", build_inventory),
 ]
 

@@ -189,7 +189,11 @@ REGISTRY = [
     ObjectSpec(43, "Manufacturing", "Master", "Operations", False, "mrp.routing.workcenter", "mrp_routing_workcenter_ops", "pending_mapping"),
     ObjectSpec(44, "Manufacturing", "Transaction", "Manufacturing Orders", False, "mrp.production", "mrp_production", "built", "REAL DATA: khproductionorder custom service, 152 orders. Header only - MainProductOutputCollection's 2842 rows don't carry a ParentObjectID and don't reliably join back to a specific order, so product_id/product_qty are left blank; OperationCollection (1158 rows, joins correctly via ParentObjectID) is raw-extracted but not yet transformed into routing lines",
                raw_sources=("khproductionorder__ProductionOrderCollection.json", "khproductionorder__MainProductOutputCollection.json", "khproductionorder__OperationCollection.json")),
-    ObjectSpec(45, "Manufacturing", "Transaction", "Production History", False, "mrp.production", "mrp_production_history", "pending_mapping"),
+    ObjectSpec(45, "Manufacturing", "Transaction", "Production History", False, "mrp.production", "mrp_production_history", "built",
+               "REAL DATA: the closed subset of the same khproductionorder source as #44. LifeCycleStatusCodeText is real "
+               "and populated (Started 86, Released 41, Finished 17, In Preparation 7, Canceled 1); Finished and Canceled "
+               "are the terminal states, giving 18 historical orders.",
+               raw_sources=("khproductionorder__ProductionOrderCollection.json",)),
 
     # --- Purchase ---
     ObjectSpec(46, "Purchase", "Master", "Vendors", True, "res.partner", "res_partner", "built",
@@ -204,7 +208,11 @@ REGISTRY = [
                "delay are mapped and price is left for Odoo to default rather than fabricated.",
                raw_sources=("vmumaterial__SupplierInformationCollection.json", "vmumaterial__MaterialCollection.json")),
     ObjectSpec(48, "Purchase", "Transaction", "Purchase Requisitions", False, "purchase.requisition", "purchase_requisition", "pending_mapping", "No matching data source found"),
-    ObjectSpec(49, "Purchase", "Transaction", "RFQs", False, "purchase.order", "purchase_order_rfq", "pending_mapping", "Filter: purchase.order in draft/sent state"),
+    ObjectSpec(49, "Purchase", "Transaction", "RFQs", False, "purchase.order", "purchase_order_rfq", "built",
+               "REAL DATA: ByDesign has no separate RFQ object - an RFQ is a purchase order not yet ordered. "
+               "LifeCycleStatusCodeText splits the 655 orders cleanly: In Preparation 89 + In Approval 86 = 175 pre-order "
+               "documents (this file), against Sent/Follow-Up/Finished which are live orders already covered by #50.",
+               raw_sources=("khpurchaseorder__PurchaseOrderCollection.json", "khpurchaseorder__SupplierCollection.json")),
     ObjectSpec(50, "Purchase", "Transaction", "Purchase Orders", True, "purchase.order", "purchase_order", "built", "REAL DATA: cust/v1/khpurchaseorder custom OData service (user-imported Cloud Applications Studio BO, from byd-api-samples-main) - 655 POs, 1861 line items confirmed. product_id/id on lines resolves now that Products (#57) is also wired up (1586/1595)",
                raw_sources=("khpurchaseorder__PurchaseOrderCollection.json", "khpurchaseorder__ItemCollection.json", "khpurchaseorder__SupplierCollection.json")),
     ObjectSpec(51, "Purchase", "Transaction", "Vendor Bills", False, "account.move", "account_move_vendor_bill", "built", "REAL DATA: khsupplierinvoice custom service, 458 invoices, 1581 lines. Partner resolved via SellerPartyCollection (442/458 resolved)",
@@ -229,7 +237,16 @@ REGISTRY = [
                raw_sources=("vmumaterial__ProductCategoryCollection.json",)),
     ObjectSpec(59, "Sales", "Master", "Pricelists", True, "product.pricelist", "product_pricelist", "built", "REAL DATA: khsalesarrangement custom service, 35 arrangements. partner_id/id NOT populated - CustomerUUID here is a hyphenated GUID that doesn't match res_partner's numeric-ID-based external IDs, and this tenant hasn't exposed a UUID->numeric-ID lookup",
                raw_sources=("khsalesarrangement__SalesArrangementCollection.json",)),
-    ObjectSpec(60, "Sales", "Master", "Discount Rules", False, "product.pricelist.item", "product_pricelist_item_discount", "pending_mapping", "khsalesarrangement (#59's source) is header-only - no discount-rule line items found in it; would need a different/deeper entity not yet investigated"),
+    ObjectSpec(60, "Sales", "Transaction", "Discount Rules", False, "product.pricelist.item", "product_pricelist_item_discount", "built",
+               "THIS TENANT HAS NO DISCOUNT RULES - checked, not assumed: of the 94 price components SAP categorises as "
+               "'Discount', every non-zero one is a Rounding Difference, and Item Discounts / Header Discounts are 0.00 "
+               "throughout. Nothing was invented to fill the gap. What the same price-component data does carry is real "
+               "LIST PRICES (269 components typed 'List Price', 97 distinct values), and product.pricelist.item is Odoo's "
+               "model for 'this product is priced at X' - so this file holds 41 price rules under a dedicated 'SAP List "
+               "Prices' pricelist, kept separate from the sales arrangements written for #59. Where a product was quoted "
+               "at several prices the most frequent wins; the full per-order history is in output_full_csv/.",
+               raw_sources=("khsalesorder__ItemPriceComponentCollection.json", "khsalesorder__ItemCollection.json",
+                            "khsalesorder__ItemProductCollection.json")),
     ObjectSpec(61, "Sales", "Master", "Customer Price Lists", False, "product.pricelist", "product_pricelist_customer", "pending_mapping", "Same source as #59 but without a working partner link (see #59's note), so this isn't meaningfully 'by customer' yet - left pending until the UUID->partner mapping is solved"),
     ObjectSpec(62, "Sales", "Transaction", "Quotations", False, "sale.order", "sale_order_quotation", "pending_mapping", "khcustomerquote custom service is imported and live (metadata confirmed, CustomerQuoteCollection has real fields) but data reads are blocked by SAP authorization restrictions for the SDK user (RBAM_ERROR) - needs broader permissions granted on this tenant before it can be extracted"),
     ObjectSpec(63, "Sales", "Transaction", "Sales Orders", True, "sale.order", "sale_order", "built", "REAL DATA: khsalesorder custom service, 196 orders, 263 lines. Partner resolved via BuyerPartyCollection (195/196 resolved)",

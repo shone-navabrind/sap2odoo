@@ -26,12 +26,12 @@ Think of it as three steps:
 | | Count |
 |---|---|
 | Objects on the client's requirement sheet | **66** (+1 we added: currency exchange rates) |
-| ✅ Done — real data extracted and converted | **36** |
-| ⏳ Not done — no usable SAP source found yet | **17** |
+| ✅ Done — real data extracted and converted | **39** |
+| ⏳ Not done — no usable SAP source found yet | **14** |
 | 🚫 Impossible — this SAP system has no such data | **14** |
 | **Mandatory objects done** | **19 of 21** |
 | Records pulled out of SAP | **256,137** |
-| Records written into Odoo import files | **13,963** (43 files) |
+| Records written into Odoo import files | **14,198** (46 files) |
 | SAP entity sets extracted | **376** |
 | SAP data fields examined | **2,452** |
 

@@ -40,6 +40,13 @@ def main():
         except Exception:
             logger.exception("FAILED transform: %s", label)
 
+    logger.info("=== Stage 2b: full-column CSV export -> output_full_csv/ ===")
+    try:
+        from src.export_full_csv import main as export_full_csv
+        export_full_csv()
+    except Exception:
+        logger.exception("FAILED full-column CSV export (output_odoo/ is unaffected)")
+
     logger.info("=== Stage 3: validate against the 66-object registry ===")
     rows = validate()
     covered = [r for r in rows if r[2]]

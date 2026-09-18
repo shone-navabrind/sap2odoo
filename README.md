@@ -15,11 +15,11 @@ import into Odoo.
 | Find a SAP data source by name — every entity set the tenant publishes | `SERVICE_CATALOG.csv` (1485 rows) |
 | Understand the code architecture and SAP quirks | `CLAUDE.md` |
 
-**Current state:** 36 of 67 objects done (**19 of 21 mandatory**), 256,137 records pulled from SAP
-across 376 entity sets, 13,963 rows written to 43 Odoo import files. 38 of the 47 custom SAP
-service files are imported — `SAP_IMPORT_PLAN.md` lists the 9 remaining, the 6 blocked by SAP
-authorisation, and the 1 broken on SAP's side. All numbers are regenerated from live data on
-every run — see `DATA_MIGRATION_GUIDE.md` §11 to reproduce them yourself.
+**Current state:** 39 of 67 objects done (**19 of 21 mandatory**), 256,137 records pulled from SAP
+across 376 entity sets, 14,198 rows written to 46 Odoo import files, plus a full-column export of
+all 3,225 SAP columns (see below). 38 of the 47 custom SAP service files are imported —
+`SAP_IMPORT_PLAN.md` lists the 9 remaining, the 6 blocked by SAP authorisation, and the 1 broken
+on SAP's side. All numbers are regenerated from live data on every run.
 
 ## Setup
 
@@ -96,6 +96,49 @@ registry status to `built`.
 | `python -m src.coverage_gap` | Live entity sets never pulled + SAP fields never mapped |
 | `python -m src.probe_gl_accounts` | Which reports actually return G/L accounts |
 | `python -m src.import_plan` | Regenerate `SAP_IMPORT_PLAN.md` |
+| `python -m src.export_full_csv` | Every SAP column to CSV in `output_full_csv/` (see above) |
+
+## Full-column export (`output_full_csv/`)
+
+`output_odoo/` deliberately contains only the fields that map onto a standard Odoo field. Of the
+~3,200 columns SAP returns, most have no standard Odoo home — so they would be silently dropped.
+`output_full_csv/` is the answer to that: **every column of every SAP entity set, as CSV.**
+
+```bash
+python -m src.export_full_csv      # reads output_raw/ only, no SAP calls, safe to re-run
+```
+
+| Path | What it is |
+|---|---|
+| `entities/<service>__<EntitySet>.csv` | One file per SAP entity set, one row per SAP record, **every column**. A direct transcription of the raw JSON — this is the guarantee nothing was dropped. |
+| `objects/<service>.csv` | The convenience view: each service's root entity widened with its one-to-one children, child columns prefixed `<Child>.<Field>`. |
+| `_INDEX.csv` | One row per entity set — rows, columns, whether any Odoo transform reads it, which Odoo file it feeds, and whether it was merged into an object file or left standalone (with the reason). |
+
+Current output: **376 entity CSVs (256,137 rows, 3,225 columns), 26 object CSVs.**
+**276 of the 376 entity sets are not read by any Odoo transform** — that data exists only here.
+
+### Using it to populate Odoo custom fields
+
+Where a record corresponds one-to-one with an Odoo record, both layouts carry an
+**`odoo_external_id`** column holding the same external ID as the matching `output_odoo/` file.
+So the workflow is:
+
+1. Import `output_odoo/*.csv` as normal — these create the records.
+2. Create the custom fields you want in Odoo.
+3. Import the matching `output_full_csv/objects/<service>.csv`, mapping `odoo_external_id` to
+   *External ID* and each extra SAP column to its custom field. Odoo updates the existing
+   records rather than creating duplicates.
+
+Verified end to end: `objects/vmumaterial.csv` widens Products from 18 to 130 columns and its
+3,058 external IDs all match `product_template.csv`; `objects/khcustomer.csv` +
+`objects/khsupplier.csv` cover all 288 IDs in `res_partner.csv`.
+
+**Children with several rows per parent are deliberately not merged** into the object files —
+flattening them would either duplicate the parent row or throw rows away. They stay in
+`entities/` in full, and `_INDEX.csv` says so per entity set.
+
+`output_full_csv/` is gitignored, like `output_raw/` and `output_odoo/` — it is real business
+data. Regenerate it with the command above.
 
 ## Import into Odoo
 

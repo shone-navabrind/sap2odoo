@@ -2,6 +2,7 @@
 venv/
 output_raw/
 output_odoo/
+output_full_csv/
 logs/*.log
 __pycache__/
 *.pyc

@@ -124,7 +124,16 @@ earlier version pre-selected ~9 fields per entity by hand and missed ~95 real, u
 and writes Odoo-ready CSVs to `output_odoo/*.csv`, using real column names confirmed present in
 the raw dumps.
 
-**`python -m src.main`** runs both stages plus a validation pass against the registry, in order.
+**Stage 2b — `python -m src.export_full_csv`** writes EVERY column of every entity set to
+`output_full_csv/`, because Stage 2 maps only the fields Odoo has a standard home for - roughly
+a tenth of the ~3,225 columns SAP returns. `entities/` is a lossless one-CSV-per-entity-set
+transcription; `objects/` widens each service's root entity with its one-to-one children;
+`_INDEX.csv` says what is in each and which of it no Odoo transform reads (currently 275 of 376
+entity sets). Where a record maps one-to-one to an Odoo record the CSVs carry an
+`odoo_external_id` column matching `output_odoo/`, so extra columns can be loaded onto
+already-imported records as custom fields. Reads only `output_raw/`; no SAP calls.
+
+**`python -m src.main`** runs all stages plus a validation pass against the registry, in order.
 
 Why split them: re-running a transform after fixing a mapping bug doesn't require re-hitting SAP
 (slow, chunked, rate-sensitive calls); and the raw dumps are themselves a useful audit trail of
@@ -194,7 +203,7 @@ the catch-all, and re-run `snapshot_metadata` rather than hand-capturing curl ou
 
 ## Odoo output today (`output_odoo/`)
 
-**43 files, 13,963 rows.** The authoritative, always-current list is `CONSOLIDATED_STATUS.csv`
+**46 files, 14,198 rows.** The authoritative, always-current list is `CONSOLIDATED_STATUS.csv`
 (one row per SAP API call) and `PROJECT_STATUS.csv` (one row per sheet object) - both regenerated
 from disk on every run. Highlights rather than a duplicate of those:
 
@@ -256,7 +265,7 @@ matches 0 of 44, on the first 32 characters matches 44 of 44. `_join_by_parent()
 ## Registry validation (`python -m src.validate`)
 
 Cross-checks `src/registry.py`'s 66+1 objects against what's actually in `output_odoo/`. Current
-state: **36/67 objects have real data, including 19 of the 21 mandatory ones.** 17 objects have a
+state: **39/67 objects have real data, including 19 of the 21 mandatory ones.** 14 objects have a
 decided Odoo target but no confirmed SAP source yet (`pending_mapping`); most are waiting on one
 of the 9 custom services still to be imported — `SAP_IMPORT_PLAN.md` says exactly which file
 closes which object. 14 objects (Engineering/PLM, Maintenance/PM, Quality/QM) are
