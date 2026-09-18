@@ -110,9 +110,11 @@ python -m src.export_full_csv      # reads output_raw/ only, no SAP calls, safe 
 
 | Path | What it is |
 |---|---|
+| `odoo_models/<odoo_model_file>.csv` | **Recommended full export.** The same model-named files and Odoo import columns as `output_odoo/`, followed by every SAP root/child field that can be linked safely to that Odoo record. One-to-many child values are JSON arrays, so nothing is dropped or duplicated. |
 | `entities/<service>__<EntitySet>.csv` | One file per SAP entity set, one row per SAP record, **every column**. A direct transcription of the raw JSON — this is the guarantee nothing was dropped. |
 | `objects/<service>.csv` | The convenience view: each service's root entity widened with its one-to-one children, child columns prefixed `<Child>.<Field>`. |
 | `_INDEX.csv` | One row per entity set — rows, columns, whether any Odoo transform reads it, which Odoo file it feeds, and whether it was merged into an object file or left standalone (with the reason). |
+| `_MODEL_INDEX.csv` | One row per Odoo-model file — source lineage, column count, and direct SAP-link coverage. |
 
 Current output: **376 entity CSVs (256,137 rows, 3,225 columns), 26 object CSVs.**
 **276 of the 376 entity sets are not read by any Odoo transform** — that data exists only here.
@@ -125,9 +127,10 @@ So the workflow is:
 
 1. Import `output_odoo/*.csv` as normal — these create the records.
 2. Create the custom fields you want in Odoo.
-3. Import the matching `output_full_csv/objects/<service>.csv`, mapping `odoo_external_id` to
-   *External ID* and each extra SAP column to its custom field. Odoo updates the existing
-   records rather than creating duplicates.
+3. Use the matching `output_full_csv/odoo_models/<odoo_model_file>.csv`, mapping `id` to
+   *External ID* and each `sap__...` column to its custom field. Odoo updates the existing
+   records rather than creating duplicates. Use `entities/` only when you need an SAP child
+   collection as its own Odoo model.
 
 Verified end to end: `objects/vmumaterial.csv` widens Products from 18 to 130 columns and its
 3,058 external IDs all match `product_template.csv`; `objects/khcustomer.csv` +

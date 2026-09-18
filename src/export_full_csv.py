@@ -12,6 +12,12 @@ Nothing here re-reads SAP. It works entirely from output_raw/*.json, so it is ch
 
 Output layout (output_full_csv/):
 
+    odoo_models/<odoo_model_file>.csv
+            The recommended business-facing layout.  It mirrors output_odoo/'s model-named files and
+            starts with the normal Odoo import columns, followed by the complete linked SAP source
+            fields.  One-to-many child values are JSON arrays, preserving every value without
+            duplicating an Odoo record.
+
   entities/<service>__<EntitySet>.csv
       One file per SAP entity set, one row per SAP record, EVERY column. A direct, lossless
       transcription of the raw JSON - this is the guarantee that nothing was dropped.
@@ -26,6 +32,9 @@ Output layout (output_full_csv/):
       One row per entity set: where it came from, how many rows and columns, whether any Odoo
       transform reads it, which Odoo file it feeds, and whether it was merged into an object
       file or left standalone (with the reason).
+
+    _MODEL_INDEX.csv
+            One row per odoo_models/ CSV, recording source lineage and direct link coverage.
 
 Where the Odoo external ID for a record can be derived, both layouts carry an
 `odoo_external_id` column, so a file can be matched row-for-row against the corresponding
@@ -49,7 +58,9 @@ RAW_DIR = "output_raw"
 OUT_DIR = "output_full_csv"
 ENTITY_DIR = os.path.join(OUT_DIR, "entities")
 OBJECT_DIR = os.path.join(OUT_DIR, "objects")
+MODEL_DIR = os.path.join(OUT_DIR, "odoo_models")
 INDEX_PATH = os.path.join(OUT_DIR, "_INDEX.csv")
+MODEL_INDEX_PATH = os.path.join(OUT_DIR, "_MODEL_INDEX.csv")
 
 # (service, entity_set) -> (external-ID prefix, field holding the key)
 # Mirrors the external IDs transform_odoo.py writes, so a full-column file can be joined to the
@@ -76,6 +87,68 @@ ODOO_KEY = {
     ("khsalesarrangement", "SalesArrangementCollection"): ("sap_pricelist", "ObjectID"),
     ("khprofitcentre", "ProfitCentreCollection"): ("sap_pc", "ID"),
     ("costcentre", "CostCentreCollection"): ("sap_cost_center", "UUID"),
+}
+
+# Odoo CSV filename -> root SAP records that create its rows.  This is deliberately separate
+# from ODOO_KEY: ODOO_KEY annotates a source entity, whereas this table records the exact
+# external-ID convention used by the transform.  Keeping the lineage here prevents the old
+# service-named convenience files from being the only way to access complete source columns.
+#
+# A root's own fields are copied as scalar columns.  Every same-service child that points to
+# that root through ParentObjectID is represented too; repeating children are JSON arrays in a
+# single cell, so no parent is duplicated and no child value is discarded.
+MODEL_ROOTS = {
+    "account_account.csv": [
+        ("fin_costandrevenue_analytics.svc", "RPFINCACU04_Q0002QueryResults", "sap_account", ("CGLACCT",)),
+        ("fin_audit_analytics.svc", "RPFINGLAU02_Q0002QueryResults", "sap_account", ("CGLACCT",)),
+        ("fin_generalledger_analytics.svc", "RPFINFXAU05_Q0001QueryResults", "sap_account", ("CGLACCT",)),
+        ("fin_generalledger_analytics.svc", "RPFINFCDU02_Q0001QueryResults", "sap_account", ("CGLACCT",)),
+        ("fin_audit_analytics.svc", "RPFININVU03_Q0001QueryResults", "sap_account", ("CGLACCT",)),
+        ("fin_audit_analytics.svc", "RPFINGLAU02_Q0003QueryResults", "sap_account", ("CGLACCT",)),
+    ],
+    "res_partner.csv": [("khcustomer", "CustomerCollection", "sap_bp", ("InternalID",)),
+                        ("khsupplier", "SupplierCollection", "sap_bp", ("InternalID",))],
+    "purchase_order.csv": [("khpurchaseorder", "PurchaseOrderCollection", "sap_po", ("ObjectID",))],
+    "purchase_order_rfq.csv": [("khpurchaseorder", "PurchaseOrderCollection", "sap_rfq", ("ID", "ObjectID"))],
+    "purchase_order_line.csv": [("khpurchaseorder", "ItemCollection", "sap_po_item", ("ObjectID",))],
+    "sale_order.csv": [("khsalesorder", "SalesOrderCollection", "sap_so", ("ObjectID",))],
+    "sale_order_line.csv": [("khsalesorder", "ItemCollection", "sap_so_item", ("ObjectID",))],
+    "account_move_customer_invoice.csv": [("khcustomerinvoice", "CustomerInvoiceCollection", "sap_cinv", ("ObjectID",))],
+    "account_move_customer_invoice_line.csv": [("khcustomerinvoice", "ItemCollection", "sap_cinv_item", ("ObjectID",))],
+    "account_move_vendor_bill.csv": [("khsupplierinvoice", "SupplierInvoiceCollection", "sap_vinv", ("ObjectID",))],
+    "account_move_open_vendor.csv": [("khsupplierinvoice", "SupplierInvoiceCollection", "sap_vinv", ("ObjectID",))],
+    "account_move_vendor_bill_line.csv": [("khsupplierinvoice", "ItemCollection", "sap_vinv_item", ("ObjectID",))],
+    "account_move_vendor_credit.csv": [("khsupplierinvoice", "SupplierInvoiceCollection", "sap_vcredit", ("ID", "ObjectID"))],
+    "account_move_credit_note.csv": [("khcustomerinvoicerequest", "CustomerInvoiceRequestCollection", "sap_ccredit", ("BaseBusinessTransactionDocumentID", "ObjectID"))],
+    "account_move_open_customer.csv": [("fin_receivablesar_analytics.svc", "RPFINDUEU04_Q0007QueryResults", "sap_openinv", ("CIM_B_BTD_ID",))],
+    "account_payment_term.csv": [("khcustomerinvoice", "CashDiscountTermsCollection", "sap_payterm", ("PaymentTermsCode",)),
+                                 ("khsupplierinvoice", "CashDiscountTermsCollection", "sap_payterm", ("Code",))],
+    "product_template.csv": [("vmumaterial", "MaterialCollection", "sap_prod", ("InternalID", "ObjectID")),
+                             ("khserviceproduct", "ServiceProductCollection", "sap_prod", ("InternalID",))],
+    "product_category.csv": [("vmumaterial", "ProductCategoryCollection", "sap_prodcat", ("ProductCategoryInternalID",)),
+                             ("khserviceproduct", "ProductCategoryCollection", "sap_prodcat", ("ProductCategoryInternalID",))],
+    "crm_lead.csv": [("khopportunity", "OpportunityCollection", "sap_opp", ("ObjectID",))],
+    "crm_lead_open.csv": [("khopportunity", "OpportunityCollection", "sap_opp", ("ObjectID",))],
+    "crm_lead_closed.csv": [("khopportunity", "OpportunityCollection", "sap_opp", ("ObjectID",))],
+    "res_users.csv": [("khemployee", "EmployeeCollection", "sap_emp", ("ObjectID",))],
+    "res_partner_contact.csv": [("khcustomer", "RelationshipCollection", "sap_contact", ("InternalID2",))],
+    "res_bank.csv": [("khhousebankaccount", "BankDirectoryEntryCollection", "sap_bank", ("OrganisationFormattedName",))],
+    "account_bank_statement.csv": [("khhousebankstatement", "HouseBankStatementCollection", "sap_bstmt", ("ObjectID",))],
+    "account_payment.csv": [("khpayment", "PaymentCollection", "sap_pay", ("ObjectID",))],
+    "product_pricelist.csv": [("khsalesarrangement", "SalesArrangementCollection", "sap_pricelist", ("ObjectID",))],
+    "stock_picking_delivery.csv": [("khoutbounddelivery", "OutboundDeliveryCollection", "sap_delivery", ("ObjectID",))],
+    "stock_picking_delivery_line.csv": [("khoutbounddelivery", "ItemCollection", "sap_delivery_item", ("ObjectID",))],
+    "mrp_production.csv": [("khproductionorder", "ProductionOrderCollection", "sap_mo", ("ObjectID",))],
+    "mrp_workcenter.csv": [("khproductionorder", "OperationCollection", "sap_wc", ("ResourceID",))],
+    "mrp_production_history.csv": [("khproductionorder", "ProductionOrderCollection", "sap_mo_hist", ("ID", "ObjectID"))],
+    "account_analytic_account.csv": [("khprofitcentre", "ProfitCentreCollection", "sap_pc", ("ID",))],
+    "account_analytic_account_cc.csv": [("costcentre", "CostCentreCollection", "sap_cost_center", ("UUID", "ObjectID", "ID"))],
+    "stock_location.csv": [("khlocation", "LocationCollection", "sap_loc", ("ObjectID",))],
+    "stock_warehouse.csv": [("khlocation", "LocationCollection", "sap_wh", ("ObjectID",))],
+    "stock_picking_transfer.csv": [("khinbounddelivery", "InboundDeliveryCollection", "sap_inbdel", ("ID",))],
+    "stock_picking_transfer_line.csv": [("khinbounddelivery", "ItemCollection", "sap_inbdel_item", ("ObjectID",))],
+    "stock_move_history.csv": [("khgoodsandserviceacknowledgement", "ItemCollection", "sap_move", ("ObjectID",))],
+    "uom_uom.csv": [("vmumaterial", "MaterialBaseMeasureUnitCodeCollection", "sap_uom", ("Code",))],
 }
 
 
@@ -238,6 +311,129 @@ def write_object_csvs(entities_by_service):
     return written, decisions
 
 
+def _sap_column(entity, field):
+    """A collision-proof, import-friendly source column name."""
+    return f"sap__{entity['service']}__{entity['entity_set']}__{field}"
+
+
+def _source_entity(entities_by_service, service, entity_set):
+    return next((entity for entity in entities_by_service.get(service, [])
+                 if entity["entity_set"] == entity_set), None)
+
+
+def _root_external_id(prefix, key_fields, row):
+    for field in key_fields:
+        value = row.get(field)
+        if value:
+            return external_id(prefix, value)
+    return ""
+
+
+def _model_fieldnames(odoo_fields, roots, entities_by_service):
+    """Return Odoo fields followed by every SAP field that can be linked to a model row."""
+    fields = list(odoo_fields)
+    seen = set(fields)
+    for service, root_name, _, _ in roots:
+        root = _source_entity(entities_by_service, service, root_name)
+        if not root:
+            continue
+        for entity in entities_by_service.get(service, []):
+            # The root itself and ParentObjectID children are linkable.  Other entity sets stay
+            # in entities/ to avoid attaching unrelated records to every Odoo row.
+            if entity is not root and not any(r.get("ParentObjectID") for r in entity["rows"]):
+                continue
+            for field in entity["fields"]:
+                column = _sap_column(entity, field)
+                if column not in seen:
+                    fields.append(column)
+                    seen.add(column)
+    return fields
+
+
+def write_odoo_model_csvs(entities, entities_by_service):
+    """
+    Write the business-facing full export: the same model-named files as output_odoo/, with
+    Odoo import columns first and every safely linkable SAP column after them.
+
+    Values from a one-to-many SAP child are a JSON array in one cell.  This preserves all child
+    rows while retaining the Odoo model's one-row-per-record grain.  Raw entities that cannot
+    be linked unambiguously remain available in entities/, the lossless audit layout.
+    """
+    os.makedirs(MODEL_DIR, exist_ok=True)
+    for filename in os.listdir(MODEL_DIR):
+        if filename.endswith(".csv"):
+            os.remove(os.path.join(MODEL_DIR, filename))
+
+    results = []
+    for filename in sorted(os.listdir("output_odoo")):
+        if not filename.endswith(".csv"):
+            continue
+        with open(os.path.join("output_odoo", filename), newline="", encoding="utf-8") as f:
+            reader = csv.DictReader(f)
+            odoo_fields = reader.fieldnames or []
+            odoo_rows = list(reader)
+
+        roots = MODEL_ROOTS.get(filename, [])
+        fieldnames = _model_fieldnames(odoo_fields, roots, entities_by_service)
+        output_rows = [dict(row) for row in odoo_rows]
+        matched_ids = set()
+
+        for service, root_name, prefix, key_fields in roots:
+            root = _source_entity(entities_by_service, service, root_name)
+            if not root or not key_fields:
+                continue
+            roots_by_id = {
+                _root_external_id(prefix, key_fields, row): row
+                for row in root["rows"]
+                if _root_external_id(prefix, key_fields, row)
+            }
+            children = [entity for entity in entities_by_service.get(service, []) if entity is not root]
+
+            for out in output_rows:
+                source_row = roots_by_id.get(out.get("id", ""))
+                if not source_row:
+                    continue
+                matched_ids.add(out["id"])
+                for field in root["fields"]:
+                    out[_sap_column(root, field)] = _cell(source_row.get(field))
+
+                object_id = source_row.get("ObjectID")
+                if not object_id:
+                    continue
+                for child in children:
+                    child_rows = [row for row in child["rows"]
+                                  if _parent_key(row) == object_id]
+                    if not child_rows:
+                        continue
+                    for field in child["fields"]:
+                        values = [_cell(row.get(field)) for row in child_rows]
+                        # Scalar for a genuine 1:1 child, JSON array for all multi-row children.
+                        out[_sap_column(child, field)] = values[0] if len(values) == 1 else json.dumps(values)
+
+        path = os.path.join(MODEL_DIR, filename)
+        with open(path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
+            writer.writeheader()
+            writer.writerows(output_rows)
+        results.append({
+            "Odoo model CSV": f"odoo_models/{filename}",
+            "Rows": len(output_rows),
+            "Odoo columns": len(odoo_fields),
+            "All-column export columns": len(fieldnames),
+            "Root SAP source(s)": " + ".join(f"{service}/{entity_set}" for service, entity_set, _, _ in roots),
+            "Rows linked to SAP": len(matched_ids),
+            "Rows without direct SAP lineage": len(output_rows) - len(matched_ids),
+            "Notes": ("SAP child fields use JSON arrays where a record has several child rows; "
+                      "unlinked entities remain losslessly available in entities/"),
+        })
+
+    with open(MODEL_INDEX_PATH, "w", newline="", encoding="utf-8") as f:
+        writer = csv.DictWriter(f, fieldnames=list(results[0]))
+        writer.writeheader()
+        writer.writerows(results)
+    return results
+
+
 def write_index(entities, decisions):
     """One row per entity set, so the folder is navigable without opening 376 files."""
     from src.consolidated_report import _read_raw  # noqa: F401  (kept for symmetry of sources)
@@ -302,6 +498,7 @@ def main():
     for entity in entities:
         by_service.setdefault(entity["service"], []).append(entity)
     object_files, decisions = write_object_csvs(by_service)
+    model_files = write_odoo_model_csvs(entities, by_service)
 
     index_rows = write_index(entities, decisions)
 
@@ -314,6 +511,9 @@ def main():
                 len(entity_files), total_rows, total_cols)
     logger.info("  objects/   %d CSVs - root entity widened with its one-to-one children",
                 len(object_files))
+    logger.info("  odoo_models/ %d CSVs - output_odoo-style model files with linked SAP columns",
+                len(model_files))
+    logger.info("  _MODEL_INDEX.csv - per-model lineage, columns, and link coverage")
     logger.info("  _INDEX.csv %d rows - what is in each file and why", len(index_rows))
     logger.info("")
     logger.info("  %d of %d entity sets are NOT read by any Odoo transform - that data exists "
