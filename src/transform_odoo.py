@@ -23,23 +23,33 @@ ODOO_DIR = "output_odoo"
 
 def load_raw(entity_set, service_hint=None):
     """
-    Load a raw JSON file by entity set name. Several services share entity set names
-    (ItemCollection, BuyerPartyCollection, etc.) - pass service_hint (the service's basename,
-    e.g. "khsalesorder") to disambiguate. Without a hint, the first filename match wins, which
-    is only safe when the entity set name is unique across all of SOURCES.
+    Load a raw JSON file by entity set name, optionally narrowed to one service.
+
+    Entity set names are NOT unique across services - ItemCollection exists on nine of them,
+    SellerPartyCollection on three, SalesCollection and SupplierCollection on two each. This
+    used to return whichever file os.listdir happened to yield first, which silently binds a
+    transform to the wrong service the moment a new service is imported. It now raises instead,
+    so the failure is a loud error at run time rather than wrong numbers in a CSV.
     """
-    for filename in os.listdir(RAW_DIR):
-        if not filename.endswith(f"__{entity_set}.json"):
-            continue
-        if service_hint and not filename.startswith(f"{service_hint}__"):
-            continue
-        with open(os.path.join(RAW_DIR, filename), encoding="utf-8") as f:
-            return json.load(f)
-    raise FileNotFoundError(
-        f"No raw file for entity set '{entity_set}'"
-        + (f" (service_hint={service_hint!r})" if service_hint else "")
-        + f" in {RAW_DIR}/ - run `python -m src.extract_raw` first."
+    matches = sorted(
+        f for f in os.listdir(RAW_DIR)
+        if f.endswith(f"__{entity_set}.json")
+        and (not service_hint or f.startswith(f"{service_hint}__"))
     )
+    if not matches:
+        raise FileNotFoundError(
+            f"No raw file for entity set '{entity_set}'"
+            + (f" (service_hint={service_hint!r})" if service_hint else "")
+            + f" in {RAW_DIR}/ - run `python -m src.extract_raw` first."
+        )
+    if len(matches) > 1:
+        raise ValueError(
+            f"Entity set '{entity_set}' exists on {len(matches)} services "
+            f"({', '.join(m.split('__')[0] for m in matches)}). "
+            f"Pass service_hint=... to say which one is meant."
+        )
+    with open(os.path.join(RAW_DIR, matches[0]), encoding="utf-8") as f:
+        return json.load(f)
 
 
 def write_csv(filename, rows, fieldnames):
@@ -67,12 +77,15 @@ PARTNER_BANK_FIELDNAMES = ["id", "partner_id/id", "bank_id/id", "acc_number"]
 CONTACT_FIELDNAMES = ["id", "name", "parent_id/id", "function", "type"]
 ANALYTIC_PLAN_FIELDNAMES = ["id", "name"]
 COST_CENTER_FIELDNAMES = ["id", "name", "code", "plan_id/id"]
+# Odoo requires every analytic account to sit in a plan; cost centers (#6) and profit
+# centres (#7) share this one synthetic plan.
+ANALYTIC_PLAN_EXTERNAL_ID = "sap_analytic_plan_cost_centers"
 
 
 def build_cost_centers():
     """Map ByDesign CostCentreCollection records to Odoo analytic accounts."""
-    cost_centers = load_raw("CostCentreCollection")["rows"]
-    plan_id = "sap_analytic_plan_cost_centers"
+    cost_centers = load_raw("CostCentreCollection", service_hint="costcentre")["rows"]
+    plan_id = ANALYTIC_PLAN_EXTERNAL_ID
 
     plan_rows = [{"id": plan_id, "name": "SAP Cost Centers"}]
     rows = []
@@ -332,7 +345,7 @@ def build_purchase_orders():
     """
     headers = load_raw("PurchaseOrderCollection")["rows"]
     items = load_raw("ItemCollection", service_hint="khpurchaseorder")["rows"]
-    suppliers = load_raw("SupplierCollection")["rows"]
+    suppliers = load_raw("SupplierCollection", service_hint="khpurchaseorder")["rows"]
 
     # SupplierCollection bundles several party roles per PO (3529 rows for 655 POs), so taking
     # the first row picked the wrong party or an empty one 33% of the time. Type-aware
@@ -453,9 +466,9 @@ def build_products():
     valuation_data = load_raw("MaterialValuationDataCollection")["rows"]
     prices = load_raw("ValuationPriceCollection")["rows"]
     texts = load_raw("TextCollection", service_hint="vmumaterial")["rows"]
-    purchasing = load_raw("PurchasingCollection")["rows"]
-    sales = load_raw("SalesCollection")["rows"]
-    categories = load_raw("ProductCategoryCollection")["rows"]
+    purchasing = load_raw("PurchasingCollection", service_hint="vmumaterial")["rows"]
+    sales = load_raw("SalesCollection", service_hint="vmumaterial")["rows"]
+    categories = load_raw("ProductCategoryCollection", service_hint="vmumaterial")["rows"]
     planning = load_raw("PlanningCollection")["rows"]
 
     prices_by_valuation_id = {}
@@ -592,8 +605,10 @@ def _service_product_rows():
             "uom_po_id/id": external_id(
                 "sap_uom", purchase.get("PurchasingMeasureUnitCode") or base_uom)
                 if (purchase.get("PurchasingMeasureUnitCode") or base_uom) else "",
-            # No valuation data for services on this tenant (khserviceproductvaluationdata is
-            # not imported), so no cost price is invented.
+            # khserviceproductvaluationdata IS imported now, and its CostRateCollection joins
+            # cleanly (7/7). Every one of those 7 rates is 0.000000, so writing them would
+            # assert "this service costs nothing" where the truth is "no cost is maintained".
+            # Left blank, like barcode/weight on materials.
             "standard_price": "",
             "purchase_ok": "True" if purchase else "False",
             "sale_ok": "True" if sale else "False",
@@ -821,7 +836,7 @@ def build_supplier_invoices():
 
     headers = load_raw("SupplierInvoiceCollection")["rows"]
     items = load_raw("ItemCollection", service_hint="khsupplierinvoice")["rows"]
-    parties = load_raw("SellerPartyCollection")["rows"]
+    parties = load_raw("SellerPartyCollection", service_hint="khsupplierinvoice")["rows"]
     party_by_doc = _group_by_parent(parties)
 
     header_rows = []
@@ -1689,6 +1704,155 @@ def build_inventory():
 # IdentifiedStock with their material links - see SAP_IMPORT_PLAN.md, priority 1.
 
 
+ANALYTIC_ACCOUNT_FIELDNAMES = ["id", "name", "code", "plan_id/id"]
+
+
+def build_profit_centres():
+    """
+    Sheet object #7 (Analytic Accounts) -> account.analytic.account.
+
+    ByDesign's second analytic dimension alongside cost centers (#6, which already writes
+    account_analytic_account_cc.csv under the same synthetic analytic plan). ProfitCentreCollection
+    carries only ID/ObjectID/UUID; the readable name lives in NameCollection, which is
+    date-versioned - the row whose validity window is open (EndDate far in the future) is the
+    current name.
+    """
+    centres = load_raw("ProfitCentreCollection", service_hint="khprofitcentre")["rows"]
+    names = {}
+    for entry in load_raw("NameCollection", service_hint="khprofitcentre")["rows"]:
+        parent = (entry.get("ParentObjectID") or "")[:32]
+        if parent and entry.get("Name") and parent not in names:
+            names[parent] = entry["Name"]
+
+    rows = []
+    for centre in centres:
+        code = centre.get("ID")
+        if not code:
+            continue
+        rows.append({
+            "id": external_id("sap_pc", code),
+            "name": names.get(centre.get("ObjectID"), code),
+            "code": code,
+            "plan_id/id": ANALYTIC_PLAN_EXTERNAL_ID,
+        })
+    write_csv("account_analytic_account.csv", rows, ANALYTIC_ACCOUNT_FIELDNAMES)
+    return {"account_analytic_account.csv": len(rows)}
+
+
+TRANSFER_HEADER_FIELDNAMES = ["id", "name", "partner_id/id", "scheduled_date", "state", "picking_type_id"]
+TRANSFER_LINE_FIELDNAMES = ["id", "picking_id/id", "product_id/id", "name", "product_uom_qty", "product_uom/id"]
+
+
+def build_stock_transfers():
+    """
+    Sheet object #32 (Stock Transfers) -> stock.picking, the INBOUND side.
+
+    Outbound deliveries were already covered (#64). khinbounddelivery adds what arrives:
+    49 inbound deliveries with 119 items carrying ProductID, and quantities in a separate
+    ItemQuantityCollection keyed on the item's ObjectID.
+
+    picking_type_id is written as Odoo's built-in incoming-picking XML ID rather than an
+    external ID of ours, because the receipt operation type ships with Odoo.
+    """
+    headers = load_raw("InboundDeliveryCollection", service_hint="khinbounddelivery")["rows"]
+    items = load_raw("ItemCollection", service_hint="khinbounddelivery")["rows"]
+    quantities = _group_by_parent(
+        load_raw("ItemQuantityCollection", service_hint="khinbounddelivery")["rows"])
+    senders = _group_by_parent(
+        load_raw("SenderPartyCollection", service_hint="khinbounddelivery")["rows"])
+
+    header_rows, known = [], set()
+    for delivery in headers:
+        object_id = delivery.get("ObjectID")
+        delivery_id = delivery.get("ID")
+        if not (object_id and delivery_id):
+            continue
+        known.add(object_id)
+        party = resolve_party(senders, object_id, prefer="supplier")
+        header_rows.append({
+            "id": external_id("sap_inbdel", delivery_id),
+            "name": delivery_id,
+            "partner_id/id": external_id("sap_bp", party) if party else "",
+            "scheduled_date": parse_sap_date(delivery.get("CreationDateTime")) or "",
+            # DeliveryNoteStatusCodeText "Received" is the only terminal state on this tenant.
+            "state": "done" if delivery.get("DeliveryNoteStatusCodeText") == "Received" else "assigned",
+            "picking_type_id": "stock.picking_type_in",
+        })
+
+    line_rows = []
+    for item in items:
+        parent = item.get("ParentObjectID")
+        if parent not in known:
+            continue
+        quantity_rows = quantities.get(item.get("ObjectID"), [])
+        quantity = next((q.get("Quantity") for q in quantity_rows if q.get("Quantity")), "")
+        unit = next((q.get("UnitCode") for q in quantity_rows if q.get("UnitCode")), "")
+        product_id = item.get("ProductID")
+        line_rows.append({
+            "id": external_id("sap_inbdel_item", item.get("ObjectID")),
+            "picking_id/id": external_id("sap_inbdel", next(
+                h["ID"] for h in headers if h.get("ObjectID") == parent)),
+            "product_id/id": external_id("sap_prod", product_id) if product_id else "",
+            "name": item.get("TypeCodeText") or item.get("ID", ""),
+            "product_uom_qty": quantity,
+            "product_uom/id": external_id("sap_uom", unit) if unit else "",
+        })
+
+    write_csv("stock_picking_transfer.csv", header_rows, TRANSFER_HEADER_FIELDNAMES)
+    write_csv("stock_picking_transfer_line.csv", line_rows, TRANSFER_LINE_FIELDNAMES)
+    return {
+        "stock_picking_transfer.csv": len(header_rows),
+        "stock_picking_transfer_line.csv": len(line_rows),
+    }
+
+
+STOCK_MOVE_FIELDNAMES = [
+    "id", "name", "reference", "product_id/id", "product_uom_qty", "product_uom/id",
+    "date", "state", "partner_id/id",
+]
+
+
+def build_stock_moves():
+    """
+    Sheet object #33 (Stock Moves History) -> stock.move.
+
+    Source is khgoodsandserviceacknowledgement - goods and service receipts against purchase
+    orders - NOT khgoodsandactivityconfirmation, which would have been the more direct
+    inventory-movement source but whose InventoryChangeItemCollection and header both return
+    HTTP 500 from SAP on any request, before and after re-importing the service. This is the
+    movement history that is actually reachable on this tenant: 137 receipts, 238 lines with
+    the product, the delivered quantity and the posting date.
+    """
+    headers = {h["ObjectID"]: h for h in load_raw(
+        "GoodsAndServiceAcknowledgementCollection",
+        service_hint="khgoodsandserviceacknowledgement")["rows"] if h.get("ObjectID")}
+    items = load_raw("ItemCollection", service_hint="khgoodsandserviceacknowledgement")["rows"]
+    sellers = _group_by_parent(load_raw(
+        "SellerPartyCollection", service_hint="khgoodsandserviceacknowledgement")["rows"])
+
+    rows = []
+    for item in items:
+        header = headers.get(item.get("ParentObjectID"))
+        product_id = item.get("ProductID")
+        if not header:
+            continue
+        party = resolve_party(sellers, item.get("ParentObjectID"), prefer="supplier")
+        unit = item.get("DeliveredQuantityUnitCode", "")
+        rows.append({
+            "id": external_id("sap_move", item.get("ObjectID")),
+            "name": item.get("Description") or item.get("ID", ""),
+            "reference": header.get("ID", ""),
+            "product_id/id": external_id("sap_prod", product_id) if product_id else "",
+            "product_uom_qty": item.get("DeliveredQuantity", ""),
+            "product_uom/id": external_id("sap_uom", unit) if unit else "",
+            "date": parse_sap_date(header.get("PostingDate")) or "",
+            "state": "done" if header.get("ReleaseStatusCodeText") == "Released" else "draft",
+            "partner_id/id": external_id("sap_bp", party) if party else "",
+        })
+    write_csv("stock_move_history.csv", rows, STOCK_MOVE_FIELDNAMES)
+    return {"stock_move_history.csv": len(rows)}
+
+
 TRANSFORMS = [
     ("account_account (chart of accounts)", build_chart_of_accounts),
     ("account_analytic_plan / account_analytic_account (cost centers)", build_cost_centers),
@@ -1714,6 +1878,9 @@ TRANSFORMS = [
     ("account_move_open_customer (open customer invoices)", build_open_customer_invoices),
     ("account_tax (taxes)", build_taxes),
     ("account_move credit notes (customer + vendor)", build_credit_notes),
+    ("account_analytic_account (profit centres)", build_profit_centres),
+    ("stock_picking_transfer (inbound deliveries)", build_stock_transfers),
+    ("stock_move_history (goods receipts)", build_stock_moves),
     ("stock_quant_adjustment (inventory balances)", build_inventory),
 ]
 

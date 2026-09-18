@@ -11,28 +11,42 @@ Services -> Import**, then upload the `.xml` file named below from
 `byd-api-samples-main/Custom OData Services/`. After importing, run
 `python -m src.probe_services` to confirm it went live, then `python -m src.main`.
 
-## Current state: 24 of 47 services are live
+## Current state: 38 of 47 services are live
 
 Already imported and returning data:
 
 ```
+  khbusinesspartner
+  khbusinesspartnerrelationship
+  khbusinessresidence
+  khcostcentre
   khcustomer
   khcustomerinvoice
   khcustomerinvoicerequest
   khcustomerquote
+  khcustomerreturn
   khemployee
+  khemployeetime
+  khfunctionalunit
   khgoodsandactivityconfirmation
+  khgoodsandserviceacknowledgement
   khhousebankaccount
   khhousebankstatement
+  khinbounddelivery
+  khlead
   khlocation
   khopportunity
   khoutbounddelivery
+  khoutbounddeliveryrequest
   khpayment
   khproductionorder
+  khprofitcentre
+  khproject
   khpurchaseorder
   khsalesarrangement
   khsalesorder
   khserviceproduct
+  khserviceproductvaluationdata
   khsupplier
   khsupplierinvoice
   tmserviceconfirmation
@@ -42,107 +56,7 @@ Already imported and returning data:
   vmumaterialvaluationdata
 ```
 
-## Priority 2 - Import next - closes an optional object or materially improves an existing one
-
-### `khinbounddelivery.xml`
-
-- **Would complete:** #32 Stock Transfers, #64 Deliveries
-- **Why:** Inbound deliveries (goods receipts): 15 header + 13 item fields, with purchase-order references. Only outbound deliveries are covered today.
-- **Exposes:** 28 entity sets, 171 fields total
-- **Largest entity sets:** `AttachmentCollection` (19 fields), `InboundDeliveryCollection` (15 fields), `ItemCollection` (13 fields), `NoteCollection` (11 fields), `ItemPurchaseOrderReferenceCollection` (9 fields)
-
-### `khproject.xml`
-
-- **Would complete:** #7 Analytic Accounts
-- **Why:** Projects with tasks, teams and service confirmations. The natural Odoo analytic-account source alongside cost centers.
-- **Exposes:** 11 entity sets, 159 fields total
-- **Largest entity sets:** `TaskCollection` (28 fields), `ProjectCollection` (24 fields), `TaskServiceCollection` (20 fields), `TaskServiceConfirmationCollection` (20 fields), `TeamCollection` (17 fields)
-
-### `khcustomerreturn.xml`
-
-- **Would complete:** #66 Credit Notes
-- **Why:** Customer returns - the business event behind most customer credit notes.
-- **Exposes:** 23 entity sets, 131 fields total
-- **Largest entity sets:** `ItemCollection` (22 fields), `CustomerReturnCollection` (17 fields), `CustomerReturnTextCollection` (11 fields), `ItemPartyCollection` (8 fields), `BusinessTransactionDocumentReferenceCollection` (7 fields)
-
-### `khgoodsandserviceacknowledgement.xml`
-
-- **Would complete:** #33 Stock Moves History
-- **Why:** Goods and service receipts against purchase orders (30 item fields) - the purchasing side of stock movement history.
-- **Exposes:** 16 entity sets, 128 fields total
-- **Largest entity sets:** `ItemCollection` (30 fields), `ItemAttachmentFolderCollection` (19 fields), `GoodsAndServiceAcknowledgementCollection` (17 fields), `ItemTextCollection` (11 fields), `DocumentReferenceCollection` (9 fields)
-
-### `khbusinesspartnerrelationship.xml`
-
-- **Would complete:** #17 Customers (MANDATORY), #46 Vendors (MANDATORY)
-- **Why:** Contact persons attached to customers/suppliers, with their own addresses. Contacts are effectively empty today.
-- **Exposes:** 19 entity sets, 101 fields total
-- **Largest entity sets:** `BusinessPartnerRelationshipCollection` (21 fields), `ServicePerformerBusinessAddressCollection` (8 fields), `ContactPersonCollection` (8 fields), `ContactPersonBusinessAddressCollection` (8 fields), `ServicePerformerBusinessAddressInformationCollection` (6 fields)
-
-### `khlead.xml`
-
-- **Would complete:** #19 Activities
-- **Why:** Leads, separate from opportunities, with notes and campaign references.
-- **Exposes:** 20 entity sets, 96 fields total
-- **Largest entity sets:** `AttachmentFolderCollection` (19 fields), `LeadCollection` (15 fields), `NoteCollection` (11 fields), `CampaignReferenceCollection` (6 fields), `ProspectPartyCollection` (5 fields)
-
-### `khprofitcentre.xml`
-
-- **Would complete:** #7 Analytic Accounts
-- **Why:** Profit centers - a second analytic dimension next to cost centers.
-- **Exposes:** 7 entity sets, 25 fields total
-- **Largest entity sets:** `NameCollection` (5 fields), `DefinitionCollection` (5 fields), `ProfitCentreCollection` (3 fields), `CurrentSuperordinateProfitCentreCollection` (3 fields), `SuperordinateProfitCentreNameCollection` (3 fields)
-
-### `khserviceproductvaluationdata.xml`
-
-- **Would complete:** #57 Products (MANDATORY)
-- **Why:** Cost rates for service products, the equivalent of the material valuation data already used for standard_price.
-- **Exposes:** 2 entity sets, 16 fields total
-- **Largest entity sets:** `CostRateCollection` (9 fields), `ServiceProductValuationDataCollection` (7 fields)
-
 ## Priority 3 - Optional - supporting detail, no sheet object depends on it alone
-
-### `khbusinesspartner.xml`
-
-- **Would complete:** #17 Customers (MANDATORY), #46 Vendors (MANDATORY)
-- **Why:** Generic business-partner view; largely redundant once khcustomer and khsupplier are in, but carries roles and notes.
-- **Exposes:** 13 entity sets, 112 fields total
-- **Largest entity sets:** `BusinessPartnerCollection` (25 fields), `PostalAddressCollection` (22 fields), `AttachmentFolderCollection` (19 fields), `NoteCollection` (11 fields), `RoleCollection` (5 fields)
-
-### `khfunctionalunit.xml`
-
-- **Would complete:** #27 Warehouses (MANDATORY), #28 Locations (MANDATORY)
-- **Why:** Organisational units - sales/purchasing/site units behind warehouses.
-- **Exposes:** 21 entity sets, 83 fields total
-- **Largest entity sets:** `AddressInformationPostalAddressCollection` (10 fields), `SuperordinateFunctionalUnitNameCollection` (5 fields), `AddressInformationCollection` (5 fields), `DefinitionCollection` (5 fields), `FunctionalRoleCollection` (5 fields)
-
-### `khemployeetime.xml`
-
-- **Would complete:** no single sheet object - supporting data
-- **Why:** Employee time records (32 item fields). Not on the 66-object sheet.
-- **Exposes:** 4 entity sets, 59 fields total
-- **Largest entity sets:** `EmployeeTimeItemCollection` (32 fields), `EmployeeTimeCollection` (14 fields), `EmployeeTimeTextCollection` (11 fields), `EmployeeTypeCollection` (2 fields)
-
-### `khbusinessresidence.xml`
-
-- **Would complete:** #27 Warehouses (MANDATORY), #28 Locations (MANDATORY)
-- **Why:** Business residences and associated sites (24 fields).
-- **Exposes:** 10 entity sets, 56 fields total
-- **Largest entity sets:** `AssociatedSiteCollection` (24 fields), `StandardIdentificationCollection` (6 fields), `NameCollection` (5 fields), `BusinessResidenceCollection` (3 fields), `DefinitionCollection` (3 fields)
-
-### `khcostcentre.xml`
-
-- **Would complete:** #6 Cost Centers
-- **Why:** Cost centers. Already covered by the standard v1 costcentre service, so this is only worth importing for the extra attribute and hierarchy entity sets.
-- **Exposes:** 14 entity sets, 50 fields total
-- **Largest entity sets:** `AttributesCollection` (7 fields), `NameCollection` (5 fields), `DefinitionCollection` (5 fields), `CostCentreCollection` (3 fields), `CurrentSuperordinateCostCentreCollection` (3 fields)
-
-### `khoutbounddeliveryrequest.xml`
-
-- **Would complete:** #32 Stock Transfers
-- **Why:** Requested outbound deliveries; complements the delivery data already pulled.
-- **Exposes:** 9 entity sets, 49 fields total
-- **Largest entity sets:** `ItemCollection` (20 fields), `ArrivalPeriodCollection` (6 fields), `OutboundDeliveryRequestCollection` (4 fields), `RequestedQuantityCollection` (4 fields), `OpenQuantityCollection` (4 fields)
 
 ### `khcompany.xml`
 
@@ -229,11 +143,22 @@ These services **are already imported and live**, but every data read returns
 `RBAM_ERROR: Not Authorized: Check Authorization Restriction for the User`. The fix is an SAP
 role change for the technical user, not another import:
 
-| Service | Sheet object | What to grant |
+| Service | Sheet object | Work center the integration user needs |
 |---|---|---|
-| `khcustomerquote` | #62 Quotations | Access to the **Sales Quotes** work center for the integration user |
-| `tmserviceorder` | (service orders) | Access to the **Service Orders** work center |
-| `tmservicerequest` | (service requests) | Access to the **Service Requests** work center |
+| `khcustomerquote` | #62 Quotations | **Sales Quotes** |
+| `khproject` | #7 Analytic Accounts | **Project Management** |
+| `khlead` | #19 Activities | **Leads** |
+| `khcustomerreturn` | #66 Credit Notes | **Customer Returns** |
+| `tmserviceorder` | (service orders) | **Service Orders** |
+| `tmservicerequest` | (service requests) | **Service Requests** |
 
 `tmserviceconfirmation` is live and authorised but every entity set returns 0 rows - there is
 genuinely no service-confirmation data in this tenant.
+
+## Live but broken on SAP's side
+
+`khgoodsandactivityconfirmation` is imported and most of it works, but
+`InventoryChangeItemCollection` and `GoodsAndActivityConfirmationCollection` return
+**HTTP 500 Internal Server Error** from SAP on even a two-row request. Re-importing the file
+did not change it, so this is a fault in SAP's own service implementation rather than
+anything the import or the query can fix - worth raising with SAP support.

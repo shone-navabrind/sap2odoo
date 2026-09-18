@@ -440,6 +440,163 @@ SOURCES = [
     ("sap/byd/odata/cust/v1/khsupplier", "TaxExemptionCollection"),                           # 1 rows, 6 fields
     ("sap/byd/odata/cust/v1/khsupplier", "CurrentDefaultWebSiteCollection"),                  # 1 rows, 3 fields
 
+
+    # =====================================================================================
+    # Third import wave (2026-09-18). The user imported the remaining priority-2 files plus
+    # several priority-3 ones, taking the tenant from 24 to 38 of 47 live custom services.
+    # Every entity set below is one the tenant reports as holding rows.
+    #
+    # Three of the newly imported services return RBAM_ERROR on every data read and so appear
+    # nowhere below - khlead, khproject and khcustomerreturn. They are installed correctly;
+    # the SDK user simply has no authorisation for those work centers. That is an SAP role
+    # change, not an import, and it now blocks six services in total (with khcustomerquote,
+    # tmserviceorder and tmservicerequest).
+    # =====================================================================================
+
+    # --- khbusinesspartner: 10 entity sets with real data ---
+    ("sap/byd/odata/cust/v1/khbusinesspartner", "RoleCollection"),                            # 942 rows, 5 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartner", "BusinessPartnerCollection"),                 # 438 rows, 25 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartner", "CurrentDefaultAddressInformationCollection"),# 398 rows, 4 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartner", "PostalAddressCollection"),                   # 394 rows, 22 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartner", "IdentificationCollection"),                  # 99 rows, 4 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartner", "ConventionalPhoneCollection"),               # 12 rows, 4 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartner", "MobilePhoneCollection"),                     # 12 rows, 4 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartner", "EMailCollection"),                           # 7 rows, 4 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartner", "FormattedAddressCollection"),                # 5 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartner", "WebSiteCollection"),                         # 1 rows, 3 fields
+
+    # --- khbusinesspartnerrelationship: 12 entity sets with real data ---
+    ("sap/byd/odata/cust/v1/khbusinesspartnerrelationship", "FirstBusinessPartnerIdentificationCollection"),# 99 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartnerrelationship", "SecondBusinessPartnerIdentificationCollection"),# 99 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartnerrelationship", "BusinessPartnerRelationshipCollection"),# 36 rows, 21 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartnerrelationship", "ContactPersonCollection"),       # 36 rows, 8 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartnerrelationship", "ContactPersonBusinessAddressInformationCollection"),# 36 rows, 6 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartnerrelationship", "ServicePerformerOrganisationFormattedAddressCollection"),# 5 rows, 2 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartnerrelationship", "ContactPersonOrganisationFormattedAddressCollection"),# 5 rows, 2 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartnerrelationship", "ContactPersonBusinessPhoneCollection"),# 4 rows, 4 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartnerrelationship", "ContactPersonBusinessMobilePhoneCollection"),# 4 rows, 4 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartnerrelationship", "ContactPersonBusinessAddressCollection"),# 1 rows, 8 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartnerrelationship", "ContactPersonBusinessEMailCollection"),# 1 rows, 4 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartnerrelationship", "ContactPersonBusinessCommunicationPreferenceCollection"),# 1 rows, 3 fields
+
+    # --- khbusinessresidence: 8 entity sets with real data ---
+    ("sap/byd/odata/cust/v1/khbusinessresidence", "ProfitCentreNameCollection"),              # 20 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khbusinessresidence", "CurrentProfitCentreAssignmentCollection"), # 19 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khbusinessresidence", "DefinitionCollection"),                    # 11 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khbusinessresidence", "CompanyNameCollection"),                   # 5 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khbusinessresidence", "CurrentCompanyAssignmentCollection"),      # 4 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khbusinessresidence", "NameCollection"),                          # 3 rows, 5 fields
+    ("sap/byd/odata/cust/v1/khbusinessresidence", "AssociatedSiteCollection"),                # 2 rows, 24 fields
+    ("sap/byd/odata/cust/v1/khbusinessresidence", "BusinessResidenceCollection"),             # 2 rows, 3 fields
+
+    # --- khcostcentre: 14 entity sets with real data ---
+    ("sap/byd/odata/cust/v1/khcostcentre", "DefinitionCollection"),                           # 49 rows, 5 fields
+    ("sap/byd/odata/cust/v1/khcostcentre", "ProfitCentreNameCollection"),                     # 20 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khcostcentre", "CurrentProfitCentreAssignmentCollection"),        # 19 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khcostcentre", "NameCollection"),                                 # 15 rows, 5 fields
+    ("sap/byd/odata/cust/v1/khcostcentre", "SuperordinateCostCentreNameCollection"),          # 15 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khcostcentre", "AttributesCollection"),                           # 14 rows, 7 fields
+    ("sap/byd/odata/cust/v1/khcostcentre", "CostCentreCollection"),                           # 14 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khcostcentre", "CurrentSuperordinateCostCentreCollection"),       # 14 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khcostcentre", "CompanyNameCollection"),                          # 5 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khcostcentre", "CurrentCompanyAssignmentCollection"),             # 4 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khcostcentre", "BusinessResidenceNameCollection"),                # 3 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khcostcentre", "ReportingLineUnitNameCollection"),                # 3 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khcostcentre", "CurrentBusinessResidenceAssignmentCollection"),   # 2 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khcostcentre", "CurrentReportingLineUnitAssignmentCollection"),   # 2 rows, 3 fields
+
+    # --- khemployeetime: 3 entity sets with real data ---
+    ("sap/byd/odata/cust/v1/khemployeetime", "EmployeeTypeCollection"),                       # 184 rows, 2 fields
+    ("sap/byd/odata/cust/v1/khemployeetime", "EmployeeTimeItemCollection"),                   # 1 rows, 32 fields
+    ("sap/byd/odata/cust/v1/khemployeetime", "EmployeeTimeCollection"),                       # 1 rows, 14 fields
+
+    # --- khfunctionalunit: 17 entity sets with real data ---
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "FunctionCollection"),                         # 150 rows, 5 fields
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "DefinitionCollection"),                       # 53 rows, 5 fields
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "ProfitCentreNameCollection"),                 # 20 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "CurrentProfitCentreAssignmentCollection"),    # 19 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "SuperordinateFunctionalUnitNameCollection"),  # 17 rows, 5 fields
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "NameCollection"),                             # 17 rows, 5 fields
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "CurrentSuperordinateFunctionalUnitCollection"),# 16 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "FunctionalUnitCollection"),                   # 16 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "CostCentreNameCollection"),                   # 15 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "CurrentCostCentreAssignmentCollection"),      # 14 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "AddressInformationPostalAddressCollection"),  # 5 rows, 10 fields
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "AddressInformationCollection"),               # 5 rows, 5 fields
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "CompanyNameCollection"),                      # 5 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "CurrentCompanyAssignmentCollection"),         # 4 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "FunctionalRoleCollection"),                   # 3 rows, 5 fields
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "BusinessResidenceNameCollection"),            # 3 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "CurrentBusinessResidenceAssignmentCollection"),# 2 rows, 3 fields
+
+    # --- khgoodsandserviceacknowledgement: 13 entity sets with real data ---
+    ("sap/byd/odata/cust/v1/khgoodsandserviceacknowledgement", "SellerPartyNameCollection"),  # 1410 rows, 2 fields
+    ("sap/byd/odata/cust/v1/khgoodsandserviceacknowledgement", "BuyerPartyNameCollection"),   # 1410 rows, 2 fields
+    ("sap/byd/odata/cust/v1/khgoodsandserviceacknowledgement", "ItemRequestorPartyNameCollection"),# 1410 rows, 2 fields
+    ("sap/byd/odata/cust/v1/khgoodsandserviceacknowledgement", "ItemPartyNameCollection"),    # 1410 rows, 2 fields
+    ("sap/byd/odata/cust/v1/khgoodsandserviceacknowledgement", "SellerPartyCollection"),      # 545 rows, 4 fields
+    ("sap/byd/odata/cust/v1/khgoodsandserviceacknowledgement", "BuyerPartyCollection"),       # 545 rows, 4 fields
+    ("sap/byd/odata/cust/v1/khgoodsandserviceacknowledgement", "ItemPurchasingContractReferenceCollection"),# 342 rows, 6 fields
+    ("sap/byd/odata/cust/v1/khgoodsandserviceacknowledgement", "ItemDocumentReferenceCollection"),# 342 rows, 6 fields
+    ("sap/byd/odata/cust/v1/khgoodsandserviceacknowledgement", "ItemPurchaseOrderReferenceCollection"),# 342 rows, 5 fields
+    ("sap/byd/odata/cust/v1/khgoodsandserviceacknowledgement", "ItemPartyCollection"),        # 252 rows, 5 fields
+    ("sap/byd/odata/cust/v1/khgoodsandserviceacknowledgement", "ItemRequestorPartyCollection"),# 252 rows, 4 fields
+    # Header for the goods-receipt items below. The row-count probe hit a transient HTTP 503
+    # ("Metadata...") on this one; a retry returned 137 rows, so it is included.
+    ("sap/byd/odata/cust/v1/khgoodsandserviceacknowledgement", "GoodsAndServiceAcknowledgementCollection"),  # 137 rows, 17 fields
+    ("sap/byd/odata/cust/v1/khgoodsandserviceacknowledgement", "ItemCollection"),             # 238 rows, 30 fields
+    ("sap/byd/odata/cust/v1/khgoodsandserviceacknowledgement", "DocumentReferenceCollection"),# 210 rows, 9 fields
+
+    # --- khinbounddelivery: 24 entity sets with real data ---
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "ShipToPartyFormattedAddressCollection"),     # 1420 rows, 2 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "SenderPartyFormattedAddressCollection"),     # 1420 rows, 2 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "ShipToPartyNameCollection"),                 # 1410 rows, 2 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "SenderPartyNameCollection"),                 # 1410 rows, 2 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "BuyerPartyNameCollection"),                  # 1410 rows, 2 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "FreightForwarderPartyNameCollection"),       # 1410 rows, 2 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "ItemPurchaseOrderReferenceCollection"),      # 407 rows, 9 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "ItemInboundDeliveryRequestReferenceCollection"),# 407 rows, 9 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "ItemSalesOrderReferenceCollection"),         # 407 rows, 9 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "ItemExternalReferenceCollection"),           # 407 rows, 9 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "ItemOutboundDeliveryReferenceCollection"),   # 407 rows, 9 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "ItemBuyerPartyCollection"),                  # 351 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "ItemSellerPartyCollection"),                 # 351 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "ItemCollection"),                            # 119 rows, 13 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "ItemQuantityCollection"),                    # 119 rows, 7 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "ItemDeliveryQuantityCollection"),            # 119 rows, 4 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "ShipToPartyCollection"),                     # 110 rows, 4 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "SenderPartyCollection"),                     # 110 rows, 4 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "BuyerPartyCollection"),                      # 110 rows, 4 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "FreightForwarderPartyCollection"),           # 110 rows, 4 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "ShipToLocationCollection"),                  # 98 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "InboundDeliveryCollection"),                 # 49 rows, 15 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "ShippingPeriodCollection"),                  # 49 rows, 6 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "ArrivalPeriodCollection"),                   # 49 rows, 6 fields
+
+    # --- khoutbounddeliveryrequest: 9 entity sets with real data ---
+    ("sap/byd/odata/cust/v1/khoutbounddeliveryrequest", "ItemBuyerPartyCollection"),          # 915 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khoutbounddeliveryrequest", "ArrivalPeriodCollection"),           # 515 rows, 6 fields
+    ("sap/byd/odata/cust/v1/khoutbounddeliveryrequest", "RequestedQuantityCollection"),       # 366 rows, 4 fields
+    ("sap/byd/odata/cust/v1/khoutbounddeliveryrequest", "OpenQuantityCollection"),            # 366 rows, 4 fields
+    ("sap/byd/odata/cust/v1/khoutbounddeliveryrequest", "ItemCollection"),                    # 183 rows, 20 fields
+    ("sap/byd/odata/cust/v1/khoutbounddeliveryrequest", "ItemScheduleLineCollection"),        # 183 rows, 2 fields
+    ("sap/byd/odata/cust/v1/khoutbounddeliveryrequest", "OutboundDeliveryRequestCollection"), # 146 rows, 4 fields
+    ("sap/byd/odata/cust/v1/khoutbounddeliveryrequest", "ShipFromLocationCollection"),        # 146 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khoutbounddeliveryrequest", "ProductRecipientPartyCollection"),   # 68 rows, 3 fields
+
+    # --- khprofitcentre: 7 entity sets with real data ---
+    ("sap/byd/odata/cust/v1/khprofitcentre", "DefinitionCollection"),                         # 62 rows, 5 fields
+    ("sap/byd/odata/cust/v1/khprofitcentre", "NameCollection"),                               # 20 rows, 5 fields
+    ("sap/byd/odata/cust/v1/khprofitcentre", "SuperordinateProfitCentreNameCollection"),      # 20 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khprofitcentre", "ProfitCentreCollection"),                       # 19 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khprofitcentre", "CurrentSuperordinateProfitCentreCollection"),   # 19 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khprofitcentre", "SegmentNameCollection"),                        # 6 rows, 3 fields
+    ("sap/byd/odata/cust/v1/khprofitcentre", "CurrentSegmentAssignmentCollection"),           # 5 rows, 3 fields
+
+    # --- khserviceproductvaluationdata: 2 entity sets with real data ---
+    ("sap/byd/odata/cust/v1/khserviceproductvaluationdata", "CostRateCollection"),            # 7 rows, 9 fields
+    ("sap/byd/odata/cust/v1/khserviceproductvaluationdata", "ServiceProductValuationDataCollection"),# 7 rows, 7 fields
+
 ]
 
 

@@ -26,13 +26,13 @@ Think of it as three steps:
 | | Count |
 |---|---|
 | Objects on the client's requirement sheet | **66** (+1 we added: currency exchange rates) |
-| ✅ Done — real data extracted and converted | **33** |
-| ⏳ Not done — no usable SAP source found yet | **20** |
+| ✅ Done — real data extracted and converted | **36** |
+| ⏳ Not done — no usable SAP source found yet | **17** |
 | 🚫 Impossible — this SAP system has no such data | **14** |
 | **Mandatory objects done** | **19 of 21** |
-| Records pulled out of SAP | **228,550** |
-| Records written into Odoo import files | **13,538** (39 files) |
-| SAP entity sets extracted | **256** |
+| Records pulled out of SAP | **256,137** |
+| Records written into Odoo import files | **13,963** (43 files) |
+| SAP entity sets extracted | **376** |
 | SAP data fields examined | **2,452** |
 
 > The Odoo record count is lower than the SAP count on purpose. Many SAP records are
@@ -41,37 +41,43 @@ Think of it as three steps:
 
 ### What changed on 2026-09-18
 
-Two rounds of work happened on this date.
+Three rounds of work happened on this date.
 
 **Round 1 — SAP publishes a catalog of its own APIs, and we had not been using it.** A plain
 `GET /sap/byd/odata/` returns every service the login may call. Earlier work assumed no such
 catalog existed and guessed service names (100 guesses, 0 hits). SAP's own Postman example files,
 sitting unopened in the project folder, revealed the catalog endpoint. Result: **1,485 SAP data
-sources catalogued and searchable** (`SERVICE_CATALOG.csv`), and **Chart of Accounts, Taxes and
-Open Customer Invoices** — three mandatory objects previously called impossible — became done.
-225 live data sets that were never being requested are now extracted.
+sources catalogued and searchable** (`SERVICE_CATALOG.csv`), **Chart of Accounts, Taxes and Open
+Customer Invoices** became done, and 225 live data sets that were never being requested got
+extracted.
 
-**Round 2 — the client imported six more SAP service files.** That took the tenant from 18 to 24
-of the 47 available services, and closed or materially improved six objects:
+**Round 2 — six more SAP service files imported (18 → 24 live).** Customers and Vendors were
+rebuilt off proper data tables instead of a report that had been *sampling* some fields; contacts
+went from 0 to 36; Banks moved to SAP's real bank directory; service products appeared in the
+product master for the first time; and Credit Notes (customer and vendor) turned out to need no
+new data at all — they sit inside the ordinary invoice tables behind a type column nothing had
+looked at.
 
-| Object | Before | After |
-|---|---|---|
-| #17 Customers / #46 Vendors *(mandatory)* | 271 partners from a report that **sampled** some fields | **288** partners from plain data tables, no sampling, with addresses, tax numbers and bank accounts |
-| Contact persons | 0 | **36** (new file `res_partner_contact.csv`) |
-| #5 Banks *(mandatory)* | 8 bank names scraped out of customer records | **10** from SAP's real bank directory |
-| #57 Products *(mandatory)* | 3,058 materials | **3,065** — service products were a separate SAP master we could not previously see |
-| #52 Vendor Credit Notes | not done | **9** |
-| #66 Credit Notes | not done | **21** |
+**Round 3 — fourteen more service files imported (24 → 38 live).** Three more objects closed:
 
-The credit notes needed no new data at all: ByDesign has no separate credit-memo table — credit
-memos sit inside the ordinary invoice tables, marked by a type column nothing had looked at.
+| Object | Result |
+|---|---|
+| #7 Analytic Accounts | **19** profit centres, alongside the existing cost centres |
+| #32 Stock Transfers | **49** inbound deliveries, 119 lines — the receipts side, where only outbound existed |
+| #33 Stock Moves History | **238** goods-receipt movements from 137 receipts |
 
-**Still blocked, and why it is not a code problem:** `khgoodsandactivityconfirmation` imported
-successfully, but its two most important tables return **HTTP 500 from SAP itself** on even a
-two-row request. That is a fault in SAP's own service, so Stock Moves (#33) and Lot/Serial (#30)
-stay open despite the import. Worth raising with SAP support or re-importing that one file.
+**What is left is not about importing more files.** Of the 9 services still not imported, none
+closes a sheet object on its own. The real blockers are two different things:
 
----
+- **Six services are imported and live but return "Not Authorized"** for the integration user:
+  `khcustomerquote`, `khproject`, `khlead`, `khcustomerreturn`, `tmserviceorder`,
+  `tmservicerequest`. That is an SAP role change — granting work-center access — not another
+  import. Between them they hold Quotations (#62), project analytic accounts, Leads (#19) and
+  customer returns.
+- **One service is broken inside SAP.** `khgoodsandactivityconfirmation` imported fine and most
+  of it works, but its two inventory-movement tables return HTTP 500 on any request, unchanged
+  after a re-import. That is a fault in SAP's own code. It is why Lot/Serial (#30) is still open;
+  Stock Moves (#33) was rescued via a different service.
 
 ## 2. What "done" actually means
 
@@ -446,56 +452,46 @@ the numbers in this document can be reproduced end to end. The last full run com
 
 ## 12. What has to happen next
 
-Everything below is an action **in SAP**, not in this code. The code side is not the bottleneck.
+Importing more service files is **no longer the main lever**. 38 of the 47 are in, and none of
+the remaining 9 closes a sheet object on its own. Two other things are now blocking.
 
-### A. Import more service definition files
+### A. Grant the integration user six work-center authorisations
 
-**24 of the 47** files in `byd-api-samples-main/Custom OData Services/` are imported. 23 remain.
-`SAP_IMPORT_PLAN.md` lists them all with what each unlocks. The eight worth doing:
+These services are imported and active, but every data read returns
+`RBAM_ERROR: Not Authorized`. This is a role change in SAP, not an import:
 
-| File | Unlocks |
-|---|---|
-| `khbusinesspartnerrelationship.xml` | Contact persons for #17 Customers / #46 Vendors **(mandatory)** |
-| `khinbounddelivery.xml` | #32 Stock Transfers, #64 Deliveries (only outbound is covered today) |
-| `khgoodsandserviceacknowledgement.xml` | #33 Stock Moves History |
-| `khcustomerreturn.xml` | More of #66 Credit Notes |
-| `khproject.xml` | #7 Analytic Accounts |
-| `khprofitcentre.xml` | #7 Analytic Accounts |
-| `khlead.xml` | #19 Activities |
-| `khserviceproductvaluationdata.xml` | Cost rates for the 7 service products in #57 **(mandatory)** |
-
-The other 15 are org-structure and supporting detail, and are not blocking any sheet object on
-their own.
-
-**How:** SAP → **Application and User Management → OData Services → Custom OData Services →
-Import**, upload the `.xml`, then tell us. Note the list screen is paginated — the count in the
-UI is not the whole story. `python -m src.probe_services` asks the tenant directly.
-
-### B. Fix one broken service
-
-`khgoodsandactivityconfirmation` is imported and active, but `InventoryChangeItemCollection` and
-`GoodsAndActivityConfirmationCollection` return **HTTP 500 Internal Server Error** from SAP on
-even a two-row request. Everything else on that service works. Try re-importing the file; if it
-still fails, it is an SAP support issue. This is what blocks Stock Moves (#33) and Lot/Serial (#30).
-
-### C. Grant the integration user three authorisations
-
-Live but returning `RBAM_ERROR: Not Authorized` on every read — a role change, not an import:
-
-| Service | Object | Grant access to |
+| Service | What it would unlock | Work center to grant |
 |---|---|---|
-| `khcustomerquote` | #62 Quotations | the **Sales Quotes** work center |
-| `tmserviceorder` | Service Orders | the **Service Orders** work center |
-| `tmservicerequest` | Service Requests | the **Service Requests** work center |
+| `khcustomerquote` | #62 Quotations | **Sales Quotes** |
+| `khproject` | #7 Analytic Accounts (projects) | **Project Management** |
+| `khlead` | #19 Activities | **Leads** |
+| `khcustomerreturn` | more of #66 Credit Notes | **Customer Returns** |
+| `tmserviceorder` | service orders | **Service Orders** |
+| `tmservicerequest` | service requests | **Service Requests** |
 
-### D. Two decisions only the client can make
+This is the single highest-value action left.
+
+### B. Fix one service that is broken inside SAP
+
+`khgoodsandactivityconfirmation` is imported and most of it works, but
+`InventoryChangeItemCollection` and `GoodsAndActivityConfirmationCollection` return
+**HTTP 500 Internal Server Error** on even a two-row request — unchanged after re-importing.
+That is a fault in SAP's own service code, so it needs SAP support. It is what keeps Lot/Serial
+Numbers (#30) open. (Stock Moves #33 was rescued through a different service.)
+
+### C. Two decisions only the client can make
 
 1. **BOMs (#40, mandatory).** Not available over the API at all — confirmed against all 1,485
    published data sets and all 609 data sets in the service files. Either switch on the PBOM
-   data sources under **Business Configuration → Analytics**, or export BOMs from the SAP screens
-   and hand over a file.
+   data sources under **Business Configuration → Analytics**, or export BOMs from the SAP
+   screens and hand over a file.
 2. **Equipment (#34, mandatory).** ByDesign has no maintenance module. Confirm where this data
    really lives, or agree it is out of scope.
+
+### D. Optional remaining imports
+
+The 9 uninstalled files are supporting detail — org structure, address snapshots, payment file
+registers. `SAP_IMPORT_PLAN.md` lists them. None is blocking a sheet object.
 
 ### E. Nice to have
 

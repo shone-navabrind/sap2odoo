@@ -1,27 +1,333 @@
 [
   {
-    "service": "khcustomer",
-    "entity_set": "CustomerCollection",
-    "count": 44,
-    "field_count": 37
+    "service": "khbusinesspartner",
+    "entity_set": "BusinessPartnerCollection",
+    "count": 438,
+    "field_count": 25
   },
   {
-    "service": "khcustomer",
-    "entity_set": "RelationshipCollection",
-    "count": 36,
-    "field_count": 26
-  },
-  {
-    "service": "khcustomer",
+    "service": "khbusinesspartner",
     "entity_set": "PostalAddressCollection",
-    "count": 44,
+    "count": 394,
     "field_count": 22
   },
   {
-    "service": "khcustomer",
-    "entity_set": "BankDetailsCollection",
-    "count": 8,
-    "field_count": 18
+    "service": "khbusinesspartner",
+    "entity_set": "NoteCollection",
+    "count": 0,
+    "field_count": 11
+  },
+  {
+    "service": "khbusinesspartner",
+    "entity_set": "RoleCollection",
+    "count": 942,
+    "field_count": 5
+  },
+  {
+    "service": "khbusinesspartner",
+    "entity_set": "ConventionalPhoneCollection",
+    "count": 12,
+    "field_count": 4
+  },
+  {
+    "service": "khbusinesspartner",
+    "entity_set": "MobilePhoneCollection",
+    "count": 12,
+    "field_count": 4
+  },
+  {
+    "service": "khbusinesspartner",
+    "entity_set": "FacsimileCollection",
+    "count": 0,
+    "field_count": 4
+  },
+  {
+    "service": "khbusinesspartner",
+    "entity_set": "EMailCollection",
+    "count": 7,
+    "field_count": 4
+  },
+  {
+    "service": "khbusinesspartner",
+    "entity_set": "IdentificationCollection",
+    "count": 99,
+    "field_count": 4
+  },
+  {
+    "service": "khbusinesspartner",
+    "entity_set": "CurrentDefaultAddressInformationCollection",
+    "count": 398,
+    "field_count": 4
+  },
+  {
+    "service": "khbusinesspartner",
+    "entity_set": "WebSiteCollection",
+    "count": 1,
+    "field_count": 3
+  },
+  {
+    "service": "khbusinesspartner",
+    "entity_set": "FormattedAddressCollection",
+    "count": 5,
+    "field_count": 3
+  },
+  {
+    "service": "khbusinesspartnerrelationship",
+    "entity_set": "BusinessPartnerRelationshipCollection",
+    "count": 36,
+    "field_count": 21
+  },
+  {
+    "service": "khbusinesspartnerrelationship",
+    "entity_set": "ServicePerformerBusinessAddressCollection",
+    "count": 0,
+    "field_count": 8
+  },
+  {
+    "service": "khbusinesspartnerrelationship",
+    "entity_set": "ContactPersonCollection",
+    "count": 36,
+    "field_count": 8
+  },
+  {
+    "service": "khbusinesspartnerrelationship",
+    "entity_set": "ContactPersonBusinessAddressCollection",
+    "count": 1,
+    "field_count": 8
+  },
+  {
+    "service": "khbusinesspartnerrelationship",
+    "entity_set": "ServicePerformerBusinessAddressInformationCollection",
+    "count": 0,
+    "field_count": 6
+  },
+  {
+    "service": "khbusinesspartnerrelationship",
+    "entity_set": "ContactPersonBusinessAddressInformationCollection",
+    "count": 36,
+    "field_count": 6
+  },
+  {
+    "service": "khbusinesspartnerrelationship",
+    "entity_set": "ServicePerformerBusinessPhoneCollection",
+    "count": 0,
+    "field_count": 4
+  },
+  {
+    "service": "khbusinesspartnerrelationship",
+    "entity_set": "ServicePerformerBusinessMobilePhoneCollection",
+    "count": 0,
+    "field_count": 4
+  },
+  {
+    "service": "khbusinesspartnerrelationship",
+    "entity_set": "ServicePerformerBusinessEMailCollection",
+    "count": 0,
+    "field_count": 4
+  },
+  {
+    "service": "khbusinesspartnerrelationship",
+    "entity_set": "ContactPersonBusinessPhoneCollection",
+    "count": 4,
+    "field_count": 4
+  },
+  {
+    "service": "khbusinesspartnerrelationship",
+    "entity_set": "ContactPersonBusinessMobilePhoneCollection",
+    "count": 4,
+    "field_count": 4
+  },
+  {
+    "service": "khbusinesspartnerrelationship",
+    "entity_set": "ContactPersonBusinessEMailCollection",
+    "count": 1,
+    "field_count": 4
+  },
+  {
+    "service": "khbusinesspartnerrelationship",
+    "entity_set": "ServicePerformerCollection",
+    "count": 0,
+    "field_count": 4
+  },
+  {
+    "service": "khbusinesspartnerrelationship",
+    "entity_set": "ServicePerformerBusinessCommunicationPreferenceCollection",
+    "count": 0,
+    "field_count": 3
+  },
+  {
+    "service": "khbusinesspartnerrelationship",
+    "entity_set": "ContactPersonBusinessCommunicationPreferenceCollection",
+    "count": 1,
+    "field_count": 3
+  },
+  {
+    "service": "khbusinesspartnerrelationship",
+    "entity_set": "FirstBusinessPartnerIdentificationCollection",
+    "count": 99,
+    "field_count": 3
+  },
+  {
+    "service": "khbusinesspartnerrelationship",
+    "entity_set": "SecondBusinessPartnerIdentificationCollection",
+    "count": 99,
+    "field_count": 3
+  },
+  {
+    "service": "khbusinesspartnerrelationship",
+    "entity_set": "ServicePerformerOrganisationFormattedAddressCollection",
+    "count": 5,
+    "field_count": 2
+  },
+  {
+    "service": "khbusinesspartnerrelationship",
+    "entity_set": "ContactPersonOrganisationFormattedAddressCollection",
+    "count": 5,
+    "field_count": 2
+  },
+  {
+    "service": "khbusinessresidence",
+    "entity_set": "AssociatedSiteCollection",
+    "count": 2,
+    "field_count": 24
+  },
+  {
+    "service": "khbusinessresidence",
+    "entity_set": "StandardIdentificationCollection",
+    "count": 0,
+    "field_count": 6
+  },
+  {
+    "service": "khbusinessresidence",
+    "entity_set": "NameCollection",
+    "count": 3,
+    "field_count": 5
+  },
+  {
+    "service": "khbusinessresidence",
+    "entity_set": "BusinessResidenceCollection",
+    "count": 2,
+    "field_count": 3
+  },
+  {
+    "service": "khbusinessresidence",
+    "entity_set": "DefinitionCollection",
+    "count": 11,
+    "field_count": 3
+  },
+  {
+    "service": "khbusinessresidence",
+    "entity_set": "CurrentCompanyAssignmentCollection",
+    "count": 4,
+    "field_count": 3
+  },
+  {
+    "service": "khbusinessresidence",
+    "entity_set": "CompanyNameCollection",
+    "count": 5,
+    "field_count": 3
+  },
+  {
+    "service": "khbusinessresidence",
+    "entity_set": "CurrentProfitCentreAssignmentCollection",
+    "count": 19,
+    "field_count": 3
+  },
+  {
+    "service": "khbusinessresidence",
+    "entity_set": "ProfitCentreNameCollection",
+    "count": 20,
+    "field_count": 3
+  },
+  {
+    "service": "khbusinessresidence",
+    "entity_set": "SiteStandardIdentificationCollection",
+    "count": 0,
+    "field_count": 3
+  },
+  {
+    "service": "khcostcentre",
+    "entity_set": "AttributesCollection",
+    "count": 14,
+    "field_count": 7
+  },
+  {
+    "service": "khcostcentre",
+    "entity_set": "NameCollection",
+    "count": 15,
+    "field_count": 5
+  },
+  {
+    "service": "khcostcentre",
+    "entity_set": "DefinitionCollection",
+    "count": 49,
+    "field_count": 5
+  },
+  {
+    "service": "khcostcentre",
+    "entity_set": "CostCentreCollection",
+    "count": 14,
+    "field_count": 3
+  },
+  {
+    "service": "khcostcentre",
+    "entity_set": "CurrentSuperordinateCostCentreCollection",
+    "count": 14,
+    "field_count": 3
+  },
+  {
+    "service": "khcostcentre",
+    "entity_set": "SuperordinateCostCentreNameCollection",
+    "count": 15,
+    "field_count": 3
+  },
+  {
+    "service": "khcostcentre",
+    "entity_set": "CurrentProfitCentreAssignmentCollection",
+    "count": 19,
+    "field_count": 3
+  },
+  {
+    "service": "khcostcentre",
+    "entity_set": "ProfitCentreNameCollection",
+    "count": 20,
+    "field_count": 3
+  },
+  {
+    "service": "khcostcentre",
+    "entity_set": "CurrentCompanyAssignmentCollection",
+    "count": 4,
+    "field_count": 3
+  },
+  {
+    "service": "khcostcentre",
+    "entity_set": "CompanyNameCollection",
+    "count": 5,
+    "field_count": 3
+  },
+  {
+    "service": "khcostcentre",
+    "entity_set": "CurrentBusinessResidenceAssignmentCollection",
+    "count": 2,
+    "field_count": 3
+  },
+  {
+    "service": "khcostcentre",
+    "entity_set": "BusinessResidenceNameCollection",
+    "count": 3,
+    "field_count": 3
+  },
+  {
+    "service": "khcostcentre",
+    "entity_set": "CurrentReportingLineUnitAssignmentCollection",
+    "count": 2,
+    "field_count": 3
+  },
+  {
+    "service": "khcostcentre",
+    "entity_set": "ReportingLineUnitNameCollection",
+    "count": 3,
+    "field_count": 3
   },
   {
     "service": "khcustomer",
@@ -37,38 +343,14 @@
   },
   {
     "service": "khcustomer",
-    "entity_set": "AddressUsageCollection",
-    "count": 48,
-    "field_count": 6
-  },
-  {
-    "service": "khcustomer",
     "entity_set": "TaxExemptionCollection",
     "count": 0,
     "field_count": 6
   },
   {
     "service": "khcustomer",
-    "entity_set": "TaxNumberCollection",
-    "count": 34,
-    "field_count": 5
-  },
-  {
-    "service": "khcustomer",
-    "entity_set": "RoleCollection",
-    "count": 62,
-    "field_count": 5
-  },
-  {
-    "service": "khcustomer",
     "entity_set": "IdentificationCollection",
     "count": 0,
-    "field_count": 4
-  },
-  {
-    "service": "khcustomer",
-    "entity_set": "CommunicationPreferenceCollection",
-    "count": 38,
     "field_count": 4
   },
   {
@@ -82,42 +364,6 @@
     "entity_set": "FacsimileCollection",
     "count": 0,
     "field_count": 4
-  },
-  {
-    "service": "khcustomer",
-    "entity_set": "MobilePhoneCollection",
-    "count": 1,
-    "field_count": 4
-  },
-  {
-    "service": "khcustomer",
-    "entity_set": "ConventionalPhoneCollection",
-    "count": 1,
-    "field_count": 4
-  },
-  {
-    "service": "khcustomer",
-    "entity_set": "AddressInformationCollection",
-    "count": 44,
-    "field_count": 4
-  },
-  {
-    "service": "khcustomer",
-    "entity_set": "NationalBankIdentificationCollection",
-    "count": 4,
-    "field_count": 3
-  },
-  {
-    "service": "khcustomer",
-    "entity_set": "WebSiteCollection",
-    "count": 1,
-    "field_count": 3
-  },
-  {
-    "service": "khcustomer",
-    "entity_set": "FormattedAddressCollection",
-    "count": 5,
-    "field_count": 3
   },
   {
     "service": "khcustomerinvoice",
@@ -140,18 +386,6 @@
   },
   {
     "service": "khcustomerinvoicerequest",
-    "entity_set": "CustomerInvoiceRequestCollection",
-    "count": 720,
-    "field_count": 34
-  },
-  {
-    "service": "khcustomerinvoicerequest",
-    "entity_set": "ItemCollection",
-    "count": 887,
-    "field_count": 21
-  },
-  {
-    "service": "khcustomerinvoicerequest",
     "entity_set": "ItemAttachmentFolderCollection",
     "count": null,
     "error": "HTTP 400: {\"error\":{\"code\":\"\",\"message\":{\"lang\":\"en\",\"value\":\"The Data Services Request has been understood but is not supported by the processor\"}}}",
@@ -159,63 +393,9 @@
   },
   {
     "service": "khcustomerinvoicerequest",
-    "entity_set": "ItemBusinessTransactionDocumentReferenceCollection",
-    "count": 414,
-    "field_count": 9
-  },
-  {
-    "service": "khcustomerinvoicerequest",
-    "entity_set": "PaymentControlCollection",
-    "count": 603,
-    "field_count": 7
-  },
-  {
-    "service": "khcustomerinvoicerequest",
     "entity_set": "PaymentControlExternalPaymentCollection",
     "count": 0,
     "field_count": 5
-  },
-  {
-    "service": "khcustomerinvoicerequest",
-    "entity_set": "CashDiscountTermsCollection",
-    "count": 593,
-    "field_count": 5
-  },
-  {
-    "service": "khcustomerinvoicerequest",
-    "entity_set": "SalesUnitPartyCollection",
-    "count": 5755,
-    "field_count": 4
-  },
-  {
-    "service": "khcustomerinvoicerequest",
-    "entity_set": "BuyerPartyNameCollection",
-    "count": 1410,
-    "field_count": 2
-  },
-  {
-    "service": "khcustomerinvoicerequest",
-    "entity_set": "BuyerPartyFormattedAddressCollection",
-    "count": 1420,
-    "field_count": 2
-  },
-  {
-    "service": "khcustomerinvoicerequest",
-    "entity_set": "EmployeeResponsibleNameCollection",
-    "count": 1410,
-    "field_count": 2
-  },
-  {
-    "service": "khcustomerinvoicerequest",
-    "entity_set": "SalesUnitNameCollection",
-    "count": 1410,
-    "field_count": 2
-  },
-  {
-    "service": "khcustomerinvoicerequest",
-    "entity_set": "BillToPartyNameCollection",
-    "count": 1410,
-    "field_count": 2
   },
   {
     "service": "khcustomerquote",
@@ -442,10 +622,322 @@
     "field_count": 2
   },
   {
+    "service": "khcustomerreturn",
+    "entity_set": "ItemCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 22
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "CustomerReturnCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 17
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "CustomerReturnTextCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 11
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "ItemPartyCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 8
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "BusinessTransactionDocumentReferenceCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 7
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "PaymentControlCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 6
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "BillToPartyCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 5
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "BuyerPartyCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 5
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "EmployeeResponsiblePartyCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 5
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "SalesAndServiceBusinessAreaCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 5
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "SalesUnitPartyCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 5
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "ExternalPaymentCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 5
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "PlannedQuantityCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 4
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "ItemSalesOrderReferenceCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 4
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "ItemInboundDeliveryReferenceCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 4
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "ItemCustomerInvoiceReferenceCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 4
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "ItemPartyFormattedAddressCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 2
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "ItemPartyNameCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 2
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "BillToPartyFormattedAddressCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 2
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "BillToPartyNameCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 2
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "BuyerPartyNameCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 2
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "EmployeeResponsiblePartyNameCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 2
+  },
+  {
+    "service": "khcustomerreturn",
+    "entity_set": "SalesUnitPartyNameCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 2
+  },
+  {
     "service": "khemployee",
     "entity_set": "CurrentResponsibleManagerCollection",
     "count": 0,
     "field_count": 9
+  },
+  {
+    "service": "khemployeetime",
+    "entity_set": "EmployeeTimeItemCollection",
+    "count": 1,
+    "field_count": 32
+  },
+  {
+    "service": "khemployeetime",
+    "entity_set": "EmployeeTimeCollection",
+    "count": 1,
+    "field_count": 14
+  },
+  {
+    "service": "khemployeetime",
+    "entity_set": "EmployeeTimeTextCollection",
+    "count": null,
+    "error": "HTTP 500: <HTML><HEAD> <TITLE>500 SAP Internal Server Error</TITLE> </HEAD><BODY> <H1>500 SAP Internal Server Error</H1> ",
+    "field_count": 11
+  },
+  {
+    "service": "khemployeetime",
+    "entity_set": "EmployeeTypeCollection",
+    "count": 184,
+    "field_count": 2
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "AddressInformationPostalAddressCollection",
+    "count": 5,
+    "field_count": 10
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "SuperordinateFunctionalUnitNameCollection",
+    "count": 17,
+    "field_count": 5
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "AddressInformationCollection",
+    "count": 5,
+    "field_count": 5
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "DefinitionCollection",
+    "count": 53,
+    "field_count": 5
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "FunctionalRoleCollection",
+    "count": 3,
+    "field_count": 5
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "FunctionCollection",
+    "count": 150,
+    "field_count": 5
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "NameCollection",
+    "count": 17,
+    "field_count": 5
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "AddressInformationEMailCollection",
+    "count": 0,
+    "field_count": 4
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "ProfitCentreNameCollection",
+    "count": 20,
+    "field_count": 3
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "CurrentProfitCentreAssignmentCollection",
+    "count": 19,
+    "field_count": 3
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "BusinessResidenceNameCollection",
+    "count": 3,
+    "field_count": 3
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "CurrentBusinessResidenceAssignmentCollection",
+    "count": 2,
+    "field_count": 3
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "CurrentSuperordinateFunctionalUnitCollection",
+    "count": 16,
+    "field_count": 3
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "CostCentreNameCollection",
+    "count": 15,
+    "field_count": 3
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "CurrentCostCentreAssignmentCollection",
+    "count": 14,
+    "field_count": 3
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "CompanyNameCollection",
+    "count": 5,
+    "field_count": 3
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "CurrentCompanyAssignmentCollection",
+    "count": 4,
+    "field_count": 3
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "FunctionalUnitDefaultWebSiteCollection",
+    "count": 0,
+    "field_count": 3
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "AddressInformationTelephoneCollection",
+    "count": 0,
+    "field_count": 3
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "AddressInformationFormattedAddressCollection",
+    "count": 0,
+    "field_count": 3
+  },
+  {
+    "service": "khfunctionalunit",
+    "entity_set": "FunctionalUnitCollection",
+    "count": 16,
+    "field_count": 3
   },
   {
     "service": "khgoodsandactivityconfirmation",
@@ -477,56 +969,107 @@
   },
   {
     "service": "khgoodsandactivityconfirmation",
-    "entity_set": "OwnerPartyCollection",
-    "count": 438,
-    "field_count": 9
-  },
-  {
-    "service": "khgoodsandactivityconfirmation",
-    "entity_set": "CustodianPartyCollection",
-    "count": 438,
-    "field_count": 5
-  },
-  {
-    "service": "khgoodsandactivityconfirmation",
-    "entity_set": "ItemChangeQuantityCollection",
-    "count": 2541,
-    "field_count": 4
-  },
-  {
-    "service": "khgoodsandactivityconfirmation",
-    "entity_set": "LogisticsAreaCollection",
-    "count": 16,
-    "field_count": 4
-  },
-  {
-    "service": "khgoodsandactivityconfirmation",
-    "entity_set": "SupplyPlanningAreaCollection",
-    "count": 1,
-    "field_count": 4
-  },
-  {
-    "service": "khgoodsandactivityconfirmation",
-    "entity_set": "IdentifiedStockCollection",
-    "count": 165,
-    "field_count": 3
-  },
-  {
-    "service": "khgoodsandactivityconfirmation",
     "entity_set": "SerialNumberCollection",
     "count": 0,
     "field_count": 3
   },
   {
-    "service": "khgoodsandactivityconfirmation",
-    "entity_set": "LocationCollection",
-    "count": 4,
-    "field_count": 3
+    "service": "khgoodsandserviceacknowledgement",
+    "entity_set": "ItemCollection",
+    "count": 238,
+    "field_count": 30
   },
   {
-    "service": "khgoodsandactivityconfirmation",
-    "entity_set": "PermanentEstablishmentCollection",
-    "count": 2,
+    "service": "khgoodsandserviceacknowledgement",
+    "entity_set": "ItemAttachmentFolderCollection",
+    "count": null,
+    "error": "HTTP 503: {\"error\":{\"code\":\"\",\"message\":{\"lang\":\"en\",\"value\":\"Metadata caching is in progress, retry after some time.\"}}}",
+    "field_count": 19
+  },
+  {
+    "service": "khgoodsandserviceacknowledgement",
+    "entity_set": "GoodsAndServiceAcknowledgementCollection",
+    "count": null,
+    "error": "HTTP 503: {\"error\":{\"code\":\"\",\"message\":{\"lang\":\"en\",\"value\":\"Metadata caching is in progress, retry after some time.\"}}}",
+    "field_count": 17
+  },
+  {
+    "service": "khgoodsandserviceacknowledgement",
+    "entity_set": "ItemTextCollection",
+    "count": null,
+    "error": "HTTP 503: {\"error\":{\"code\":\"\",\"message\":{\"lang\":\"en\",\"value\":\"Metadata caching is in progress, retry after some time.\"}}}",
+    "field_count": 11
+  },
+  {
+    "service": "khgoodsandserviceacknowledgement",
+    "entity_set": "DocumentReferenceCollection",
+    "count": 210,
+    "field_count": 9
+  },
+  {
+    "service": "khgoodsandserviceacknowledgement",
+    "entity_set": "ItemPurchasingContractReferenceCollection",
+    "count": 342,
+    "field_count": 6
+  },
+  {
+    "service": "khgoodsandserviceacknowledgement",
+    "entity_set": "ItemDocumentReferenceCollection",
+    "count": 342,
+    "field_count": 6
+  },
+  {
+    "service": "khgoodsandserviceacknowledgement",
+    "entity_set": "ItemPurchaseOrderReferenceCollection",
+    "count": 342,
+    "field_count": 5
+  },
+  {
+    "service": "khgoodsandserviceacknowledgement",
+    "entity_set": "ItemPartyCollection",
+    "count": 252,
+    "field_count": 5
+  },
+  {
+    "service": "khgoodsandserviceacknowledgement",
+    "entity_set": "SellerPartyCollection",
+    "count": 545,
+    "field_count": 4
+  },
+  {
+    "service": "khgoodsandserviceacknowledgement",
+    "entity_set": "BuyerPartyCollection",
+    "count": 545,
+    "field_count": 4
+  },
+  {
+    "service": "khgoodsandserviceacknowledgement",
+    "entity_set": "ItemRequestorPartyCollection",
+    "count": 252,
+    "field_count": 4
+  },
+  {
+    "service": "khgoodsandserviceacknowledgement",
+    "entity_set": "SellerPartyNameCollection",
+    "count": 1410,
+    "field_count": 2
+  },
+  {
+    "service": "khgoodsandserviceacknowledgement",
+    "entity_set": "BuyerPartyNameCollection",
+    "count": 1410,
+    "field_count": 2
+  },
+  {
+    "service": "khgoodsandserviceacknowledgement",
+    "entity_set": "ItemRequestorPartyNameCollection",
+    "count": 1410,
+    "field_count": 2
+  },
+  {
+    "service": "khgoodsandserviceacknowledgement",
+    "entity_set": "ItemPartyNameCollection",
+    "count": 1410,
     "field_count": 2
   },
   {
@@ -537,33 +1080,312 @@
   },
   {
     "service": "khhousebankaccount",
-    "entity_set": "BankDirectoryEntryCollection",
-    "count": 10,
-    "field_count": 12
-  },
-  {
-    "service": "khhousebankaccount",
-    "entity_set": "HouseBankCollection",
-    "count": 8,
-    "field_count": 7
-  },
-  {
-    "service": "khhousebankaccount",
     "entity_set": "BankDirectoryEntryBranchCollection",
     "count": 0,
     "field_count": 7
   },
   {
-    "service": "khhousebankaccount",
-    "entity_set": "NationalBankIdentificationCollection",
-    "count": 4,
+    "service": "khinbounddelivery",
+    "entity_set": "AttachmentCollection",
+    "count": null,
+    "error": "HTTP 400: {\"error\":{\"code\":\"\",\"message\":{\"lang\":\"en\",\"value\":\"The Data Services Request has been understood but is not supported by the processor\"}}}",
+    "field_count": 19
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "InboundDeliveryCollection",
+    "count": 49,
+    "field_count": 15
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "ItemCollection",
+    "count": 119,
+    "field_count": 13
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "NoteCollection",
+    "count": null,
+    "error": "HTTP 500: <HTML><HEAD> <TITLE>500 SAP Internal Server Error</TITLE> </HEAD><BODY> <H1>500 SAP Internal Server Error</H1> ",
+    "field_count": 11
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "ItemPurchaseOrderReferenceCollection",
+    "count": 407,
+    "field_count": 9
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "ItemInboundDeliveryRequestReferenceCollection",
+    "count": 407,
+    "field_count": 9
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "ItemSalesOrderReferenceCollection",
+    "count": 407,
+    "field_count": 9
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "ItemExternalReferenceCollection",
+    "count": 407,
+    "field_count": 9
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "ItemOutboundDeliveryReferenceCollection",
+    "count": 407,
+    "field_count": 9
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "ItemQuantityCollection",
+    "count": 119,
+    "field_count": 7
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "ShippingPeriodCollection",
+    "count": 49,
     "field_count": 6
   },
   {
-    "service": "khhousebankaccount",
-    "entity_set": "DescriptionCollection",
-    "count": 12,
+    "service": "khinbounddelivery",
+    "entity_set": "ArrivalPeriodCollection",
+    "count": 49,
+    "field_count": 6
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "GrossWeightMeasureCollection",
+    "count": 0,
     "field_count": 4
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "GrossVolumeMeasureCollection",
+    "count": 0,
+    "field_count": 4
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "ShipToPartyCollection",
+    "count": 110,
+    "field_count": 4
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "SenderPartyCollection",
+    "count": 110,
+    "field_count": 4
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "BuyerPartyCollection",
+    "count": 110,
+    "field_count": 4
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "ItemDeliveryQuantityCollection",
+    "count": 119,
+    "field_count": 4
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "FreightForwarderPartyCollection",
+    "count": 110,
+    "field_count": 4
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "ItemBuyerPartyCollection",
+    "count": 351,
+    "field_count": 3
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "ItemSellerPartyCollection",
+    "count": 351,
+    "field_count": 3
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "ShipToLocationCollection",
+    "count": 98,
+    "field_count": 3
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "ShipToPartyFormattedAddressCollection",
+    "count": 1420,
+    "field_count": 2
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "SenderPartyFormattedAddressCollection",
+    "count": 1420,
+    "field_count": 2
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "ShipToPartyNameCollection",
+    "count": 1410,
+    "field_count": 2
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "SenderPartyNameCollection",
+    "count": 1410,
+    "field_count": 2
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "BuyerPartyNameCollection",
+    "count": 1410,
+    "field_count": 2
+  },
+  {
+    "service": "khinbounddelivery",
+    "entity_set": "FreightForwarderPartyNameCollection",
+    "count": 1410,
+    "field_count": 2
+  },
+  {
+    "service": "khlead",
+    "entity_set": "LeadCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 15
+  },
+  {
+    "service": "khlead",
+    "entity_set": "NoteCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 11
+  },
+  {
+    "service": "khlead",
+    "entity_set": "CampaignReferenceCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 6
+  },
+  {
+    "service": "khlead",
+    "entity_set": "ProspectPartyCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 5
+  },
+  {
+    "service": "khlead",
+    "entity_set": "ProspectPartyContactCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 5
+  },
+  {
+    "service": "khlead",
+    "entity_set": "EmployeeResponsibleMarketingPartyCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 4
+  },
+  {
+    "service": "khlead",
+    "entity_set": "EmployeeResponsibleSalesPartyCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 4
+  },
+  {
+    "service": "khlead",
+    "entity_set": "MarketingUnitPartyCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 4
+  },
+  {
+    "service": "khlead",
+    "entity_set": "SalesUnitPartyCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 3
+  },
+  {
+    "service": "khlead",
+    "entity_set": "ProspectPartyNameCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 2
+  },
+  {
+    "service": "khlead",
+    "entity_set": "ProspectPartyFormattedAddressCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 2
+  },
+  {
+    "service": "khlead",
+    "entity_set": "ProspectPartyContactNameCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 2
+  },
+  {
+    "service": "khlead",
+    "entity_set": "ProspectPartyContactEmailCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 2
+  },
+  {
+    "service": "khlead",
+    "entity_set": "ProspectPartyContactTelephoneCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 2
+  },
+  {
+    "service": "khlead",
+    "entity_set": "ProspectPartyEmailCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 2
+  },
+  {
+    "service": "khlead",
+    "entity_set": "ProspectPartyTelephoneCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 2
+  },
+  {
+    "service": "khlead",
+    "entity_set": "ProspectPartyWebCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 2
+  },
+  {
+    "service": "khlead",
+    "entity_set": "EmployeeResponsibleMarketingNameCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 2
+  },
+  {
+    "service": "khlead",
+    "entity_set": "EmployeeResponsibleSalesNameCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 2
   },
   {
     "service": "khopportunity",
@@ -584,6 +1406,60 @@
     "field_count": 4
   },
   {
+    "service": "khoutbounddeliveryrequest",
+    "entity_set": "ItemCollection",
+    "count": 183,
+    "field_count": 20
+  },
+  {
+    "service": "khoutbounddeliveryrequest",
+    "entity_set": "ArrivalPeriodCollection",
+    "count": 515,
+    "field_count": 6
+  },
+  {
+    "service": "khoutbounddeliveryrequest",
+    "entity_set": "OutboundDeliveryRequestCollection",
+    "count": 146,
+    "field_count": 4
+  },
+  {
+    "service": "khoutbounddeliveryrequest",
+    "entity_set": "RequestedQuantityCollection",
+    "count": 366,
+    "field_count": 4
+  },
+  {
+    "service": "khoutbounddeliveryrequest",
+    "entity_set": "OpenQuantityCollection",
+    "count": 366,
+    "field_count": 4
+  },
+  {
+    "service": "khoutbounddeliveryrequest",
+    "entity_set": "ProductRecipientPartyCollection",
+    "count": 68,
+    "field_count": 3
+  },
+  {
+    "service": "khoutbounddeliveryrequest",
+    "entity_set": "ShipFromLocationCollection",
+    "count": 146,
+    "field_count": 3
+  },
+  {
+    "service": "khoutbounddeliveryrequest",
+    "entity_set": "ItemBuyerPartyCollection",
+    "count": 915,
+    "field_count": 3
+  },
+  {
+    "service": "khoutbounddeliveryrequest",
+    "entity_set": "ItemScheduleLineCollection",
+    "count": 183,
+    "field_count": 2
+  },
+  {
     "service": "khpayment",
     "entity_set": "HouseBankAccountCollection",
     "count": 0,
@@ -594,6 +1470,125 @@
     "entity_set": "NotesCollection",
     "count": 0,
     "field_count": 11
+  },
+  {
+    "service": "khprofitcentre",
+    "entity_set": "NameCollection",
+    "count": 20,
+    "field_count": 5
+  },
+  {
+    "service": "khprofitcentre",
+    "entity_set": "DefinitionCollection",
+    "count": 62,
+    "field_count": 5
+  },
+  {
+    "service": "khprofitcentre",
+    "entity_set": "ProfitCentreCollection",
+    "count": 19,
+    "field_count": 3
+  },
+  {
+    "service": "khprofitcentre",
+    "entity_set": "CurrentSuperordinateProfitCentreCollection",
+    "count": 19,
+    "field_count": 3
+  },
+  {
+    "service": "khprofitcentre",
+    "entity_set": "SuperordinateProfitCentreNameCollection",
+    "count": 20,
+    "field_count": 3
+  },
+  {
+    "service": "khprofitcentre",
+    "entity_set": "CurrentSegmentAssignmentCollection",
+    "count": 5,
+    "field_count": 3
+  },
+  {
+    "service": "khprofitcentre",
+    "entity_set": "SegmentNameCollection",
+    "count": 6,
+    "field_count": 3
+  },
+  {
+    "service": "khproject",
+    "entity_set": "TaskCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 28
+  },
+  {
+    "service": "khproject",
+    "entity_set": "ProjectCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 24
+  },
+  {
+    "service": "khproject",
+    "entity_set": "TaskServiceCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 20
+  },
+  {
+    "service": "khproject",
+    "entity_set": "TaskServiceConfirmationCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 20
+  },
+  {
+    "service": "khproject",
+    "entity_set": "TeamCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 17
+  },
+  {
+    "service": "khproject",
+    "entity_set": "ProjectSummaryTaskCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 14
+  },
+  {
+    "service": "khproject",
+    "entity_set": "TaskMaterialCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 14
+  },
+  {
+    "service": "khproject",
+    "entity_set": "TaskExpenseCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 8
+  },
+  {
+    "service": "khproject",
+    "entity_set": "TaskRevenueCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 6
+  },
+  {
+    "service": "khproject",
+    "entity_set": "TaskRelationshipCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 5
+  },
+  {
+    "service": "khproject",
+    "entity_set": "ProjectBuyerPartyCollection",
+    "count": null,
+    "error": "HTTP 403: {\"error\":{\"code\":\"RBAM_ERROR\",\"message\":{\"lang\":\"en\",\"value\":\"Not Authorized: Check Authorization Restriction for the User\"}}}",
+    "field_count": 3
   },
   {
     "service": "khsalesorder",
@@ -629,18 +1624,6 @@
   },
   {
     "service": "khserviceproduct",
-    "entity_set": "SalesCollection",
-    "count": 6,
-    "field_count": 16
-  },
-  {
-    "service": "khserviceproduct",
-    "entity_set": "ServiceProductCollection",
-    "count": 7,
-    "field_count": 12
-  },
-  {
-    "service": "khserviceproduct",
     "entity_set": "TextCollection",
     "count": 0,
     "field_count": 11
@@ -659,18 +1642,6 @@
   },
   {
     "service": "khserviceproduct",
-    "entity_set": "DeviantTaxClassificationCollection",
-    "count": 1,
-    "field_count": 8
-  },
-  {
-    "service": "khserviceproduct",
-    "entity_set": "ProductCategoryCollection",
-    "count": 7,
-    "field_count": 7
-  },
-  {
-    "service": "khserviceproduct",
     "entity_set": "CustomerInformationCollection",
     "count": 0,
     "field_count": 7
@@ -683,57 +1654,21 @@
   },
   {
     "service": "khserviceproduct",
-    "entity_set": "PurchasingCollection",
-    "count": 4,
-    "field_count": 5
-  },
-  {
-    "service": "khserviceproduct",
-    "entity_set": "ValuationCollection",
-    "count": 7,
-    "field_count": 5
-  },
-  {
-    "service": "khserviceproduct",
     "entity_set": "WithholdingTaxClassificationCollection",
     "count": 0,
     "field_count": 5
   },
   {
-    "service": "khserviceproduct",
-    "entity_set": "IdentificationCollection",
+    "service": "khserviceproductvaluationdata",
+    "entity_set": "CostRateCollection",
     "count": 7,
-    "field_count": 4
+    "field_count": 9
   },
   {
-    "service": "khserviceproduct",
-    "entity_set": "SalesOrganisationNameByValidityCollection",
-    "count": 17,
-    "field_count": 4
-  },
-  {
-    "service": "khserviceproduct",
-    "entity_set": "CompanyCurrentNameCollection",
-    "count": 5,
-    "field_count": 2
-  },
-  {
-    "service": "khsupplier",
-    "entity_set": "CurrentDefaultPostalAddressCollection",
-    "count": 248,
-    "field_count": 22
-  },
-  {
-    "service": "khsupplier",
-    "entity_set": "SupplierCollection",
-    "count": 250,
-    "field_count": 19
-  },
-  {
-    "service": "khsupplier",
-    "entity_set": "BankDetailsCollection",
-    "count": 82,
-    "field_count": 18
+    "service": "khserviceproductvaluationdata",
+    "entity_set": "ServiceProductValuationDataCollection",
+    "count": 7,
+    "field_count": 7
   },
   {
     "service": "khsupplier",
@@ -743,68 +1678,8 @@
   },
   {
     "service": "khsupplier",
-    "entity_set": "PurchasingDataCollection",
-    "count": 237,
-    "field_count": 11
-  },
-  {
-    "service": "khsupplier",
-    "entity_set": "WithholdingTaxClassificationCollection",
-    "count": 11,
-    "field_count": 7
-  },
-  {
-    "service": "khsupplier",
-    "entity_set": "TaxExemptionCollection",
-    "count": 1,
-    "field_count": 6
-  },
-  {
-    "service": "khsupplier",
-    "entity_set": "TaxNumberCollection",
-    "count": 43,
-    "field_count": 5
-  },
-  {
-    "service": "khsupplier",
-    "entity_set": "RoleCollection",
-    "count": 758,
-    "field_count": 5
-  },
-  {
-    "service": "khsupplier",
-    "entity_set": "CurrentDefaultCommunicationPreferenceCollection",
-    "count": 47,
-    "field_count": 4
-  },
-  {
-    "service": "khsupplier",
-    "entity_set": "CurrentDefaultEMailCollection",
-    "count": 3,
-    "field_count": 4
-  },
-  {
-    "service": "khsupplier",
     "entity_set": "CurrentDefaultFacsimileCollection",
     "count": 0,
-    "field_count": 4
-  },
-  {
-    "service": "khsupplier",
-    "entity_set": "CurrentDefaultMobilePhoneCollection",
-    "count": 8,
-    "field_count": 4
-  },
-  {
-    "service": "khsupplier",
-    "entity_set": "CurrentDefaultConventionalPhoneCollection",
-    "count": 8,
-    "field_count": 4
-  },
-  {
-    "service": "khsupplier",
-    "entity_set": "CurrentDefaultAddressInformationCollection",
-    "count": 248,
     "field_count": 4
   },
   {
@@ -812,18 +1687,6 @@
     "entity_set": "IdentificationCollection",
     "count": 0,
     "field_count": 4
-  },
-  {
-    "service": "khsupplier",
-    "entity_set": "NationalBankIdentificationCollection",
-    "count": 4,
-    "field_count": 3
-  },
-  {
-    "service": "khsupplier",
-    "entity_set": "CurrentDefaultWebSiteCollection",
-    "count": 1,
-    "field_count": 3
   },
   {
     "service": "khsupplier",

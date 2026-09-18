@@ -194,7 +194,7 @@ the catch-all, and re-run `snapshot_metadata` rather than hand-capturing curl ou
 
 ## Odoo output today (`output_odoo/`)
 
-**39 files, 13,538 rows.** The authoritative, always-current list is `CONSOLIDATED_STATUS.csv`
+**43 files, 13,963 rows.** The authoritative, always-current list is `CONSOLIDATED_STATUS.csv`
 (one row per SAP API call) and `PROJECT_STATUS.csv` (one row per sheet object) - both regenerated
 from disk on every run. Highlights rather than a duplicate of those:
 
@@ -256,9 +256,9 @@ matches 0 of 44, on the first 32 characters matches 44 of 44. `_join_by_parent()
 ## Registry validation (`python -m src.validate`)
 
 Cross-checks `src/registry.py`'s 66+1 objects against what's actually in `output_odoo/`. Current
-state: **33/67 objects have real data, including 19 of the 21 mandatory ones.** 20 objects have a
+state: **36/67 objects have real data, including 19 of the 21 mandatory ones.** 17 objects have a
 decided Odoo target but no confirmed SAP source yet (`pending_mapping`); most are waiting on one
-of the 23 custom services still to be imported — `SAP_IMPORT_PLAN.md` says exactly which file
+of the 9 custom services still to be imported — `SAP_IMPORT_PLAN.md` says exactly which file
 closes which object. 14 objects (Engineering/PLM, Maintenance/PM, Quality/QM) are
 `not_in_bydesign` — standard ByDesign has no equivalent module.
 

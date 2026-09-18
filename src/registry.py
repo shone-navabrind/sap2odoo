@@ -69,7 +69,13 @@ REGISTRY = [
                raw_sources=("khhousebankaccount__BankDirectoryEntryCollection.json", "khcustomer__BankDetailsCollection.json", "khsupplier__BankDetailsCollection.json")),
     ObjectSpec(6, "Accounts", "Master", "Cost Centers", False, "account.analytic.account", "account_analytic_account_cc", "built", "14 records from standard OData v1 service costcentre, entity set CostCentreCollection. Imported as analytic accounts under the SAP Cost Centers analytic plan.",
                raw_sources=("costcentre__CostCentreCollection.json",)),
-    ObjectSpec(7, "Accounts", "Master", "Analytic Accounts", False, "account.analytic.account", "account_analytic_account", "pending_mapping"),
+    ObjectSpec(7, "Accounts", "Master", "Analytic Accounts", False, "account.analytic.account", "account_analytic_account", "built",
+               "REAL DATA: khprofitcentre - 19 profit centres, ByDesign's second analytic dimension alongside the cost "
+               "centres already built as #6. They share the one synthetic analytic plan Odoo requires. The readable name "
+               "comes from a date-versioned NameCollection, not from the profit centre record itself, which carries only "
+               "ID/ObjectID/UUID. khproject would add project-based analytic accounts too, but it is authorisation-blocked "
+               "(RBAM_ERROR) - see SAP_IMPORT_PLAN.md.",
+               raw_sources=("khprofitcentre__ProfitCentreCollection.json", "khprofitcentre__NameCollection.json")),
     ObjectSpec(8, "Accounts", "Transaction", "Open Customer Invoices", True, "account.move", "account_move_open_customer", "built",
                "REAL DATA: the 'dunning/open-item report not yet found' called for by the earlier investigation is ByDesign's "
                "Trade Receivables Payables Register (FINDUEU04) on fin_receivablesar_analytics.svc - 189 still-unsettled "
@@ -104,7 +110,10 @@ REGISTRY = [
                raw_sources=("khcustomer__CustomerCollection.json", "khcustomer__PostalAddressCollection.json", "khcustomer__TaxNumberCollection.json", "khcustomer__RelationshipCollection.json")),
     ObjectSpec(18, "CRM", "Master", "Salespersons", True, "res.users", "res_users_salesperson", "built", "REAL DATA: khemployee custom service, 99 employees (output file is res_users.csv - see FILENAME_OVERRIDES)",
                raw_sources=("khemployee__EmployeeCollection.json", "khemployee__WorkplaceAddressCollection.json")),
-    ObjectSpec(19, "CRM", "Master", "Activities", False, "mail.activity", "mail_activity", "pending_mapping"),
+    ObjectSpec(19, "CRM", "Master", "Activities", False, "mail.activity", "mail_activity", "pending_mapping",
+               "BLOCKED BY AUTHORISATION, not by a missing service: khlead is imported and live, but every one of its 19 "
+               "entity sets returns RBAM_ERROR (Not Authorized) for the SDK user. Granting that user the Leads work center "
+               "makes it readable - an SAP role change, not another import."),
     ObjectSpec(20, "CRM", "Transaction", "Opportunities", False, "crm.lead", "crm_lead", "built", "REAL DATA: khopportunity custom service, 15 opportunities (all, unfiltered)",
                raw_sources=("khopportunity__OpportunityCollection.json",)),
     ObjectSpec(21, "CRM", "Transaction", "Open Opportunities", True, "crm.lead", "crm_lead_open", "built", "REAL DATA: same khopportunity source as #20, filtered on LifeCycleStatusCode (Open=1, In Process=2) - 8/15 open",
@@ -136,8 +145,22 @@ REGISTRY = [
                "logistics area x site - exactly Odoo's stock.quant grain. 1805 on-hand balances; location_id resolves to the "
                "16 storage areas now written into stock_location.csv (1802/1805).",
                raw_sources=("scm_physicalinventory_analytics.svc__RPSCMINBU03_Q0001QueryResults.json",)),
-    ObjectSpec(32, "Inventory", "Transaction", "Stock Transfers", False, "stock.picking", "stock_picking_transfer", "pending_mapping"),
-    ObjectSpec(33, "Inventory", "Transaction", "Stock Moves History", False, "stock.move", "stock_move_history", "pending_mapping"),
+    ObjectSpec(32, "Inventory", "Transaction", "Stock Transfers", False, "stock.picking", "stock_picking_transfer", "built",
+               "REAL DATA: khinbounddelivery - 49 inbound deliveries with 119 items. This is the receipts side; outbound "
+               "deliveries were already covered as #64. Quantities live in a separate ItemQuantityCollection keyed on the "
+               "item's ObjectID, not on the item row itself. picking_type_id is written as Odoo's built-in "
+               "stock.picking_type_in rather than an external ID of ours.",
+               raw_sources=("khinbounddelivery__InboundDeliveryCollection.json", "khinbounddelivery__ItemCollection.json",
+                            "khinbounddelivery__ItemQuantityCollection.json", "khinbounddelivery__SenderPartyCollection.json")),
+    ObjectSpec(33, "Inventory", "Transaction", "Stock Moves History", False, "stock.move", "stock_move_history", "built",
+               "REAL DATA: khgoodsandserviceacknowledgement - 137 goods/service receipts with 238 lines carrying the "
+               "product, delivered quantity and posting date. NOT from khgoodsandactivityconfirmation, which would have "
+               "been the more direct inventory-movement source: that service is imported and most of it works, but its "
+               "InventoryChangeItemCollection and header both return HTTP 500 from SAP on any request, unchanged after a "
+               "re-import - an SAP-side defect, not a query problem.",
+               raw_sources=("khgoodsandserviceacknowledgement__GoodsAndServiceAcknowledgementCollection.json",
+                            "khgoodsandserviceacknowledgement__ItemCollection.json",
+                            "khgoodsandserviceacknowledgement__SellerPartyCollection.json")),
 
     # --- Maintenance ---
     ObjectSpec(34, "Maintenance", "Master", "Equipment", True, "maintenance.equipment", "maintenance_equipment", "not_in_bydesign", "MANDATORY - investigated twice. (1) Zero matches for 'equipment' across the tenant's 573-entry Design Data Sources catalog. (2) User imported+tested tmserviceorder/tmserviceconfirmation/tmservicerequest (Service Order/Confirmation/Request custom services) as a possible alternate path: their metadata confirms NO standalone Equipment entity exists in any of them - ReferenceObjectCollection only carries ProductID(+SerialID), i.e. ByDesign models 'equipment' as a serialized Product instance, not separate master data. tmserviceorder/tmservicerequest data access is additionally blocked by SAP authorization restrictions for the SDK user (metadata visible, data reads return RBAM_ERROR); tmserviceconfirmation is accessible but has 0 rows on this tenant. CONCLUSION: standard ByDesign has no Equipment master data object - if this data is needed, it must come from a different source system or be confirmed out of scope with Danlaw/the client."),

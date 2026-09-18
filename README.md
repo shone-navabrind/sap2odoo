@@ -15,11 +15,11 @@ import into Odoo.
 | Find a SAP data source by name — every entity set the tenant publishes | `SERVICE_CATALOG.csv` (1485 rows) |
 | Understand the code architecture and SAP quirks | `CLAUDE.md` |
 
-**Current state:** 33 of 67 objects done (**19 of 21 mandatory**), 228,550 records pulled from SAP
-across 256 entity sets, 13,538 rows written to 39 Odoo import files. 24 of the 47 custom SAP
-service files are imported — `SAP_IMPORT_PLAN.md` lists the 23 remaining and what each unlocks.
-All numbers are regenerated from live data on every run — see `DATA_MIGRATION_GUIDE.md` §11 to
-reproduce them yourself.
+**Current state:** 36 of 67 objects done (**19 of 21 mandatory**), 256,137 records pulled from SAP
+across 376 entity sets, 13,963 rows written to 43 Odoo import files. 38 of the 47 custom SAP
+service files are imported — `SAP_IMPORT_PLAN.md` lists the 9 remaining, the 6 blocked by SAP
+authorisation, and the 1 broken on SAP's side. All numbers are regenerated from live data on
+every run — see `DATA_MIGRATION_GUIDE.md` §11 to reproduce them yourself.
 
 ## Setup
 
