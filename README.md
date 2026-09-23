@@ -21,6 +21,53 @@ all 3,225 SAP columns (see below). 38 of the 47 custom SAP service files are imp
 `SAP_IMPORT_PLAN.md` lists the 9 remaining, the 6 blocked by SAP authorisation, and the 1 broken
 on SAP's side. All numbers are regenerated from live data on every run.
 
+## How it works (pipeline)
+
+```
+                    SAP Business ByDesign tenant
+                    (HTTP Basic auth, credentials in .env)
+                                 │
+                                 ▼
+   ┌───────────────────────────────────────────────────────┐
+   │  STAGE 1 — EXTRACT           src/extract_raw.py        │
+   │  every field SAP declares for each (service, entity)   │   src/sap_client.py does the
+   │  pair in the SOURCES list, no filtering, no mapping    │ ◄ actual HTTP calls, pagination,
+   └───────────────────────────┬───────────────────────────┘   OLAP chunk-merge, $metadata parsing
+                                ▼
+                    output_raw/*.json
+              (one file per SAP entity set — lossless,
+               exactly what SAP returned)
+                                │
+                ┌───────────────┴────────────────┐
+                ▼                                 ▼
+   ┌────────────────────────────┐   ┌──────────────────────────────┐
+   │ STAGE 2 — TRANSFORM         │   │ STAGE 2b — FULL-COLUMN EXPORT │
+   │ src/transform_odoo.py       │   │ src/export_full_csv.py        │
+   │ maps confirmed SAP columns  │   │ every SAP column, for every   │
+   │ onto standard Odoo fields   │   │ entity set - nothing dropped  │
+   └──────────────┬───────────────┘   └──────────────┬─────────────┘
+                  ▼                                   ▼
+        output_odoo/*.csv                    output_full_csv/
+        (import these into Odoo)      (source for Odoo custom fields -
+                  │                     see "Full-column export" below)
+                  ▼
+   ┌────────────────────────────┐
+   │ STAGE 3 — VALIDATE          │  src/validate.py checks output_odoo/
+   │                              │  against src/registry.py (the 66+1
+   │                              │  object requirement list)
+   └──────────────┬───────────────┘
+                  ▼
+   ┌────────────────────────────┐
+   │ STAGE 4 — REPORT            │  src/status_report.py -> PROJECT_STATUS.csv
+   │                              │  src/consolidated_report.py -> CONSOLIDATED_STATUS.csv
+   └────────────────────────────┘
+```
+
+`python -m src.main` runs all four stages in order. Stages 1 and 2 are deliberately separate
+processes reading/writing plain files on disk (not in-memory handoff), so Stage 2 can be re-run
+any number of times against the SAP calls already made in Stage 1 — see "Where the logic lives"
+below for which file to touch for which kind of change.
+
 ## Setup
 
 ```bash
@@ -49,11 +96,31 @@ python -m src.consolidated_report               # Rebuild CONSOLIDATED_STATUS.cs
 python -m src.generate_field_mapping_workbook   # Rebuild SAP_Field_Mapping.xlsx
 ```
 
+## Where the logic lives
+
+| To change… | Edit this file |
+|---|---|
+| Which SAP (service, entity set) pairs get pulled in Stage 1 | `src/extract_raw.py` — the `SOURCES` list |
+| SAP HTTP calls, pagination, the OLAP chunk/merge-key logic, `$metadata` parsing | `src/sap_client.py` |
+| How a raw SAP column maps onto an Odoo field | `src/transform_odoo.py` — one `build_*()` function per object, registered in the `TRANSFORMS` list at the bottom |
+| Which requirement-sheet objects exist, their mandatory flag, status, and notes | `src/registry.py` — the `REGISTRY` list of `ObjectSpec` |
+| The full-column export layout, or which SAP columns attach to which Odoo model file | `src/export_full_csv.py` — `MODEL_ROOTS` (root + child entities per Odoo file) and `ODOO_KEY` (external-ID join keys) |
+| Registry-vs-`output_odoo/` cross-check (Stage 3) | `src/validate.py` |
+| The team status CSV (Stage 4) | `src/status_report.py` |
+| The one-row-per-SAP-call CSV (Stage 4) | `src/consolidated_report.py` |
+| The field-by-field Excel workbook | `src/generate_field_mapping_workbook.py` |
+| Credentials, page size, timeouts, output/log directories | `.env` (values) / `src/config.py` (which env vars exist) |
+| Pipeline orchestration / stage order | `src/main.py` |
+| Which un-imported custom services unlock which objects next | `src/import_plan.py` → generates `SAP_IMPORT_PLAN.md` |
+| Finding live/dead custom services, un-pulled entity sets, or un-mapped fields | `src/probe_services.py`, `src/coverage_gap.py` (see "Validating field coverage" below) |
+
 ### Running just one object, or a limited/quick pull
 
 Every stage above (`main`, `extract_raw`, `transform_odoo`) accepts `--only TEXT` to scope the
-run to a single business object instead of the whole tenant - match against a service name,
-entity set, or transform label, whichever is easiest to remember:
+run to a single business object instead of the whole tenant - matched case-insensitively as a
+substring against a SAP service name, a SAP entity set name, or the Odoo transform's label
+(whichever is easiest to remember). `--only` for `extract_raw`/`main` matches service/entity
+names; `--only` for `transform_odoo` matches the transform label shown in its log output.
 
 ```bash
 python -m src.main --only khcustomer            # full pipeline, just Customers
@@ -63,12 +130,97 @@ python -m src.transform_odoo --only product_template   # Stage 2 only - re-map f
 ```
 
 `extract_raw` and `main` also accept `--limit N` to cap every entity set at N rows during
-extraction - useful for a quick connectivity/shape check against a new or live tenant before
-committing to a full multi-hour pull:
+extraction (via `$top`, so it actually limits the SAP calls made, not just what's kept) - useful
+for a quick connectivity/shape check against a new or live tenant before committing to a full
+multi-hour pull:
 
 ```bash
 python -m src.main --only khcustomer --limit 50   # pull 50 Customer rows and run the pipeline on them
 ```
+
+**Caveat:** since matching is substring-based against both service *and* entity set names, a
+short/generic word can match more than you expect - e.g. `--only costcentre` also matches
+`khcostcentre` and `khfunctionalunit` (their entity sets contain "CostCentre" in the name), not
+just the `costcentre` service. That's harmless (the extra data simply gets pulled too and
+whatever's unrelated just sits unread), but if you want precision, use a full service name from
+the tables below rather than a generic word.
+
+#### Every built object, individually
+
+One row per object that currently has real data (39 of 67; the remaining 28 are `pending_mapping`
+or `not_in_bydesign` - see `SAP_IMPORT_PLAN.md` and `PROJECT_STATUS.csv` for those). The Extract
+column is the Stage 1 command(s) to re-pull just that object's raw data from SAP; Transform is the
+Stage 2 command to re-map it from whatever is already in `output_raw/` (no SAP calls, runs in
+seconds); Output is the `output_odoo/*.csv` file(s) it produces.
+
+#### Accounts
+
+| # | Object | Mandatory | Extract (Stage 1) | Transform (Stage 2) | Output |
+|---|---|---|---|---|---|
+| 1 | Chart of Accounts | **Yes** | `python -m src.extract_raw --only fin_costandrevenue_analytics.svc && python -m src.extract_raw --only fin_audit_analytics.svc && python -m src.extract_raw --only fin_generalledger_analytics.svc` | `python -m src.transform_odoo --only "account_account (chart of accounts)"` | `account_account.csv` |
+| 2 | Taxes | **Yes** | `python -m src.extract_raw --only fin_taxmanagement_analytics.svc` | `python -m src.transform_odoo --only "account_tax (taxes)"` | `account_tax.csv` |
+| 4 | Payment Terms | **Yes** | `python -m src.extract_raw --only khcustomerinvoice && python -m src.extract_raw --only khsupplierinvoice` | `python -m src.transform_odoo --only "account_payment_term"` | `account_payment_term.csv` |
+| 5 | Banks | **Yes** | `python -m src.extract_raw --only khhousebankaccount && python -m src.extract_raw --only khcustomer && python -m src.extract_raw --only khsupplier` | `python -m src.transform_odoo --only "res_partner / res_bank / res_partner_bank"` | `res_bank.csv + res_partner_bank.csv` |
+| 6 | Cost Centers | optional | `python -m src.extract_raw --only costcentre` | `python -m src.transform_odoo --only "account_analytic_plan / account_analytic_account (cost centers)"` | `account_analytic_account_cc.csv` |
+| 7 | Analytic Accounts | optional | `python -m src.extract_raw --only khprofitcentre` | `python -m src.transform_odoo --only "account_analytic_account (profit centres)"` | `account_analytic_account.csv` |
+| 8 | Open Customer Invoices | **Yes** | `python -m src.extract_raw --only fin_receivablesar_analytics.svc` | `python -m src.transform_odoo --only "account_move_open_customer (open customer invoices)"` | `account_move_open_customer.csv` |
+| 9 | Open Vendor Bills | **Yes** | `python -m src.extract_raw --only khsupplierinvoice` | `python -m src.transform_odoo --only "account_move_vendor_bill(_line)"` | `account_move_open_vendor.csv` |
+| 10 | Customer Payments | optional | `python -m src.extract_raw --only khpayment` | `python -m src.transform_odoo --only "account_payment"` | `account_payment.csv` |
+| 11 | Vendor Payments | optional | `python -m src.extract_raw --only khpayment` | `python -m src.transform_odoo --only "account_payment"` | `account_payment.csv` |
+| 12 | Bank Statements | optional | `python -m src.extract_raw --only khhousebankstatement` | `python -m src.transform_odoo --only "account_bank_statement"` | `account_bank_statement.csv` |
+
+#### CRM
+
+| # | Object | Mandatory | Extract (Stage 1) | Transform (Stage 2) | Output |
+|---|---|---|---|---|---|
+| 17 | Customers | **Yes** | `python -m src.extract_raw --only khcustomer` | `python -m src.transform_odoo --only "res_partner / res_bank / res_partner_bank"` | `res_partner.csv` |
+| 18 | Salespersons | **Yes** | `python -m src.extract_raw --only khemployee` | `python -m src.transform_odoo --only "res_users (employees/salespersons)"` | `res_users.csv` |
+| 20 | Opportunities | optional | `python -m src.extract_raw --only khopportunity` | `python -m src.transform_odoo --only "crm_lead (opportunities)"` | `crm_lead.csv` |
+| 21 | Open Opportunities | **Yes** | `python -m src.extract_raw --only khopportunity` | `python -m src.transform_odoo --only "crm_lead (opportunities)"` | `crm_lead_open.csv` |
+| 22 | Closed Opportunities | optional | `python -m src.extract_raw --only khopportunity` | `python -m src.transform_odoo --only "crm_lead (opportunities)"` | `crm_lead_closed.csv` |
+
+#### Inventory
+
+| # | Object | Mandatory | Extract (Stage 1) | Transform (Stage 2) | Output |
+|---|---|---|---|---|---|
+| 27 | Warehouses | **Yes** | `python -m src.extract_raw --only khlocation` | `python -m src.transform_odoo --only "stock_location"` | `stock_warehouse.csv` |
+| 28 | Locations | **Yes** | `python -m src.extract_raw --only khlocation` | `python -m src.transform_odoo --only "stock_location"` | `stock_location.csv` |
+| 29 | UOM | **Yes** | `python -m src.extract_raw --only vmumaterial` | `python -m src.transform_odoo --only "uom_uom"` | `uom_uom.csv` |
+| 31 | Inventory Adjustments | optional | `python -m src.extract_raw --only scm_physicalinventory_analytics.svc` | `python -m src.transform_odoo --only "stock_quant_adjustment (inventory balances)"` | `stock_quant_adjustment.csv` |
+| 32 | Stock Transfers | optional | `python -m src.extract_raw --only khinbounddelivery` | `python -m src.transform_odoo --only "stock_picking_transfer (inbound deliveries)"` | `stock_picking_transfer.csv + _line.csv` |
+| 33 | Stock Moves History | optional | `python -m src.extract_raw --only khgoodsandserviceacknowledgement` | `python -m src.transform_odoo --only "stock_move_history (goods receipts)"` | `stock_move_history.csv` |
+
+#### Manufacturing
+
+| # | Object | Mandatory | Extract (Stage 1) | Transform (Stage 2) | Output |
+|---|---|---|---|---|---|
+| 42 | Work Centers | **Yes** | `python -m src.extract_raw --only khproductionorder` | `python -m src.transform_odoo --only "mrp_workcenter"` | `mrp_workcenter.csv` |
+| 44 | Manufacturing Orders | optional | `python -m src.extract_raw --only khproductionorder` | `python -m src.transform_odoo --only "mrp_production"` | `mrp_production.csv` |
+| 45 | Production History | optional | `python -m src.extract_raw --only khproductionorder` | `python -m src.transform_odoo --only "mrp_production_history (closed orders)"` | `mrp_production_history.csv` |
+
+#### Purchase
+
+| # | Object | Mandatory | Extract (Stage 1) | Transform (Stage 2) | Output |
+|---|---|---|---|---|---|
+| 46 | Vendors | **Yes** | `python -m src.extract_raw --only khsupplier` | `python -m src.transform_odoo --only "res_partner / res_bank / res_partner_bank"` | `res_partner.csv` |
+| 47 | Vendor Pricelists | optional | `python -m src.extract_raw --only vmumaterial` | `python -m src.transform_odoo --only "product_supplierinfo (vendor pricelists)"` | `product_supplierinfo.csv` |
+| 49 | RFQs | optional | `python -m src.extract_raw --only khpurchaseorder` | `python -m src.transform_odoo --only "purchase_order_rfq (draft purchase orders)"` | `purchase_order_rfq.csv` |
+| 50 | Purchase Orders | **Yes** | `python -m src.extract_raw --only khpurchaseorder` | `python -m src.transform_odoo --only "purchase_order / purchase_order_line"` | `purchase_order.csv + _line.csv` |
+| 51 | Vendor Bills | optional | `python -m src.extract_raw --only khsupplierinvoice` | `python -m src.transform_odoo --only "account_move_vendor_bill(_line)"` | `account_move_vendor_bill.csv + _line.csv` |
+| 52 | Vendor Credit Notes | optional | `python -m src.extract_raw --only khsupplierinvoice` | `python -m src.transform_odoo --only "account_move credit notes (customer + vendor)"` | `account_move_vendor_credit.csv` |
+
+#### Sales
+
+| # | Object | Mandatory | Extract (Stage 1) | Transform (Stage 2) | Output |
+|---|---|---|---|---|---|
+| 57 | Products | **Yes** | `python -m src.extract_raw --only vmumaterial && python -m src.extract_raw --only vmumaterialvaluationdata` | `python -m src.transform_odoo --only "product_template"` | `product_template.csv` |
+| 58 | Product Categories | **Yes** | `python -m src.extract_raw --only vmumaterial` | `python -m src.transform_odoo --only "product_category"` | `product_category.csv` |
+| 59 | Pricelists | **Yes** | `python -m src.extract_raw --only khsalesarrangement` | `python -m src.transform_odoo --only "product_pricelist (sales arrangements)"` | `product_pricelist.csv` |
+| 60 | Discount Rules | optional | `python -m src.extract_raw --only khsalesorder` | `python -m src.transform_odoo --only "product_pricelist_item (list prices)"` | `product_pricelist_item_discount.csv` |
+| 63 | Sales Orders | **Yes** | `python -m src.extract_raw --only khsalesorder` | `python -m src.transform_odoo --only "sale_order / sale_order_line"` | `sale_order.csv + _line.csv` |
+| 64 | Deliveries | optional | `python -m src.extract_raw --only khoutbounddelivery` | `python -m src.transform_odoo --only "stock_picking_delivery(_line)"` | `stock_picking_delivery.csv + _line.csv` |
+| 65 | Customer Invoices | optional | `python -m src.extract_raw --only khcustomerinvoice` | `python -m src.transform_odoo --only "account_move_customer_invoice(_line)"` | `account_move_customer_invoice.csv + _line.csv` |
+| 66 | Credit Notes | optional | `python -m src.extract_raw --only khcustomerinvoicerequest` | `python -m src.transform_odoo --only "account_move credit notes (customer + vendor)"` | `account_move_credit_note.csv` |
 
 ## Team status tracking (`PROJECT_STATUS.csv`)
 
@@ -118,6 +270,51 @@ registry status to `built`.
 | `python -m src.probe_gl_accounts` | Which reports actually return G/L accounts |
 | `python -m src.import_plan` | Regenerate `SAP_IMPORT_PLAN.md` |
 | `python -m src.export_full_csv` | Every SAP column to CSV in `output_full_csv/` (see above) |
+
+### `python -m src.snapshot_metadata` in detail
+
+**What it's for:** live `$metadata` for `*_analytics.svc` (BI/OLAP report) services is unstable on
+this tenant - the first call can return 90-100 real fields, and a later call, with no code or
+query change, can collapse to just `ID` + `TotaledProperties` (see CLAUDE.md, "Critical gotcha:
+live `$metadata` is unstable"). `src/sap_client.py`'s `get_entity_fields()` always prefers a
+captured file over a live call when one exists, so a real field list, once seen, is never lost to
+a later collapse.
+
+**What it does:** walks every `*_analytics.svc` service except the three catch-all aggregators
+(`ana_businessanalytics_analytics.svc` and friends - their metadata is permanently collapsed, so
+walking them is pointless), fetches `$metadata`, and writes `schema_snapshots/<service>.metadata.xml`
+- but only when the fetched metadata actually has real fields (more than 2 properties), so a good
+existing snapshot is never overwritten with a collapsed one.
+
+**When to run it:**
+- Once, right after pointing `.env` at a **different tenant** (a new `SAP_BASE_URL`) - the
+  snapshots on disk were captured against whichever tenant was live at the time, and a different
+  tenant can have different fields. Custom `kh*` services don't need this (they fetch `$metadata`
+  live, successfully, every run - see CLAUDE.md) but the analytics `.svc` services do.
+- If an analytics-sourced Odoo file (Chart of Accounts #1, Taxes #2, Open Customer Invoices #8,
+  Inventory Adjustments #31) looks like it's missing a column that should be there.
+- It is **not** part of `python -m src.main` - it changes files under `schema_snapshots/` (code
+  configuration, not business data), so it's run manually/occasionally, not on every extraction.
+
+```bash
+python -m src.snapshot_metadata
+```
+
+## Validating field coverage (did we capture every field?)
+
+Four different tools answer this, at different granularity - none of them assert correctness on
+their own; together they trace every claim back to `output_raw/*.json`, never to a guess:
+
+| Question | Tool |
+|---|---|
+| Is this **object** (e.g. "Products") done? | `python -m src.validate` — registry-level, cross-checks `src/registry.py` against `output_odoo/` |
+| Which **entity sets** does the tenant expose that we've never even pulled? Which **fields** did we pull but never map to an Odoo column? | `python -m src.coverage_gap` |
+| For a specific **Odoo file**, exactly which raw SAP columns made it in vs. which stayed unmapped? | `output_full_csv/_INDEX.csv` (per entity set) and `_MODEL_INDEX.csv` (per Odoo model file) — regenerate with `python -m src.export_full_csv` |
+| **Field-by-field**, human-readable: this SAP field → this Odoo column (or blank) | `SAP_Field_Mapping.xlsx` — one worksheet per object, regenerate with `python -m src.generate_field_mapping_workbook` |
+
+In short: `coverage_gap.py` and `_INDEX.csv`/`_MODEL_INDEX.csv` are the actual field-completeness
+check (they read `output_raw/*.json` and `src/transform_odoo.py`'s source and report what's
+unread); `SAP_Field_Mapping.xlsx` is the same information laid out for a non-technical reviewer.
 
 ## Full-column export (`output_full_csv/`)
 
