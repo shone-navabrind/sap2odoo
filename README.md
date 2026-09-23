@@ -23,50 +23,56 @@ on SAP's side. All numbers are regenerated from live data on every run.
 
 ## How it works (pipeline)
 
+`python -m src.main` runs every stage below **in this exact order, one after another** (not in
+parallel - each stage fully finishes before the next starts):
+
 ```
-                    SAP Business ByDesign tenant
-                    (HTTP Basic auth, credentials in .env)
-                                 │
+        SAP Business ByDesign tenant  (HTTP Basic auth, credentials in .env)
+                          │
+                          ▼
+ ┌──────────────────────────────────────────────────────────────────┐
+ │ STAGE 1 — EXTRACT                                                  │
+ │ src/extract_raw.py  (SOURCES list drives which entities get pulled)│
+ │ src/sap_client.py   (does the actual HTTP calls, pagination,       │
+ │                       OLAP chunk-merge, $metadata parsing)         │
+ │ writes -> output_raw/*.json  (every field SAP declares, no         │
+ │           filtering, no mapping - one file per entity set)         │
+ └──────────────────────────────┬───────────────────────────────────┘
                                  ▼
-   ┌───────────────────────────────────────────────────────┐
-   │  STAGE 1 — EXTRACT           src/extract_raw.py        │
-   │  every field SAP declares for each (service, entity)   │   src/sap_client.py does the
-   │  pair in the SOURCES list, no filtering, no mapping    │ ◄ actual HTTP calls, pagination,
-   └───────────────────────────┬───────────────────────────┘   OLAP chunk-merge, $metadata parsing
-                                ▼
-                    output_raw/*.json
-              (one file per SAP entity set — lossless,
-               exactly what SAP returned)
-                                │
-                ┌───────────────┴────────────────┐
-                ▼                                 ▼
-   ┌────────────────────────────┐   ┌──────────────────────────────┐
-   │ STAGE 2 — TRANSFORM         │   │ STAGE 2b — FULL-COLUMN EXPORT │
-   │ src/transform_odoo.py       │   │ src/export_full_csv.py        │
-   │ maps confirmed SAP columns  │   │ every SAP column, for every   │
-   │ onto standard Odoo fields   │   │ entity set - nothing dropped  │
-   └──────────────┬───────────────┘   └──────────────┬─────────────┘
-                  ▼                                   ▼
-        output_odoo/*.csv                    output_full_csv/
-        (import these into Odoo)      (source for Odoo custom fields -
-                  │                     see "Full-column export" below)
-                  ▼
-   ┌────────────────────────────┐
-   │ STAGE 3 — VALIDATE          │  src/validate.py checks output_odoo/
-   │                              │  against src/registry.py (the 66+1
-   │                              │  object requirement list)
-   └──────────────┬───────────────┘
-                  ▼
-   ┌────────────────────────────┐
-   │ STAGE 4 — REPORT            │  src/status_report.py -> PROJECT_STATUS.csv
-   │                              │  src/consolidated_report.py -> CONSOLIDATED_STATUS.csv
-   └────────────────────────────┘
+ ┌──────────────────────────────────────────────────────────────────┐
+ │ STAGE 2 — TRANSFORM                                                │
+ │ src/transform_odoo.py  (one build_*() per object, reads only       │
+ │                          output_raw/ - no SAP calls)               │
+ │ writes -> output_odoo/*.csv   (Odoo-ready import files - only the  │
+ │           fields Odoo has a standard home for)                     │
+ └──────────────────────────────┬───────────────────────────────────┘
+                                 ▼
+ ┌──────────────────────────────────────────────────────────────────┐
+ │ STAGE 2b — FULL-COLUMN EXPORT                                      │
+ │ src/export_full_csv.py  (reads output_raw/ AND output_odoo/ - no   │
+ │                           SAP calls)                                │
+ │ writes -> output_full_csv/    (every SAP column for every entity   │
+ │           set - nothing Stage 2 left out is lost; see "Full-column │
+ │           export" below)                                           │
+ └──────────────────────────────┬───────────────────────────────────┘
+                                 ▼
+ ┌──────────────────────────────────────────────────────────────────┐
+ │ STAGE 3 — VALIDATE                                                  │
+ │ src/validate.py  (cross-checks output_odoo/ against src/registry.py,│
+ │                    the 66+1 object requirement list)                │
+ └──────────────────────────────┬───────────────────────────────────┘
+                                 ▼
+ ┌──────────────────────────────────────────────────────────────────┐
+ │ STAGE 4 — REPORT                                                    │
+ │ src/status_report.py       -> PROJECT_STATUS.csv                   │
+ │ src/consolidated_report.py -> CONSOLIDATED_STATUS.csv               │
+ └──────────────────────────────────────────────────────────────────┘
 ```
 
-`python -m src.main` runs all four stages in order. Stages 1 and 2 are deliberately separate
-processes reading/writing plain files on disk (not in-memory handoff), so Stage 2 can be re-run
-any number of times against the SAP calls already made in Stage 1 — see "Where the logic lives"
-below for which file to touch for which kind of change.
+Stages 1 and 2 are deliberately separate processes reading/writing plain files on disk (not an
+in-memory handoff), so Stage 2 (and 2b, 3, 4) can be re-run any number of times against the SAP
+calls already made in Stage 1, without re-hitting SAP — see "Where the logic lives" below for
+which file to touch for which kind of change.
 
 ## Setup
 
