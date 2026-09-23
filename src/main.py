@@ -23,17 +23,43 @@ def setup_logging(log_dir):
 
 
 def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(
+        description="Full pipeline: extract_raw -> transform_odoo -> export_full_csv -> validate."
+    )
+    parser.add_argument(
+        "--only", metavar="TEXT",
+        help="Run only the SAP sources and Odoo transform(s) matching TEXT (case-insensitive "
+             "substring of the service name, entity set, or transform label), e.g. "
+             "--only khcustomer or --only res_partner. Everything else in the pipeline "
+             "(export_full_csv, validate, status reports) still runs against whatever is "
+             "already on disk from prior runs.",
+    )
+    parser.add_argument(
+        "--limit", type=int, metavar="N",
+        help="Cap each SAP entity set at N rows during extraction - for a quick/limited test "
+             "run instead of pulling a whole tenant's history.",
+    )
+    args = parser.parse_args()
+
     config = load_config()
     setup_logging(config.log_dir)
     logger = logging.getLogger("sap2odoo")
 
     logger.info("=== Stage 1: raw extraction from SAP -> output_raw/ ===")
     client = SAPODataClient(config)
-    raw_summary = extract_all(client, "output_raw")
+    raw_summary = extract_all(client, "output_raw", only=args.only, limit=args.limit)
 
     logger.info("=== Stage 2: transform raw data -> Odoo CSVs in output_odoo/ ===")
+    transforms = TRANSFORMS
+    if args.only:
+        needle = args.only.lower()
+        transforms = [(label, fn) for label, fn in TRANSFORMS if needle in label.lower()]
+        if not transforms:
+            logger.warning("--only %r matched no transform label - Stage 2 will do nothing", args.only)
     odoo_summary = {}
-    for label, fn in TRANSFORMS:
+    for label, fn in transforms:
         logger.info("Transforming %s...", label)
         try:
             odoo_summary.update(fn())

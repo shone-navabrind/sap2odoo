@@ -2025,9 +2025,27 @@ TRANSFORMS = [
 
 
 def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--only", metavar="TEXT",
+        help="Only run transforms whose label contains TEXT (case-insensitive), e.g. "
+             "--only res_partner or --only product_template. Reads whatever is already in "
+             "output_raw/ - no SAP calls - so this re-runs one object's mapping in seconds.",
+    )
+    args = parser.parse_args()
+
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
+    transforms = TRANSFORMS
+    if args.only:
+        needle = args.only.lower()
+        transforms = [(label, fn) for label, fn in TRANSFORMS if needle in label.lower()]
+        if not transforms:
+            logger.warning("--only %r matched no transform label", args.only)
+
     summary = {}
-    for label, fn in TRANSFORMS:
+    for label, fn in transforms:
         logger.info("Transforming %s...", label)
         try:
             summary.update(fn())

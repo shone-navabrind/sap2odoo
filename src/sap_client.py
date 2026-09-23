@@ -116,7 +116,7 @@ class SAPODataClient:
             response.raise_for_status()
         return response
 
-    def get_entity_set(self, service, entity_set, select=None, filter_expr=None, expand=None):
+    def get_entity_set(self, service, entity_set, select=None, filter_expr=None, expand=None, max_rows=None):
         """
         Fetch every row of an OData entity set, paginating with $skip/$top.
 
@@ -125,6 +125,10 @@ class SAPODataClient:
         MainProductOutputCollection has no ParentObjectID and its ObjectIDs don't match the
         order's, so $expand=MainProductOutput is the only way to link a production order to the
         product it produces.
+
+        `max_rows` stops pagination early once at least that many rows are collected (still
+        returns full pages, just fewer of them) - for a quick/limited test pull instead of
+        pulling a whole tenant's history.
         """
         url = f"{self.config.sap_base_url}/{service}/{entity_set}"
         page_size = self.config.page_size
@@ -158,9 +162,11 @@ class SAPODataClient:
 
             if len(page) < page_size:
                 break
+            if max_rows and len(rows) >= max_rows:
+                break
             skip += page_size
 
-        return rows
+        return rows[:max_rows] if max_rows else rows
 
     def get_metadata_xml(self, service):
         url = f"{self.config.sap_base_url}/{service}/$metadata"
@@ -200,7 +206,7 @@ class SAPODataClient:
         logger.info("%s/%s: %d fields from %s", service, entity_set, len(fields), source)
         return fields
 
-    def get_entity_set_all_fields(self, service, entity_set, chunk_size=8, expand=None):
+    def get_entity_set_all_fields(self, service, entity_set, chunk_size=8, expand=None, max_rows=None):
         """
         Fetch every field SAP declares for an entity set, without deciding upfront which
         ones matter. Used for raw extraction (src/extract_raw.py) so field mapping decisions
@@ -243,9 +249,9 @@ class SAPODataClient:
         if not is_olap_entity:
             # Plain CRUD - no drill-down limit, so no need to chunk or find a merge key at all.
             if expand:
-                rows = self.get_entity_set(service, entity_set, expand=expand)
+                rows = self.get_entity_set(service, entity_set, expand=expand, max_rows=max_rows)
                 return [_flatten_expanded(r) for r in rows], all_fields
-            return self.get_entity_set(service, entity_set, select=fields), all_fields
+            return self.get_entity_set(service, entity_set, select=fields, max_rows=max_rows), all_fields
 
         key_field = _olap_merge_key(fields)
         if key_field is None:

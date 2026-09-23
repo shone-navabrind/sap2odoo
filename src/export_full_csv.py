@@ -389,6 +389,19 @@ def write_odoo_model_csvs(entities, entities_by_service):
             }
             children = [entity for entity in entities_by_service.get(service, []) if entity is not root]
 
+            # Index each child once by parent key instead of rescanning its full row list for
+            # every output row - the previous linear scan made this O(rows * child_rows), which
+            # took hours (and had to be killed) on services like khsupplierinvoice where a
+            # 55k-row parent joins against 680k-row children.
+            children_indexed = []
+            for child in children:
+                by_parent = {}
+                for row in child["rows"]:
+                    parent = _parent_key(row)
+                    if parent:
+                        by_parent.setdefault(parent, []).append(row)
+                children_indexed.append((child, by_parent))
+
             for out in output_rows:
                 source_row = roots_by_id.get(out.get("id", ""))
                 if not source_row:
@@ -400,9 +413,8 @@ def write_odoo_model_csvs(entities, entities_by_service):
                 object_id = source_row.get("ObjectID")
                 if not object_id:
                     continue
-                for child in children:
-                    child_rows = [row for row in child["rows"]
-                                  if _parent_key(row) == object_id]
+                for child, by_parent in children_indexed:
+                    child_rows = by_parent.get(object_id)
                     if not child_rows:
                         continue
                     for field in child["fields"]:

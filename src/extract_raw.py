@@ -605,22 +605,51 @@ def raw_filename(service, entity_set):
     return f"{basename}__{entity_set}.json"
 
 
-def extract_all(client, output_dir):
+def matching_sources(only=None):
+    """
+    SOURCES filtered to those whose service name or entity set contains `only` (case-insensitive
+    substring match), or all of SOURCES if `only` is falsy. Used by both the `--only` CLI flag
+    here and by `python -m src.transform_odoo --only` (indirectly, via which raw files exist).
+    """
+    if not only:
+        return list(SOURCES)
+    needle = only.lower()
+    return [
+        s for s in SOURCES
+        if needle in s[0].rsplit("/", 1)[-1].lower() or needle in s[1].lower()
+    ]
+
+
+def extract_all(client, output_dir, only=None, limit=None):
+    """
+    only: case-insensitive substring to match against service name or entity set - e.g.
+      only="khcustomer" pulls just the Customers object, only="vmumaterial" pulls just Products.
+    limit: caps each entity set at this many rows (via $top), for a quick/limited test pull
+      instead of a full extraction.
+    """
     os.makedirs(output_dir, exist_ok=True)
     summary = []
+    sources = matching_sources(only)
+    if only and not sources:
+        logger.warning("--only %r matched nothing in SOURCES", only)
 
-    for source in SOURCES:
+    for source in sources:
         # A source is (service, entity_set) or (service, entity_set, options) - see SOURCES.
         service, entity_set = source[0], source[1]
         options = source[2] if len(source) > 2 else {}
         expand, select = options.get("expand"), options.get("select")
         detail = f" (expand={expand})" if expand else f" (select={len(select)} fields)" if select else ""
+        if limit:
+            detail += f" (limit={limit})"
         logger.info("Raw extracting %s/%s%s ...", service, entity_set, detail)
         try:
             if select:
-                rows, declared_fields = client.get_entity_set(service, entity_set, select=select), select
+                rows = client.get_entity_set(service, entity_set, select=select, max_rows=limit)
+                declared_fields = select
             else:
-                rows, declared_fields = client.get_entity_set_all_fields(service, entity_set, expand=expand)
+                rows, declared_fields = client.get_entity_set_all_fields(
+                    service, entity_set, expand=expand, max_rows=limit
+                )
         except Exception:
             logger.exception("FAILED raw extraction: %s/%s", service, entity_set)
             summary.append((service, entity_set, "FAILED", 0))
@@ -647,10 +676,26 @@ def extract_all(client, output_dir):
 
 
 def main():
+    import argparse
+
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--only", metavar="TEXT",
+        help="Only pull sources whose service name or entity set contains TEXT "
+             "(case-insensitive), e.g. --only khcustomer or --only vmumaterial. "
+             "Use this to re-pull a single object instead of the whole tenant.",
+    )
+    parser.add_argument(
+        "--limit", type=int, metavar="N",
+        help="Cap each entity set at N rows, for a quick/limited test pull instead of a full "
+             "extraction. Combine with --only to pull a small sample of one object.",
+    )
+    args = parser.parse_args()
+
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     config = load_config()
     client = SAPODataClient(config)
-    summary = extract_all(client, "output_raw")
+    summary = extract_all(client, "output_raw", only=args.only, limit=args.limit)
 
     logger.info("=== Raw extraction summary ===")
     for service, entity_set, status, count in summary:

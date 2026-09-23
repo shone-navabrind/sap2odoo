@@ -128,10 +128,18 @@ the raw dumps.
 `output_full_csv/`, because Stage 2 maps only the fields Odoo has a standard home for - roughly
 a tenth of the ~3,225 columns SAP returns. `entities/` is a lossless one-CSV-per-entity-set
 transcription; `objects/` widens each service's root entity with its one-to-one children;
-`_INDEX.csv` says what is in each and which of it no Odoo transform reads (currently 275 of 376
-entity sets). Where a record maps one-to-one to an Odoo record the CSVs carry an
-`odoo_external_id` column matching `output_odoo/`, so extra columns can be loaded onto
-already-imported records as custom fields. Reads only `output_raw/`; no SAP calls.
+`odoo_models/` mirrors `output_odoo/`'s file-per-Odoo-object layout but with every linkable SAP
+column attached (one-to-many children become a JSON array per cell); `_INDEX.csv` /
+`_MODEL_INDEX.csv` say what is in each and which of it no Odoo transform reads (currently 275 of
+376 entity sets). Reads only `output_raw/`; no SAP calls.
+
+> **Fixed 2026-09-23**: `write_odoo_model_csvs()` used to rescan a child entity's ENTIRE row list
+> for every parent row (`[r for r in child["rows"] if ...]` inside the parent loop) instead of
+> indexing children by parent key once. On a small tenant this was invisible; on the live tenant
+> (`khsupplierinvoice` alone has ~55k parent rows joining against ~680k child rows per child
+> collection) it made this stage run for hours and had to be killed with Ctrl+C. Children are now
+> indexed into a `{parent_id: [rows]}` dict once per service before the parent loop runs -
+> confirmed the same local dataset that used to take unbounded time now finishes in ~5s.
 
 **`python -m src.main`** runs all stages plus a validation pass against the registry, in order.
 
@@ -139,9 +147,28 @@ Why split them: re-running a transform after fixing a mapping bug doesn't requir
 (slow, chunked, rate-sensitive calls); and the raw dumps are themselves a useful audit trail of
 exactly what SAP has, independent of any Odoo decisions made on top of them.
 
+### Running one object, or a limited pull
+
+`python -m src.main`, `extract_raw`, and `transform_odoo` all accept `--only TEXT` (matched
+case-insensitively against a service name, entity set, or transform label) to scope a run to one
+business object - e.g. `python -m src.main --only khcustomer` or `--only res_partner`.
+`extract_raw`/`main` also take `--limit N` to cap every entity set at N rows, for a quick
+connectivity/shape check before committing to a full pull. Both were added because the full
+tenant pull is a multi-hour, many-hundred-call operation, and until now there was no way to
+re-pull or re-test just one object without re-running everything.
+
 ## Source system: SAP Business ByDesign, not S/4HANA
 
-Tenant: `my345654.sapbydesign.com`. Real OData path pattern (confirmed working):
+Tenant: originally `my345654.sapbydesign.com` (documented below); the user has since pointed
+`.env` at a second, live tenant (`my346623.sapbydesign.com`) with the same architecture. **The
+`schema_snapshots/*.metadata.xml` files were captured against the first tenant.** Custom `kh*`
+services fetch metadata live every run (see "Critical gotcha: live `$metadata` is unstable"
+below) so they self-correct against whichever tenant `.env` points at; the catch-all-avoiding
+`*_analytics.svc` snapshots do not, and could miss fields the live tenant has that the captured
+tenant didn't. If analytics output looks like it's missing columns on the new tenant, re-run
+`python -m src.snapshot_metadata` against it before assuming the field doesn't exist.
+
+Real OData path pattern (confirmed working):
 `{SAP_BASE_URL}/sap/byd/odata/<service_name>.svc/<EntitySet>` — a small named `.svc` service per
 business area with SAP-internal names (not S/4HANA's `/API_XXX_SRV/...`, and not a single
 flat catalog). The names do not have to be guessed: `GET {SAP_BASE_URL}/sap/byd/odata/` lists

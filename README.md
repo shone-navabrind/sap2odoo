@@ -49,6 +49,27 @@ python -m src.consolidated_report               # Rebuild CONSOLIDATED_STATUS.cs
 python -m src.generate_field_mapping_workbook   # Rebuild SAP_Field_Mapping.xlsx
 ```
 
+### Running just one object, or a limited/quick pull
+
+Every stage above (`main`, `extract_raw`, `transform_odoo`) accepts `--only TEXT` to scope the
+run to a single business object instead of the whole tenant - match against a service name,
+entity set, or transform label, whichever is easiest to remember:
+
+```bash
+python -m src.main --only khcustomer            # full pipeline, just Customers
+python -m src.main --only res_partner           # same thing, matched by the Odoo transform label
+python -m src.extract_raw --only vmumaterial     # Stage 1 only - just re-pull Products from SAP
+python -m src.transform_odoo --only product_template   # Stage 2 only - re-map from existing output_raw/
+```
+
+`extract_raw` and `main` also accept `--limit N` to cap every entity set at N rows during
+extraction - useful for a quick connectivity/shape check against a new or live tenant before
+committing to a full multi-hour pull:
+
+```bash
+python -m src.main --only khcustomer --limit 50   # pull 50 Customer rows and run the pipeline on them
+```
+
 ## Team status tracking (`PROJECT_STATUS.csv`)
 
 Regenerated automatically at the end of every `python -m src.main` run. One row per sheet
