@@ -15,11 +15,57 @@ import into Odoo.
 | Find a SAP data source by name — every entity set the tenant publishes | `SERVICE_CATALOG.csv` (1485 rows) |
 | Understand the code architecture and SAP quirks | `CLAUDE.md` |
 
-**Current state:** 39 of 67 objects done (**19 of 21 mandatory**), 256,137 records pulled from SAP
-across 376 entity sets, 14,198 rows written to 46 Odoo import files, plus a full-column export of
-all 3,225 SAP columns (see below). 38 of the 47 custom SAP service files are imported —
-`SAP_IMPORT_PLAN.md` lists the 9 remaining, the 6 blocked by SAP authorisation, and the 1 broken
-on SAP's side. All numbers are regenerated from live data on every run.
+## Status (2026-09-23)
+
+**In one paragraph:** 39 of the 67 requirement-sheet objects have real, verified SAP data flowing
+into Odoo-ready CSVs today, and that includes **19 of the 21 objects marked mandatory** — every
+mandatory master and transaction the client asked for is done except two, and both of those two
+have been investigated exhaustively rather than left unexplained: **Equipment (#34)** doesn't
+exist as a distinct data object anywhere in standard ByDesign (it's modelled as a serialized
+product, not master data - confirmed against the tenant's full catalog three times), and
+**BOMs (#40)** are confirmed absent from all 1,485 published + 609 XML-defined entity sets this
+tenant exposes, meaning no further OData import can produce them - both need a decision from
+Danlaw/the client (source elsewhere, manual entry, or descope) rather than more engineering here.
+Of the remaining 28 objects, 14 are `pending_mapping` (optional; a source is believed to exist but
+isn't wired up yet, mostly waiting on 9 still-unimported custom SAP service files - none of them
+unlock a mandatory item) and 14 are `not_in_bydesign` (the Engineering/PLM, Maintenance/PM, and
+Quality/QM modules aren't part of standard Business ByDesign at all, confirmed by a zero-match
+search of the tenant's 573-entry Design Data Sources catalog).
+
+**Mandatory objects (19/21 done):**
+
+| Status | Count | Detail |
+|---|---|---|
+| ✅ Done | 19 | See the per-object table below for the exact command/file for each |
+| ⛔ Not achievable via SAP OData | 1 | **#34 Equipment** - no such object exists in standard ByDesign |
+| ⛔ Needs a Business Configuration change, not an import | 1 | **#40 BOMs** - confirmed absent from every entity set the tenant publishes; needs PBOM data sources exposed via SAP Business Configuration, or a manual/alternate-source export |
+
+**Optional objects (20/46 done):**
+
+| Status | Count | What to do next |
+|---|---|---|
+| ✅ Done | 20 | - |
+| 🟡 `pending_mapping` | 13 | Import one of the 9 remaining custom service `.xml` files listed in `SAP_IMPORT_PLAN.md` (`byd-api-samples-main/Custom OData Services/`), then re-run `python -m src.main` (or `--only <service>` for just that one) |
+| ⚪ `not_in_bydesign` | 13 | Confirm with the client whether this data genuinely needs to come from a different source system - standard ByDesign has no equivalent module |
+
+(The registry's 14 `pending_mapping` and 14 `not_in_bydesign` totals shown above each include one
+of the two remaining mandatory gaps - BOMs and Equipment respectively - already counted in the
+mandatory table, hence 13 here rather than 14.)
+
+**Next actions, in priority order:**
+1. Confirm with the client/Danlaw how to handle the two remaining mandatory gaps (#34 Equipment,
+   #40 BOMs) - both are data-availability questions, not code questions.
+2. Import the 9 remaining optional custom services (`SAP_IMPORT_PLAN.md` has the exact file names
+   and what each one unlocks) if that data is wanted.
+3. Get the SDK/integration user's SAP authorizations extended for the services currently blocked
+   by `RBAM_ERROR` (khcustomerquote, khproject, khlead, khcustomerreturn, tmserviceorder,
+   tmservicerequest - see `SAP_IMPORT_PLAN.md`), which unlock several of the 14 `pending_mapping`
+   objects without any further engineering.
+4. Confirm the 14 `not_in_bydesign` objects (Engineering/PLM, Maintenance, Quality) are genuinely
+   out of scope, or identify their real source system if they're needed.
+
+All of these numbers are read live from `src/registry.py` and whatever is actually on disk - never
+hand-typed - so re-run `python -m src.validate` any time to get the current true count.
 
 ## How it works (pipeline)
 
