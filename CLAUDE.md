@@ -166,10 +166,12 @@ exactly what SAP has, independent of any Odoo decisions made on top of them.
 case-insensitively against a service name, entity set, or transform label) to scope a run to one
 business object - e.g. `python -m src.main --only khcustomer` or `--only res_partner`.
 `extract_raw`/`main` also take `--limit N` to cap every entity set at N rows, for a quick
-connectivity/shape check before committing to a full pull, and `--workers N` to pull entity sets
-concurrently via a thread pool instead of one at a time (default stays sequential - concurrency
-hasn't been load-tested against SAP's tolerance for simultaneous requests from one user). Both
-`--only`/`--limit` were added because the full
+connectivity/shape check before committing to a full pull; `--workers N` to pull entity sets
+concurrently via a thread pool instead of one at a time (default stays sequential; confirmed safe
+at `--workers 5` on this tenant on 2026-09-24 - ~5 entity sets/minute including 300k+ row ones
+that took 5-11 minutes each sequentially, no new errors); and `--resume` to skip anything already
+in `output_raw/` (switch an in-progress or interrupted run to a different `--workers` count
+without re-pulling). `--only`/`--limit` were added because the full
 tenant pull is a multi-hour, many-hundred-call operation, and until now there was no way to
 re-pull or re-test just one object without re-running everything.
 

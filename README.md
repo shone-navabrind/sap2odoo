@@ -264,17 +264,26 @@ That's why a full extraction takes hours: it's almost entirely network wait time
 `extract_raw` and `main` accept `--workers N` to pull N entity sets **concurrently** instead:
 
 ```bash
-python -m src.extract_raw --workers 6     # pull up to 6 entity sets at once
-python -m src.main --workers 6            # same, as part of the full pipeline
+python -m src.extract_raw --workers 5     # pull up to 5 entity sets at once
+python -m src.main --workers 5            # same, as part of the full pipeline
 ```
 
 This is implemented with a plain thread pool (`concurrent.futures.ThreadPoolExecutor`) - safe
 because every entity set writes its own separate `output_raw/*.json` file, so there's no shared
-state between threads to corrupt. **Caveat: concurrency hasn't been load-tested against this
-tenant** - it's not yet known how many simultaneous requests SAP will tolerate from one user
-before throttling or rejecting them. Default stays sequential (`--workers 1`) for that reason;
-start with a small number like 4-8 and watch for new `403`/`5xx` errors that don't happen at
-`--workers 1` before pushing higher.
+state between threads to corrupt. **Confirmed on this tenant (2026-09-24)**: switched a live,
+in-progress sequential extraction over to `--workers 5` partway through (using `--resume` below
+to pick up where it left off) and got roughly **5 entity sets/minute**, including several
+300,000+ row entities finishing concurrently that had taken 5-11 minutes *each* sequentially - no
+new errors, no throttling, nothing beyond the same 2 pre-existing SAP-side issues that show up
+regardless of concurrency. Default still stays sequential (`--workers 1`) since higher counts
+(10+) remain untested - `--workers 5` is a confirmed-safe starting point, not just a theory.
+
+If a run needs to be interrupted and restarted (or switched to a different `--workers` count),
+add `--resume` to skip everything already sitting in `output_raw/` instead of re-pulling it:
+
+```bash
+python -m src.main --resume --workers 5   # continue an interrupted/earlier run, in parallel
+```
 
 **Caveat:** since matching is substring-based against both service *and* entity set names, a
 short/generic word can match more than you expect - e.g. `--only costcentre` also matches
