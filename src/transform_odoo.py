@@ -1798,6 +1798,13 @@ def build_stock_transfers():
 
     picking_type_id is written as Odoo's built-in incoming-picking XML ID rather than an
     external ID of ours, because the receipt operation type ships with Odoo.
+
+    The external ID is keyed on ObjectID, not the human-readable ID field - confirmed by
+    diagnostics/validate_relations.py that SAP reuses the same ID across two different
+    ObjectIDs for a handful of deliveries (e.g. "8020005269" appears on both an "Inconsistent/
+    Not Released" draft and a later "Consistent/Released" version - looks like a
+    correction/reprocessing pattern for Customer Returns). Keying on ID silently collapsed each
+    such pair into one row, dropping the other. ID is kept as the display "name" only.
     """
     headers = load_raw("InboundDeliveryCollection", service_hint="khinbounddelivery")["rows"]
     items = load_raw("ItemCollection", service_hint="khinbounddelivery")["rows"]
@@ -1815,7 +1822,7 @@ def build_stock_transfers():
         known.add(object_id)
         party = resolve_party(senders, object_id, prefer="supplier")
         header_rows.append({
-            "id": external_id("sap_inbdel", delivery_id),
+            "id": external_id("sap_inbdel", object_id),
             "name": delivery_id,
             "partner_id/id": external_id("sap_bp", party) if party else "",
             "scheduled_date": parse_sap_date(delivery.get("CreationDateTime")) or "",
@@ -1835,8 +1842,7 @@ def build_stock_transfers():
         product_id = item.get("ProductID")
         line_rows.append({
             "id": external_id("sap_inbdel_item", item.get("ObjectID")),
-            "picking_id/id": external_id("sap_inbdel", next(
-                h["ID"] for h in headers if h.get("ObjectID") == parent)),
+            "picking_id/id": external_id("sap_inbdel", parent),
             "product_id/id": external_id("sap_prod", product_id) if product_id else "",
             "name": item.get("TypeCodeText") or item.get("ID", ""),
             "product_uom_qty": quantity,

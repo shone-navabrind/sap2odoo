@@ -144,6 +144,18 @@ covering every field SAP returned for every one of the 497 entity sets extracted
 385 entity sets that have no standard Odoo field to map into. See README.md's "Full-column
 export" section for how to load these as Odoo custom fields.
 
+## Data-quality audit (`diagnostics/`)
+
+`python diagnostics/validate_relations.py` independently re-checks every `output_odoo/*.csv`
+file from scratch - every relation column, does it actually resolve to a real record; is every
+`id` column actually unique; column-by-column blank/distinct counts. It found and led to fixing
+one real bug (`stock_picking_transfer.csv` had 3 duplicate external IDs, because SAP itself
+reuses the same delivery `ID` across two different `ObjectID`s for a handful of Customer
+Returns - now keyed on the always-unique `ObjectID` instead). The remaining **760 unresolved
+relation values (0.13% of all 599,565 rows)** were each traced to a real, explained cause - not
+a bug - documented in `diagnostics/FINDINGS.md`. Full per-file numbers in
+`diagnostics/RELATION_REPORT.md`.
+
 ## Known SAP-side issues (not fixable from this codebase)
 
 - `khpurchaseorder/NotesCollection` returns `HTTP 500 Internal Server Error` at `$skip=2000` -
