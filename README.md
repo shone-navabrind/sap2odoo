@@ -15,6 +15,25 @@ import into Odoo.
 | Find a SAP data source by name — every entity set the tenant publishes | `SERVICE_CATALOG.csv` (1485 rows) |
 | Understand the code architecture and SAP quirks | `CLAUDE.md` |
 
+## Glossary (plain English)
+
+A few words get used constantly in this project. If any of them are unfamiliar, here's what
+they actually mean - no prior SAP or Odoo experience assumed.
+
+| Term | What it means, in plain English |
+|---|---|
+| **OData** | The specific way SAP lets outside programs ask for its data over the internet. It's a standardized style of web address (URL) that means "give me the data from this table, optionally filtered/limited." Every SAP call this project makes is an OData request. |
+| **Service** | A named group of related data inside SAP - think of it like one drawer in a filing cabinet. E.g. the `khcustomer` service is the drawer that holds everything about Customers. |
+| **Entity set** (often just called an **entity**) | One specific *table* inside a service - like one folder inside that drawer. The `khcustomer` service, for example, doesn't just have one table - it has `CustomerCollection` (one row per customer), `PostalAddressCollection` (one row per address), `BankDetailsCollection` (one row per bank account on file), and more. Each entity set is extracted and saved as its own separate file. |
+| **Field** / **column** | One piece of information inside a row - exactly the same idea as a column in an Excel sheet (e.g. `CustomerID`, `CreatedOn`, `CountryCode`). |
+| **Row** / **record** | One single entry in an entity set - e.g. one specific customer, one specific invoice line. |
+| **`$metadata`** | SAP's own answer to "what columns does this table have?" - fetched before the real data, so the extractor knows exactly what fields to ask for. |
+| **`ObjectID`** | SAP's internal, unique ID for one row. Every row in every entity set has one. |
+| **`ParentObjectID`** | Says "this row belongs to that other row" - e.g. an address row's `ParentObjectID` points at the `ObjectID` of the customer it belongs to. This is how child data (addresses, bank details, invoice lines, …) gets linked back to its parent record. |
+| **External ID** | The ID format Odoo's CSV importer expects, e.g. `sap_bp_12345`. It lets Odoo recognize "this is the same record" if the file is re-imported later, and lets *other* files reference this record as a relationship (e.g. an invoice file pointing at `partner_id/id = sap_bp_12345`). |
+| **`--only <text>`** | A command-line option (see "Running just one object" below) that limits a run to whatever matches that text, instead of doing everything. |
+| **Tenant** | The specific SAP Business ByDesign instance/company account being connected to (`SAP_BASE_URL` in `.env`). "The live tenant" = the client's real, production SAP system. |
+
 ## Status (2026-09-23)
 
 **In one paragraph:** 39 of the 67 requirement-sheet objects have real, verified SAP data flowing
@@ -120,6 +139,52 @@ in-memory handoff), so Stage 2 (and 2b, 3, 4) can be re-run any number of times 
 calls already made in Stage 1, without re-hitting SAP — see "Where the logic lives" below for
 which file to touch for which kind of change.
 
+## The three output folders, explained simply
+
+Every run produces three separate folders, each answering a different question. Here's the
+plain-English version, using **Customers** as a worked example throughout:
+
+```
+output_raw/                            <- "What did SAP actually say?"
+  khcustomer__CustomerCollection.json      one file per entity set (table), every field,
+  khcustomer__PostalAddressCollection.json exactly as SAP returned it. Nothing curated yet.
+  khcustomer__BankDetailsCollection.json
+  ... (569 files like this, one per entity set)
+
+output_odoo/                           <- "What do I import into Odoo?"
+  res_partner.csv                          ONE file per Odoo object (Customers + Vendors are
+                                            both res_partner in Odoo), containing ONLY the
+                                            columns Odoo has a native field for, formatted the
+                                            way Odoo's Import screen expects (external IDs,
+                                            relation syntax). Upload these files directly.
+  res_partner_bank.csv
+  product_template.csv
+  ... (46 files like this - one per Odoo object built so far)
+
+output_full_csv/                       <- "Everything else, for custom fields"
+  entities/
+    khcustomer__CustomerCollection.csv     same content as output_raw/'s json files, just as
+    khcustomer__PostalAddressCollection.csv CSV instead of JSON - one file per entity set,
+    ...                                     every column, guaranteed nothing missing.
+  objects/
+    khcustomer.csv                         convenience view: the Customer table widened with
+                                            its address/bank/etc. columns merged in, so you
+                                            have fewer files to open per service.
+  odoo_models/
+    res_partner_full.csv (etc.)            the one to actually use for custom fields: same
+                                            row-per-record layout as output_odoo/res_partner.csv,
+                                            but with EVERY additional SAP column attached too -
+                                            so you can map a column here straight onto a custom
+                                            field for the exact same record you already imported.
+```
+
+**In one sentence each:**
+- `output_raw/` = the unedited photocopy of what SAP has.
+- `output_odoo/` = the finished files you import into Odoo as-is.
+- `output_full_csv/` = the "everything else" archive, structured so it can be loaded as custom
+  fields onto the records `output_odoo/` already created (see "Full-column export" below for the
+  exact how-to).
+
 ## Setup
 
 ```bash
@@ -189,6 +254,27 @@ multi-hour pull:
 ```bash
 python -m src.main --only khcustomer --limit 50   # pull 50 Customer rows and run the pipeline on them
 ```
+
+### Speeding up a full extraction: `--workers N`
+
+Stage 1 pulls 569 entity sets **one at a time, in sequence** by default - each is its own HTTP
+call that spends nearly all its time waiting on SAP's response, not doing any real work locally.
+That's why a full extraction takes hours: it's almost entirely network wait time, serialized.
+
+`extract_raw` and `main` accept `--workers N` to pull N entity sets **concurrently** instead:
+
+```bash
+python -m src.extract_raw --workers 6     # pull up to 6 entity sets at once
+python -m src.main --workers 6            # same, as part of the full pipeline
+```
+
+This is implemented with a plain thread pool (`concurrent.futures.ThreadPoolExecutor`) - safe
+because every entity set writes its own separate `output_raw/*.json` file, so there's no shared
+state between threads to corrupt. **Caveat: concurrency hasn't been load-tested against this
+tenant** - it's not yet known how many simultaneous requests SAP will tolerate from one user
+before throttling or rejecting them. Default stays sequential (`--workers 1`) for that reason;
+start with a small number like 4-8 and watch for new `403`/`5xx` errors that don't happen at
+`--workers 1` before pushing higher.
 
 **Caveat:** since matching is substring-based against both service *and* entity set names, a
 short/generic word can match more than you expect - e.g. `--only costcentre` also matches

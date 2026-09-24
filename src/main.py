@@ -41,6 +41,11 @@ def main():
         help="Cap each SAP entity set at N rows during extraction - for a quick/limited test "
              "run instead of pulling a whole tenant's history.",
     )
+    parser.add_argument(
+        "--workers", type=int, default=1, metavar="N",
+        help="Pull N entity sets concurrently in Stage 1 instead of one at a time (default: 1, "
+             "sequential). See `python -m src.extract_raw --help` for caveats.",
+    )
     args = parser.parse_args()
 
     config = load_config()
@@ -49,7 +54,7 @@ def main():
 
     logger.info("=== Stage 1: raw extraction from SAP -> output_raw/ ===")
     client = SAPODataClient(config)
-    raw_summary = extract_all(client, "output_raw", only=args.only, limit=args.limit)
+    raw_summary = extract_all(client, "output_raw", only=args.only, limit=args.limit, workers=args.workers)
 
     logger.info("=== Stage 2: transform raw data -> Odoo CSVs in output_odoo/ ===")
     transforms = TRANSFORMS

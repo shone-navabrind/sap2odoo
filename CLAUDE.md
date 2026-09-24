@@ -130,8 +130,21 @@ a tenth of the ~3,225 columns SAP returns. `entities/` is a lossless one-CSV-per
 transcription; `objects/` widens each service's root entity with its one-to-one children;
 `odoo_models/` mirrors `output_odoo/`'s file-per-Odoo-object layout but with every linkable SAP
 column attached (one-to-many children become a JSON array per cell); `_INDEX.csv` /
-`_MODEL_INDEX.csv` say what is in each and which of it no Odoo transform reads (currently 275 of
-376 entity sets). Reads only `output_raw/`; no SAP calls.
+`_MODEL_INDEX.csv` say what is in each and which of it no Odoo transform reads. Reads only
+`output_raw/`; no SAP calls.
+
+> **Fixed 2026-09-24**: `python -m src.coverage_gap` found 193 entity sets that were confirmed
+> LIVE on the tenant (real business fields, not codelists) but had never been added to `SOURCES`
+> at all - so they weren't extracted, full stop, regardless of what Stage 2b claims to capture.
+> 122 of the 193 belonged to 7 whole services (`khcustomerquote`, `khcustomerreturn`, `khlead`,
+> `khproject`, `tmserviceconfirmation`, `tmserviceorder`, `tmservicerequest`) that were imported
+> into SAP but never wired into the code at all; the other 71 were supplementary tables (Notes,
+> Attachments, extra contact details) on services that were already partly wired up. All 193 were
+> generated programmatically from `missing_entity_sets()` and appended to `SOURCES` (now 569
+> entries, was 376) - `coverage_gap.py --sets` reports 0 remaining. Note this is separate from,
+> and does not affect, "GAP 2" (SAP fields extracted but not mapped into a standard Odoo column) -
+> that data was never missing, it was always in `output_full_csv/entities/`; only GAP 1 (entity
+> sets never in `SOURCES` at all) meant genuinely-missing data.
 
 > **Fixed 2026-09-23**: `write_odoo_model_csvs()` used to rescan a child entity's ENTIRE row list
 > for every parent row (`[r for r in child["rows"] if ...]` inside the parent loop) instead of
@@ -153,7 +166,10 @@ exactly what SAP has, independent of any Odoo decisions made on top of them.
 case-insensitively against a service name, entity set, or transform label) to scope a run to one
 business object - e.g. `python -m src.main --only khcustomer` or `--only res_partner`.
 `extract_raw`/`main` also take `--limit N` to cap every entity set at N rows, for a quick
-connectivity/shape check before committing to a full pull. Both were added because the full
+connectivity/shape check before committing to a full pull, and `--workers N` to pull entity sets
+concurrently via a thread pool instead of one at a time (default stays sequential - concurrency
+hasn't been load-tested against SAP's tolerance for simultaneous requests from one user). Both
+`--only`/`--limit` were added because the full
 tenant pull is a multi-hour, many-hundred-call operation, and until now there was no way to
 re-pull or re-test just one object without re-running everything.
 

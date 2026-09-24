@@ -21,6 +21,7 @@ them back together on the account number would write one arbitrary project/docum
 into the raw dump and present it as fact. Naming the fields keeps the dump honest.
 """
 
+import concurrent.futures
 import json
 import logging
 import os
@@ -597,6 +598,265 @@ SOURCES = [
     ("sap/byd/odata/cust/v1/khserviceproductvaluationdata", "CostRateCollection"),            # 7 rows, 9 fields
     ("sap/byd/odata/cust/v1/khserviceproductvaluationdata", "ServiceProductValuationDataCollection"),# 7 rows, 7 fields
 
+    # --- Coverage-gap backfill (2026-09-24): entity sets that were LIVE on the tenant
+    # but never added to SOURCES - found by `python -m src.coverage_gap`. Includes 7 whole
+    # services (khcustomerquote, khcustomerreturn, khlead, khproject, tmserviceconfirmation,
+    # tmserviceorder, tmservicerequest) that were imported/live but never wired up at all,
+    # plus supplementary entity sets (Notes/Text/Attachment/contact-detail collections) on
+    # services that were already partially extracted. Some of the whole-service ones may
+    # fail with RBAM_ERROR (SAP authorization) - see SAP_IMPORT_PLAN.md; extract_all() logs
+    # and continues past any that do, same as everything else.
+    # --- khbusinesspartner: 2 entity sets found missing, 15 fields total ---
+    ("sap/byd/odata/cust/v1/khbusinesspartner", "NoteCollection"),                             # 11 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartner", "FacsimileCollection"),                        # 4 fields
+
+    # --- khbusinesspartnerrelationship: 7 entity sets found missing, 33 fields total ---
+    ("sap/byd/odata/cust/v1/khbusinesspartnerrelationship", "ServicePerformerBusinessAddressCollection"), # 8 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartnerrelationship", "ServicePerformerBusinessAddressInformationCollection"), # 6 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartnerrelationship", "ServicePerformerBusinessPhoneCollection"), # 4 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartnerrelationship", "ServicePerformerBusinessMobilePhoneCollection"), # 4 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartnerrelationship", "ServicePerformerBusinessEMailCollection"), # 4 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartnerrelationship", "ServicePerformerCollection"),     # 4 fields
+    ("sap/byd/odata/cust/v1/khbusinesspartnerrelationship", "ServicePerformerBusinessCommunicationPreferenceCollection"), # 3 fields
+
+    # --- khbusinessresidence: 2 entity sets found missing, 9 fields total ---
+    ("sap/byd/odata/cust/v1/khbusinessresidence", "StandardIdentificationCollection"),         # 6 fields
+    ("sap/byd/odata/cust/v1/khbusinessresidence", "SiteStandardIdentificationCollection"),     # 3 fields
+
+    # --- khcustomer: 6 entity sets found missing, 39 fields total ---
+    ("sap/byd/odata/cust/v1/khcustomer", "NoteCollection"),                                    # 11 fields
+    ("sap/byd/odata/cust/v1/khcustomer", "EmployeeResponsibleCollection"),                     # 10 fields
+    ("sap/byd/odata/cust/v1/khcustomer", "TaxExemptionCollection"),                            # 6 fields
+    ("sap/byd/odata/cust/v1/khcustomer", "IdentificationCollection"),                          # 4 fields
+    ("sap/byd/odata/cust/v1/khcustomer", "EMailCollection"),                                   # 4 fields
+    ("sap/byd/odata/cust/v1/khcustomer", "FacsimileCollection"),                               # 4 fields
+
+    # --- khcustomerinvoice: 3 entity sets found missing, 30 fields total ---
+    ("sap/byd/odata/cust/v1/khcustomerinvoice", "ItemAttachmentFolderCollection"),             # 19 fields
+    ("sap/byd/odata/cust/v1/khcustomerinvoice", "PaymentControlCollection"),                   # 6 fields
+    ("sap/byd/odata/cust/v1/khcustomerinvoice", "ExternalPaymentCollection"),                  # 5 fields
+
+    # --- khcustomerinvoicerequest: 2 entity sets found missing, 24 fields total ---
+    ("sap/byd/odata/cust/v1/khcustomerinvoicerequest", "ItemAttachmentFolderCollection"),      # 19 fields
+    ("sap/byd/odata/cust/v1/khcustomerinvoicerequest", "PaymentControlExternalPaymentCollection"), # 5 fields
+
+    # --- khcustomerquote: 32 entity sets found missing, 240 fields total ---
+    ("sap/byd/odata/cust/v1/khcustomerquote", "ItemCollection"),                               # 38 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "CustomerQuoteCollection"),                      # 33 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "ItemAttachmentFolderCollection"),               # 19 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "PriceComponentCollection"),                     # 18 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "ItemPriceComponentCollection"),                 # 16 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "ItemNotesCollection"),                          # 11 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "ItemPriceAndTaxCalculationCollection"),         # 11 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "NotesCollection"),                              # 11 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "SalesOrderReferenceCollection"),                # 6 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "DocumentReferenceCollection"),                  # 6 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "PriceAndTaxCalculationCollection"),             # 5 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "OpportunityReferenceCollection"),               # 5 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "BuyerPartyContactCollection"),                  # 5 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "ValidityPeriodCollection"),                     # 5 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "PeriodTermsCollection"),                        # 5 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "SalesUnitPartyCollection"),                     # 4 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "EmployeeResponsibleCollection"),                # 4 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "BillToPartyCollection"),                        # 4 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "ShipToPartyCollection"),                        # 4 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "BuyerPartyCollection"),                         # 4 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "ItemScheduleLineCollection"),                   # 4 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "SalesUnitPartyNameCollection"),                 # 2 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "EmployeeResponsibleNameCollection"),            # 2 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "BillToPartyAddressCollection"),                 # 2 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "BillToPartyNameCollection"),                    # 2 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "BuyerPartyContactEmailCollection"),             # 2 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "BuyerPartyContactTelephoneCollection"),         # 2 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "BuyerPartyContactNameCollection"),              # 2 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "ShipToPartyAddressCollection"),                 # 2 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "ShipToPartyNameCollection"),                    # 2 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "BuyerPartyAddressCollection"),                  # 2 fields
+    ("sap/byd/odata/cust/v1/khcustomerquote", "BuyerPartyNameCollection"),                     # 2 fields
+
+    # --- khcustomerreturn: 23 entity sets found missing, 131 fields total ---
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "ItemCollection"),                              # 22 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "CustomerReturnCollection"),                    # 17 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "CustomerReturnTextCollection"),                # 11 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "ItemPartyCollection"),                         # 8 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "BusinessTransactionDocumentReferenceCollection"), # 7 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "PaymentControlCollection"),                    # 6 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "BillToPartyCollection"),                       # 5 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "BuyerPartyCollection"),                        # 5 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "EmployeeResponsiblePartyCollection"),          # 5 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "SalesAndServiceBusinessAreaCollection"),       # 5 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "SalesUnitPartyCollection"),                    # 5 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "ExternalPaymentCollection"),                   # 5 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "PlannedQuantityCollection"),                   # 4 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "ItemSalesOrderReferenceCollection"),           # 4 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "ItemInboundDeliveryReferenceCollection"),      # 4 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "ItemCustomerInvoiceReferenceCollection"),      # 4 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "ItemPartyFormattedAddressCollection"),         # 2 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "ItemPartyNameCollection"),                     # 2 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "BillToPartyFormattedAddressCollection"),       # 2 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "BillToPartyNameCollection"),                   # 2 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "BuyerPartyNameCollection"),                    # 2 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "EmployeeResponsiblePartyNameCollection"),      # 2 fields
+    ("sap/byd/odata/cust/v1/khcustomerreturn", "SalesUnitPartyNameCollection"),                # 2 fields
+
+    # --- khemployee: 1 entity sets found missing, 9 fields total ---
+    ("sap/byd/odata/cust/v1/khemployee", "CurrentResponsibleManagerCollection"),               # 9 fields
+
+    # --- khemployeetime: 1 entity sets found missing, 11 fields total ---
+    ("sap/byd/odata/cust/v1/khemployeetime", "EmployeeTimeTextCollection"),                    # 11 fields
+
+    # --- khfunctionalunit: 4 entity sets found missing, 13 fields total ---
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "AddressInformationEMailCollection"),           # 4 fields
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "FunctionalUnitDefaultWebSiteCollection"),      # 3 fields
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "AddressInformationTelephoneCollection"),       # 3 fields
+    ("sap/byd/odata/cust/v1/khfunctionalunit", "AddressInformationFormattedAddressCollection"), # 3 fields
+
+    # --- khgoodsandactivityconfirmation: 5 entity sets found missing, 60 fields total ---
+    ("sap/byd/odata/cust/v1/khgoodsandactivityconfirmation", "InventoryChangeItemCollection"), # 20 fields
+    ("sap/byd/odata/cust/v1/khgoodsandactivityconfirmation", "GoodsAndActivityConfirmationCollection"), # 15 fields
+    ("sap/byd/odata/cust/v1/khgoodsandactivityconfirmation", "TextCollection"),                # 11 fields
+    ("sap/byd/odata/cust/v1/khgoodsandactivityconfirmation", "ItemTextCollection"),            # 11 fields
+    ("sap/byd/odata/cust/v1/khgoodsandactivityconfirmation", "SerialNumberCollection"),        # 3 fields
+
+    # --- khgoodsandserviceacknowledgement: 2 entity sets found missing, 30 fields total ---
+    ("sap/byd/odata/cust/v1/khgoodsandserviceacknowledgement", "ItemAttachmentFolderCollection"), # 19 fields
+    ("sap/byd/odata/cust/v1/khgoodsandserviceacknowledgement", "ItemTextCollection"),          # 11 fields
+
+    # --- khhousebankaccount: 2 entity sets found missing, 25 fields total ---
+    ("sap/byd/odata/cust/v1/khhousebankaccount", "HouseBankAccountCollection"),                # 18 fields
+    ("sap/byd/odata/cust/v1/khhousebankaccount", "BankDirectoryEntryBranchCollection"),        # 7 fields
+
+    # --- khinbounddelivery: 4 entity sets found missing, 38 fields total ---
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "AttachmentCollection"),                       # 19 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "NoteCollection"),                             # 11 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "GrossWeightMeasureCollection"),               # 4 fields
+    ("sap/byd/odata/cust/v1/khinbounddelivery", "GrossVolumeMeasureCollection"),               # 4 fields
+
+    # --- khlead: 19 entity sets found missing, 77 fields total ---
+    ("sap/byd/odata/cust/v1/khlead", "LeadCollection"),                                        # 15 fields
+    ("sap/byd/odata/cust/v1/khlead", "NoteCollection"),                                        # 11 fields
+    ("sap/byd/odata/cust/v1/khlead", "CampaignReferenceCollection"),                           # 6 fields
+    ("sap/byd/odata/cust/v1/khlead", "ProspectPartyCollection"),                               # 5 fields
+    ("sap/byd/odata/cust/v1/khlead", "ProspectPartyContactCollection"),                        # 5 fields
+    ("sap/byd/odata/cust/v1/khlead", "EmployeeResponsibleMarketingPartyCollection"),           # 4 fields
+    ("sap/byd/odata/cust/v1/khlead", "EmployeeResponsibleSalesPartyCollection"),               # 4 fields
+    ("sap/byd/odata/cust/v1/khlead", "MarketingUnitPartyCollection"),                          # 4 fields
+    ("sap/byd/odata/cust/v1/khlead", "SalesUnitPartyCollection"),                              # 3 fields
+    ("sap/byd/odata/cust/v1/khlead", "ProspectPartyNameCollection"),                           # 2 fields
+    ("sap/byd/odata/cust/v1/khlead", "ProspectPartyFormattedAddressCollection"),               # 2 fields
+    ("sap/byd/odata/cust/v1/khlead", "ProspectPartyContactNameCollection"),                    # 2 fields
+    ("sap/byd/odata/cust/v1/khlead", "ProspectPartyContactEmailCollection"),                   # 2 fields
+    ("sap/byd/odata/cust/v1/khlead", "ProspectPartyContactTelephoneCollection"),               # 2 fields
+    ("sap/byd/odata/cust/v1/khlead", "ProspectPartyEmailCollection"),                          # 2 fields
+    ("sap/byd/odata/cust/v1/khlead", "ProspectPartyTelephoneCollection"),                      # 2 fields
+    ("sap/byd/odata/cust/v1/khlead", "ProspectPartyWebCollection"),                            # 2 fields
+    ("sap/byd/odata/cust/v1/khlead", "EmployeeResponsibleMarketingNameCollection"),            # 2 fields
+    ("sap/byd/odata/cust/v1/khlead", "EmployeeResponsibleSalesNameCollection"),                # 2 fields
+
+    # --- khopportunity: 1 entity sets found missing, 11 fields total ---
+    ("sap/byd/odata/cust/v1/khopportunity", "TextCollection"),                                 # 11 fields
+
+    # --- khoutbounddelivery: 2 entity sets found missing, 8 fields total ---
+    ("sap/byd/odata/cust/v1/khoutbounddelivery", "GrossVolumeMeasureCollection"),              # 4 fields
+    ("sap/byd/odata/cust/v1/khoutbounddelivery", "GrossWeightMeasureCollection"),              # 4 fields
+
+    # --- khpayment: 1 entity sets found missing, 16 fields total ---
+    ("sap/byd/odata/cust/v1/khpayment", "HouseBankAccountCollection"),                         # 16 fields
+
+    # --- khproductionorder: 1 entity sets found missing, 11 fields total ---
+    ("sap/byd/odata/cust/v1/khproductionorder", "NotesCollection"),                            # 11 fields
+
+    # --- khproject: 11 entity sets found missing, 159 fields total ---
+    ("sap/byd/odata/cust/v1/khproject", "TaskCollection"),                                     # 28 fields
+    ("sap/byd/odata/cust/v1/khproject", "ProjectCollection"),                                  # 24 fields
+    ("sap/byd/odata/cust/v1/khproject", "TaskServiceCollection"),                              # 20 fields
+    ("sap/byd/odata/cust/v1/khproject", "TaskServiceConfirmationCollection"),                  # 20 fields
+    ("sap/byd/odata/cust/v1/khproject", "TeamCollection"),                                     # 17 fields
+    ("sap/byd/odata/cust/v1/khproject", "ProjectSummaryTaskCollection"),                       # 14 fields
+    ("sap/byd/odata/cust/v1/khproject", "TaskMaterialCollection"),                             # 14 fields
+    ("sap/byd/odata/cust/v1/khproject", "TaskExpenseCollection"),                              # 8 fields
+    ("sap/byd/odata/cust/v1/khproject", "TaskRevenueCollection"),                              # 6 fields
+    ("sap/byd/odata/cust/v1/khproject", "TaskRelationshipCollection"),                         # 5 fields
+    ("sap/byd/odata/cust/v1/khproject", "ProjectBuyerPartyCollection"),                        # 3 fields
+
+    # --- khsalesorder: 5 entity sets found missing, 50 fields total ---
+    ("sap/byd/odata/cust/v1/khsalesorder", "ItemAttachmentFolderCollection"),                  # 19 fields
+    ("sap/byd/odata/cust/v1/khsalesorder", "TextCollection"),                                  # 11 fields
+    ("sap/byd/odata/cust/v1/khsalesorder", "ItemTextCollection"),                              # 11 fields
+    ("sap/byd/odata/cust/v1/khsalesorder", "ExternalPaymentCollection"),                       # 5 fields
+    ("sap/byd/odata/cust/v1/khsalesorder", "ItemShipFromLocationDetailsCollection"),           # 4 fields
+
+    # --- khserviceproduct: 6 entity sets found missing, 51 fields total ---
+    ("sap/byd/odata/cust/v1/khserviceproduct", "TextCollection"),                              # 11 fields
+    ("sap/byd/odata/cust/v1/khserviceproduct", "PurchasingTextCollection"),                    # 11 fields
+    ("sap/byd/odata/cust/v1/khserviceproduct", "SalesTextCollection"),                         # 11 fields
+    ("sap/byd/odata/cust/v1/khserviceproduct", "CustomerInformationCollection"),               # 7 fields
+    ("sap/byd/odata/cust/v1/khserviceproduct", "QuantityConversionCollection"),                # 6 fields
+    ("sap/byd/odata/cust/v1/khserviceproduct", "WithholdingTaxClassificationCollection"),      # 5 fields
+
+    # --- khsupplier: 4 entity sets found missing, 22 fields total ---
+    ("sap/byd/odata/cust/v1/khsupplier", "NoteCollection"),                                    # 11 fields
+    ("sap/byd/odata/cust/v1/khsupplier", "CurrentDefaultFacsimileCollection"),                 # 4 fields
+    ("sap/byd/odata/cust/v1/khsupplier", "IdentificationCollection"),                          # 4 fields
+    ("sap/byd/odata/cust/v1/khsupplier", "CurrentDefaultFormattedAddressCollection"),          # 3 fields
+
+    # --- khsupplierinvoice: 1 entity sets found missing, 19 fields total ---
+    ("sap/byd/odata/cust/v1/khsupplierinvoice", "AttachmentCollection"),                       # 19 fields
+
+    # --- tmserviceconfirmation: 9 entity sets found missing, 49 fields total ---
+    ("sap/byd/odata/cust/v1/tmserviceconfirmation", "ItemCollection"),                         # 12 fields
+    ("sap/byd/odata/cust/v1/tmserviceconfirmation", "ServiceConfirmationCollection"),          # 11 fields
+    ("sap/byd/odata/cust/v1/tmserviceconfirmation", "BTDReferenceCollection"),                 # 5 fields
+    ("sap/byd/odata/cust/v1/tmserviceconfirmation", "MainIncidentServiceIssueCategoryCollection"), # 5 fields
+    ("sap/byd/odata/cust/v1/tmserviceconfirmation", "ItemScheduleLineCollection"),             # 4 fields
+    ("sap/byd/odata/cust/v1/tmserviceconfirmation", "BuyerCollection"),                        # 3 fields
+    ("sap/byd/odata/cust/v1/tmserviceconfirmation", "ReferenceObjectCollection"),              # 3 fields
+    ("sap/byd/odata/cust/v1/tmserviceconfirmation", "ProcessorCollection"),                    # 3 fields
+    ("sap/byd/odata/cust/v1/tmserviceconfirmation", "ServicePerformerCollection"),             # 3 fields
+
+    # --- tmserviceorder: 20 entity sets found missing, 120 fields total ---
+    ("sap/byd/odata/cust/v1/tmserviceorder", "ServiceOrderCollection"),                        # 27 fields
+    ("sap/byd/odata/cust/v1/tmserviceorder", "TextCollection"),                                # 11 fields
+    ("sap/byd/odata/cust/v1/tmserviceorder", "ItemCollection"),                                # 10 fields
+    ("sap/byd/odata/cust/v1/tmserviceorder", "ItemScheduleLineCollection"),                    # 8 fields
+    ("sap/byd/odata/cust/v1/tmserviceorder", "RequestedItemScheduleLineCollection"),           # 7 fields
+    ("sap/byd/odata/cust/v1/tmserviceorder", "ServiceRequestReferenceCollection"),             # 6 fields
+    ("sap/byd/odata/cust/v1/tmserviceorder", "BusinessTransactionDocumentReferenceCollection"), # 6 fields
+    ("sap/byd/odata/cust/v1/tmserviceorder", "ServiceOrderPeriodTermsCollection"),             # 6 fields
+    ("sap/byd/odata/cust/v1/tmserviceorder", "PlannedArrivalAtCustomerTimePointCollection"),   # 4 fields
+    ("sap/byd/odata/cust/v1/tmserviceorder", "FirstReactionDueTimePointCollection"),           # 4 fields
+    ("sap/byd/odata/cust/v1/tmserviceorder", "ExecutionReleaseTimePointCollection"),           # 4 fields
+    ("sap/byd/odata/cust/v1/tmserviceorder", "CompletionDueTimePointCollection"),              # 4 fields
+    ("sap/byd/odata/cust/v1/tmserviceorder", "BuyerPartyCollection"),                          # 4 fields
+    ("sap/byd/odata/cust/v1/tmserviceorder", "ServicePerformerCollection"),                    # 3 fields
+    ("sap/byd/odata/cust/v1/tmserviceorder", "ServiceSupportTeamCollection"),                  # 3 fields
+    ("sap/byd/odata/cust/v1/tmserviceorder", "ReferenceObjectCollection"),                     # 3 fields
+    ("sap/byd/odata/cust/v1/tmserviceorder", "ProcessorCollection"),                           # 3 fields
+    ("sap/byd/odata/cust/v1/tmserviceorder", "MainIncidentServiceIssueCategoryCollection"),    # 3 fields
+    ("sap/byd/odata/cust/v1/tmserviceorder", "ServiceExecutionTeamPartyCollection"),           # 2 fields
+    ("sap/byd/odata/cust/v1/tmserviceorder", "BuyerPartyDisplayNameCollection"),               # 2 fields
+
+    # --- tmservicerequest: 8 entity sets found missing, 35 fields total ---
+    ("sap/byd/odata/cust/v1/tmservicerequest", "ServiceRequestCollection"),                    # 8 fields
+    ("sap/byd/odata/cust/v1/tmservicerequest", "BusinessTransactionDocumentReferenceCollection"), # 7 fields
+    ("sap/byd/odata/cust/v1/tmservicerequest", "ReferenceObjectCollection"),                   # 5 fields
+    ("sap/byd/odata/cust/v1/tmservicerequest", "CompletionDueCollection"),                     # 3 fields
+    ("sap/byd/odata/cust/v1/tmservicerequest", "IncidentServiceIssueCategoryCollection"),      # 3 fields
+    ("sap/byd/odata/cust/v1/tmservicerequest", "BuyerCollection"),                             # 3 fields
+    ("sap/byd/odata/cust/v1/tmservicerequest", "ProcessorCollection"),                         # 3 fields
+    ("sap/byd/odata/cust/v1/tmservicerequest", "ServiceSupportTeamCollection"),                # 3 fields
+
+    # --- vmumaterial: 9 entity sets found missing, 67 fields total ---
+    ("sap/byd/odata/cust/v1/vmumaterial", "SalesTextCollection"),                              # 11 fields
+    ("sap/byd/odata/cust/v1/vmumaterial", "PurchasingTextCollection"),                         # 11 fields
+    ("sap/byd/odata/cust/v1/vmumaterial", "SalesWarrantyCollection"),                          # 10 fields
+    ("sap/byd/odata/cust/v1/vmumaterial", "CustomerInformationCollection"),                    # 7 fields
+    ("sap/byd/odata/cust/v1/vmumaterial", "QuantityCharacteristicCollection"),                 # 7 fields
+    ("sap/byd/odata/cust/v1/vmumaterial", "LogisticsStorageGroupCollection"),                  # 6 fields
+    ("sap/byd/odata/cust/v1/vmumaterial", "LogisticsProductionGroupCollection"),               # 6 fields
+    ("sap/byd/odata/cust/v1/vmumaterial", "WithholdingTaxClassificationCollection"),           # 5 fields
+    ("sap/byd/odata/cust/v1/vmumaterial", "GlobalTradeItemNumberCollection"),                  # 4 fields
+
 ]
 
 
@@ -620,58 +880,79 @@ def matching_sources(only=None):
     ]
 
 
-def extract_all(client, output_dir, only=None, limit=None):
+def _extract_one(client, output_dir, source, limit):
+    """
+    Pull and write a single (service, entity_set) source. Returns the summary tuple. Never
+    raises - a failure is caught, logged, and reported as a "FAILED" summary row so one bad
+    entity set doesn't stop the rest (see extract_all's caller in src/main.py for the same
+    contract at the transform stage).
+    """
+    service, entity_set = source[0], source[1]
+    options = source[2] if len(source) > 2 else {}
+    expand, select = options.get("expand"), options.get("select")
+    detail = f" (expand={expand})" if expand else f" (select={len(select)} fields)" if select else ""
+    if limit:
+        detail += f" (limit={limit})"
+    logger.info("Raw extracting %s/%s%s ...", service, entity_set, detail)
+    try:
+        if select:
+            rows = client.get_entity_set(service, entity_set, select=select, max_rows=limit)
+            declared_fields = select
+        else:
+            rows, declared_fields = client.get_entity_set_all_fields(
+                service, entity_set, expand=expand, max_rows=limit
+            )
+    except Exception:
+        logger.exception("FAILED raw extraction: %s/%s", service, entity_set)
+        return (service, entity_set, "FAILED", 0)
+
+    fields_present = sorted({k for row in rows for k in row if k != "__metadata"})
+    payload = {
+        "service": service,
+        "entity_set": entity_set,
+        "declared_field_count": len(declared_fields),
+        "row_count": len(rows),
+        "fields_present": fields_present,
+        "rows": [{k: v for k, v in row.items() if k != "__metadata"} for row in rows],
+    }
+
+    path = os.path.join(output_dir, raw_filename(service, entity_set))
+    with open(path, "w", encoding="utf-8") as f:
+        json.dump(payload, f, indent=2, default=str)
+
+    logger.info("Wrote %s (%d rows, %d columns)", path, len(rows), len(fields_present))
+    return (service, entity_set, "OK", len(rows))
+
+
+def extract_all(client, output_dir, only=None, limit=None, workers=1):
     """
     only: case-insensitive substring to match against service name or entity set - e.g.
       only="khcustomer" pulls just the Customers object, only="vmumaterial" pulls just Products.
     limit: caps each entity set at this many rows (via $top), for a quick/limited test pull
       instead of a full extraction.
+    workers: how many (service, entity_set) sources to pull concurrently. Defaults to 1
+      (sequential - the original, fully-verified behaviour). Each source is an independent
+      HTTP round-trip spending nearly all its time waiting on SAP, not on CPU, so this is
+      I/O-bound and a natural fit for a thread pool: one call sitting idle waiting for a
+      response doesn't block another from being sent. Every source writes its own distinct
+      output_raw/*.json file, so there is no shared state between threads to corrupt.
+      Not yet verified at scale against this tenant's concurrency tolerance - start with a
+      small number (e.g. 4-8) rather than assuming SAP will accept dozens of simultaneous
+      requests from one user.
     """
     os.makedirs(output_dir, exist_ok=True)
-    summary = []
     sources = matching_sources(only)
     if only and not sources:
         logger.warning("--only %r matched nothing in SOURCES", only)
 
-    for source in sources:
-        # A source is (service, entity_set) or (service, entity_set, options) - see SOURCES.
-        service, entity_set = source[0], source[1]
-        options = source[2] if len(source) > 2 else {}
-        expand, select = options.get("expand"), options.get("select")
-        detail = f" (expand={expand})" if expand else f" (select={len(select)} fields)" if select else ""
-        if limit:
-            detail += f" (limit={limit})"
-        logger.info("Raw extracting %s/%s%s ...", service, entity_set, detail)
-        try:
-            if select:
-                rows = client.get_entity_set(service, entity_set, select=select, max_rows=limit)
-                declared_fields = select
-            else:
-                rows, declared_fields = client.get_entity_set_all_fields(
-                    service, entity_set, expand=expand, max_rows=limit
-                )
-        except Exception:
-            logger.exception("FAILED raw extraction: %s/%s", service, entity_set)
-            summary.append((service, entity_set, "FAILED", 0))
-            continue
+    if workers <= 1:
+        return [_extract_one(client, output_dir, source, limit) for source in sources]
 
-        fields_present = sorted({k for row in rows for k in row if k != "__metadata"})
-        payload = {
-            "service": service,
-            "entity_set": entity_set,
-            "declared_field_count": len(declared_fields),
-            "row_count": len(rows),
-            "fields_present": fields_present,
-            "rows": [{k: v for k, v in row.items() if k != "__metadata"} for row in rows],
-        }
-
-        path = os.path.join(output_dir, raw_filename(service, entity_set))
-        with open(path, "w", encoding="utf-8") as f:
-            json.dump(payload, f, indent=2, default=str)
-
-        logger.info("Wrote %s (%d rows, %d columns)", path, len(rows), len(fields_present))
-        summary.append((service, entity_set, "OK", len(rows)))
-
+    summary = []
+    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+        futures = [pool.submit(_extract_one, client, output_dir, source, limit) for source in sources]
+        for future in concurrent.futures.as_completed(futures):
+            summary.append(future.result())
     return summary
 
 
@@ -690,12 +971,20 @@ def main():
         help="Cap each entity set at N rows, for a quick/limited test pull instead of a full "
              "extraction. Combine with --only to pull a small sample of one object.",
     )
+    parser.add_argument(
+        "--workers", type=int, default=1, metavar="N",
+        help="Pull N entity sets concurrently instead of one at a time (default: 1, sequential). "
+             "Each source is its own HTTP call spending most of its time waiting on SAP, so this "
+             "can speed up a full extraction significantly - but concurrency hasn't been "
+             "verified at scale against this tenant, so start small (e.g. 4-8) rather than a "
+             "large number.",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     config = load_config()
     client = SAPODataClient(config)
-    summary = extract_all(client, "output_raw", only=args.only, limit=args.limit)
+    summary = extract_all(client, "output_raw", only=args.only, limit=args.limit, workers=args.workers)
 
     logger.info("=== Raw extraction summary ===")
     for service, entity_set, status, count in summary:
