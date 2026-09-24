@@ -46,6 +46,11 @@ def main():
         help="Pull N entity sets concurrently in Stage 1 instead of one at a time (default: 1, "
              "sequential). See `python -m src.extract_raw --help` for caveats.",
     )
+    parser.add_argument(
+        "--resume", action="store_true",
+        help="Skip any Stage 1 source whose output_raw/*.json file already exists - continue an "
+             "interrupted run, or switch it to a different --workers count, without re-pulling.",
+    )
     args = parser.parse_args()
 
     config = load_config()
@@ -54,7 +59,9 @@ def main():
 
     logger.info("=== Stage 1: raw extraction from SAP -> output_raw/ ===")
     client = SAPODataClient(config)
-    raw_summary = extract_all(client, "output_raw", only=args.only, limit=args.limit, workers=args.workers)
+    raw_summary = extract_all(
+        client, "output_raw", only=args.only, limit=args.limit, workers=args.workers, resume=args.resume
+    )
 
     logger.info("=== Stage 2: transform raw data -> Odoo CSVs in output_odoo/ ===")
     transforms = TRANSFORMS

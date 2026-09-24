@@ -924,7 +924,7 @@ def _extract_one(client, output_dir, source, limit):
     return (service, entity_set, "OK", len(rows))
 
 
-def extract_all(client, output_dir, only=None, limit=None, workers=1):
+def extract_all(client, output_dir, only=None, limit=None, workers=1, resume=False):
     """
     only: case-insensitive substring to match against service name or entity set - e.g.
       only="khcustomer" pulls just the Customers object, only="vmumaterial" pulls just Products.
@@ -939,11 +939,26 @@ def extract_all(client, output_dir, only=None, limit=None, workers=1):
       Not yet verified at scale against this tenant's concurrency tolerance - start with a
       small number (e.g. 4-8) rather than assuming SAP will accept dozens of simultaneous
       requests from one user.
+    resume: skip any source whose output_raw/*.json file already exists (regardless of when
+      or how it was written - a prior run, a --only backfill, anything). Lets a run be
+      switched to a different --workers count, or restarted after an interruption, without
+      re-pulling everything from scratch. Does NOT verify an existing file is complete or
+      correct (e.g. from a run cut off mid-write) - if in doubt, delete that one file first
+      and it will be re-pulled.
     """
     os.makedirs(output_dir, exist_ok=True)
     sources = matching_sources(only)
     if only and not sources:
         logger.warning("--only %r matched nothing in SOURCES", only)
+
+    if resume:
+        before = len(sources)
+        sources = [
+            s for s in sources
+            if not os.path.isfile(os.path.join(output_dir, raw_filename(s[0], s[1])))
+        ]
+        logger.info("--resume: skipping %d sources already in %s/, %d remaining",
+                    before - len(sources), output_dir, len(sources))
 
     if workers <= 1:
         return [_extract_one(client, output_dir, source, limit) for source in sources]
@@ -979,12 +994,20 @@ def main():
              "verified at scale against this tenant, so start small (e.g. 4-8) rather than a "
              "large number.",
     )
+    parser.add_argument(
+        "--resume", action="store_true",
+        help="Skip any source whose output_raw/*.json file already exists. Use this to switch "
+             "an in-progress or interrupted extraction to a different --workers count without "
+             "re-pulling everything already done.",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s: %(message)s")
     config = load_config()
     client = SAPODataClient(config)
-    summary = extract_all(client, "output_raw", only=args.only, limit=args.limit, workers=args.workers)
+    summary = extract_all(
+        client, "output_raw", only=args.only, limit=args.limit, workers=args.workers, resume=args.resume
+    )
 
     logger.info("=== Raw extraction summary ===")
     for service, entity_set, status, count in summary:
