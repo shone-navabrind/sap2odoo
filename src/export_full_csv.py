@@ -379,9 +379,19 @@ def _apply_root_to_model(output_rows, matched_ids, fieldnames, seen_fields, serv
         for row in root["rows"]
         if _root_external_id(prefix, key_fields, row)
     }
-    # The root itself and ParentObjectID children are linkable. Other entity sets in this
-    # service stay in entities/ only, to avoid attaching unrelated records to every Odoo row.
-    children = [e for e in service_entities if e is not root and any(r.get("ParentObjectID") for r in e["rows"])]
+    # A child must actually point AT one of this root's own ObjectIDs, not just carry a
+    # ParentObjectID at all - a service can hold more than one independent root (vmumaterial has
+    # both MaterialCollection/Products and MaterialBaseMeasureUnitCodeCollection/UOM codes), and
+    # without this check every other entity in the service - including a DIFFERENT root's real
+    # children - got listed as an available column on every model built from that service, even
+    # when the join could never actually populate them (e.g. product fields showing up as
+    # "available" on uom.uom, which has no ObjectID to join through in the first place).
+    root_object_ids = {row.get("ObjectID") for row in root["rows"] if row.get("ObjectID")}
+    children = [
+        e for e in service_entities
+        if e is not root and root_object_ids
+        and any(_parent_key(r) in root_object_ids for r in e["rows"])
+    ]
 
     # Index each child once by parent key instead of rescanning its full row list for every
     # output row - a linear scan here made this O(rows * child_rows), which took hours (and had
