@@ -7,6 +7,7 @@ import into Odoo.
 
 | If you want to… | Read / open |
 |---|---|
+| **See the current real status** — what's done, pending, blocked, and why, with record counts | **[`STATUS.md`](STATUS.md)** |
 | **Know what to do next in SAP** — which service files to import, and what each one unlocks | **[`SAP_IMPORT_PLAN.md`](SAP_IMPORT_PLAN.md)** |
 | **Understand the whole project** (technical or not) — what's done, which API gives what, sample data, what's left | **[`DATA_MIGRATION_GUIDE.md`](DATA_MIGRATION_GUIDE.md)** |
 | See **everything in one table** — every API call, records in/out, status | **`CONSOLIDATED_STATUS.csv`** |
@@ -212,6 +213,27 @@ python -m src.status_report   # Regenerate PROJECT_STATUS.csv from whatever's cu
 python -m src.consolidated_report               # Rebuild CONSOLIDATED_STATUS.csv
 python -m src.generate_field_mapping_workbook   # Rebuild SAP_Field_Mapping.xlsx
 ```
+
+### Starting fresh: cleaning up old output
+
+`output_raw/`, `output_odoo/`, and `output_full_csv/` can add up to several GB on a real tenant
+(the live tenant's full extraction is ~7GB across the three). `python -m src.clean` removes them
+safely - it always shows exactly what it's about to delete and its total size, and requires an
+explicit `yes` (interactively) or `--yes` (for scripts) before touching anything:
+
+```bash
+python -m src.clean                  # interactive - asks what to delete, confirms before deleting
+python -m src.clean --all --yes      # delete everything (raw, odoo, full-csv, logs, reports), no prompt
+python -m src.clean --raw --yes      # just output_raw/, to force a full re-extraction from SAP
+python -m src.clean --odoo --yes     # just output_odoo/, to force Stage 2 to rebuild from existing raw data
+```
+
+After cleaning, `python -m src.main` (optionally with `--resume` if a prior partial extraction
+is still in `output_raw/`) starts a completely fresh run. These folders are intentionally **not**
+tracked in git (see `.gitignore`) - they're real business data pulled from a live tenant, several
+individual files exceed GitHub's 100MB per-file limit on their own, and the total size makes a
+normal git repo impractical. If you need to hand this data to someone else, copy the folders
+directly (or zip them) rather than relying on git.
 
 ## Where the logic lives
 
