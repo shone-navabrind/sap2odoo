@@ -48,8 +48,10 @@ import gc
 import json
 import logging
 import os
+import re
 import sys
 import time
+from datetime import datetime, timezone
 
 from src.csv_writer import external_id
 from src.extract_raw import SOURCES
@@ -193,6 +195,47 @@ def load_raw_files_for_service(service):
     return out
 
 
+# SAP OData v2 (this tenant's dialect) encodes Edm.DateTime as "/Date(epoch_ms)/" and Edm.Time
+# as an ISO-8601 duration ("PT1H30M0S"). Odoo's own transforms already convert the specific
+# fields they map (src/sap_client.py's parse_sap_date()), but every OTHER date/time-shaped
+# column - the ~2,900 that only exist in this full-column export - was passed through as the
+# literal SAP-formatted string, which is not something Odoo's CSV importer can parse into a
+# Date/Datetime/Float field. Normalized here, at the single point every cell value passes
+# through, rather than per-field, so nothing new added later can slip past it unnoticed.
+_SAP_DATETIME_RE = re.compile(r"^/Date\((-?\d+)\)/$")
+_SAP_DURATION_RE = re.compile(r"^PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?$")
+
+
+def _normalize_sap_value(value):
+    """
+    Converts a raw SAP-formatted string to something Odoo's importer can actually use:
+      "/Date(1548392338608)/"  -> "2019-01-25 06:38:58"  (full precision kept - a Date-typed
+                                   Odoo field just uses the date part; a Datetime-typed one
+                                   gets the time too, so nothing is lost by always keeping it)
+      "PT1H30M0S"               -> "1.5"  (decimal hours, matching how Odoo's own Float-typed
+                                   duration fields, e.g. mrp.workorder's duration, store time)
+    Anything that isn't one of these two exact SAP formats is returned unchanged.
+    """
+    date_match = _SAP_DATETIME_RE.match(value)
+    if date_match:
+        epoch_ms = int(date_match.group(1))
+        try:
+            dt = datetime.fromtimestamp(epoch_ms / 1000, tz=timezone.utc)
+        except (ValueError, OverflowError, OSError):
+            # SAP's own "no date set" sentinel (seen as /Date(-62135769600000)/, which lands
+            # right around year 0/1 - outside what Python's datetime can represent at all) -
+            # this means "no date," not a real one, so blank is the correct value, not a crash.
+            return ""
+        return dt.strftime("%Y-%m-%d %H:%M:%S")
+
+    duration_match = _SAP_DURATION_RE.match(value)
+    if duration_match and value != "PT":
+        hours, minutes, seconds = (float(g) if g else 0.0 for g in duration_match.groups())
+        return f"{hours + minutes / 60 + seconds / 3600:g}"
+
+    return value
+
+
 def _cell(value):
     """A CSV-safe scalar. Nested values are kept as JSON rather than silently flattened away."""
     if value is None:
@@ -201,6 +244,8 @@ def _cell(value):
         return "True" if value else "False"
     if isinstance(value, (dict, list)):
         return json.dumps(value, default=str)
+    if isinstance(value, str):
+        return _normalize_sap_value(value)
     return str(value)
 
 
@@ -428,8 +473,20 @@ def _apply_root_to_model(output_rows, matched_ids, fieldnames, seen_fields, serv
                 continue
             for field in child["fields"]:
                 values = [_cell(row.get(field)) for row in child_rows]
-                # Scalar for a genuine 1:1 child, JSON array for all multi-row children.
-                out[_sap_column(child, field)] = values[0] if len(values) == 1 else json.dumps(values)
+                distinct = set(values)
+                # A field that happens to hold the SAME value on every line of this parent
+                # (common for things like currency code, tax jurisdiction, or timezone, which
+                # rarely vary line-to-line on one document) is written as that one scalar value,
+                # not a JSON array repeating it N times - "["INDIA", "INDIA", "INDIA"]" is not
+                # something Odoo's importer can use in a Char/Selection field, and repeating an
+                # identical value carries no extra information a single value doesn't already
+                # have. Only genuinely varying per-line data (ProductID, Quantity, ...) becomes
+                # an array - which is inherent to a header row representing several lines, not
+                # something a smarter cell format could avoid.
+                if len(distinct) == 1:
+                    out[_sap_column(child, field)] = next(iter(distinct))
+                else:
+                    out[_sap_column(child, field)] = json.dumps(values)
 
 
 def write_odoo_model_csvs():
