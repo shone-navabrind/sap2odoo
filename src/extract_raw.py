@@ -29,6 +29,7 @@ import sys
 
 from src.config import load_config
 from src.sap_client import SAPODataClient
+from src.sysmem import safe_worker_count
 
 logger = logging.getLogger("sap2odoo.extract_raw")
 
@@ -930,15 +931,17 @@ def extract_all(client, output_dir, only=None, limit=None, workers=1, resume=Fal
       only="khcustomer" pulls just the Customers object, only="vmumaterial" pulls just Products.
     limit: caps each entity set at this many rows (via $top), for a quick/limited test pull
       instead of a full extraction.
-    workers: how many (service, entity_set) sources to pull concurrently. Defaults to 1
-      (sequential - the original, fully-verified behaviour). Each source is an independent
-      HTTP round-trip spending nearly all its time waiting on SAP, not on CPU, so this is
-      I/O-bound and a natural fit for a thread pool: one call sitting idle waiting for a
-      response doesn't block another from being sent. Every source writes its own distinct
-      output_raw/*.json file, so there is no shared state between threads to corrupt.
-      Not yet verified at scale against this tenant's concurrency tolerance - start with a
-      small number (e.g. 4-8) rather than assuming SAP will accept dozens of simultaneous
-      requests from one user.
+    workers: how many (service, entity_set) sources to pull concurrently, AT MOST - the actual
+      number used is re-checked against currently-available system memory before every batch
+      (see src/sysmem.py) and scaled down automatically if the machine is under real memory
+      pressure from other things running on it, rather than always using exactly what was
+      asked for. Defaults to 1 (sequential - the original, fully-verified behaviour). Each
+      source is an independent HTTP round-trip spending nearly all its time waiting on SAP, not
+      on CPU, so this is I/O-bound and a natural fit for a thread pool: one call sitting idle
+      waiting for a response doesn't block another from being sent. Every source writes its own
+      distinct output_raw/*.json file, so there is no shared state between threads to corrupt.
+      Confirmed safe on this tenant at --workers 5 (2026-09-24): ~5-19 entity sets/minute, no
+      new errors versus sequential.
     resume: skip any source whose output_raw/*.json file already exists (regardless of when
       or how it was written - a prior run, a --only backfill, anything). Lets a run be
       switched to a different --workers count, or restarted after an interruption, without
@@ -963,11 +966,27 @@ def extract_all(client, output_dir, only=None, limit=None, workers=1, resume=Fal
     if workers <= 1:
         return [_extract_one(client, output_dir, source, limit) for source in sources]
 
+    return _extract_all_parallel(client, output_dir, sources, limit, workers)
+
+
+def _extract_all_parallel(client, output_dir, sources, limit, requested_workers):
+    """
+    Runs `sources` through a thread pool in waves rather than one pool sized once for the whole
+    run: before each wave, safe_worker_count() re-checks memory RIGHT NOW and sizes that wave to
+    what's actually safe, so a run that starts with headroom to spare but later competes with
+    other things on the machine (a browser tab, another app opening) scales itself down instead
+    of ploughing on and risking the same OOM kill export_full_csv.py had. A quiet machine gets
+    the full requested concurrency throughout; a loaded one gets less, automatically.
+    """
     summary = []
-    with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
-        futures = [pool.submit(_extract_one, client, output_dir, source, limit) for source in sources]
-        for future in concurrent.futures.as_completed(futures):
-            summary.append(future.result())
+    remaining = list(sources)
+    while remaining:
+        workers = safe_worker_count(requested_workers)
+        batch, remaining = remaining[:workers], remaining[workers:]
+        with concurrent.futures.ThreadPoolExecutor(max_workers=workers) as pool:
+            futures = [pool.submit(_extract_one, client, output_dir, source, limit) for source in batch]
+            for future in concurrent.futures.as_completed(futures):
+                summary.append(future.result())
     return summary
 
 

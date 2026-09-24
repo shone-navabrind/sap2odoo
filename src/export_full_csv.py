@@ -49,9 +49,11 @@ import json
 import logging
 import os
 import sys
+import time
 
 from src.csv_writer import external_id
 from src.extract_raw import SOURCES
+from src.sysmem import low_memory
 
 logger = logging.getLogger("sap2odoo.export_full_csv")
 
@@ -357,6 +359,10 @@ def _apply_root_to_model(output_rows, matched_ids, fieldnames, seen_fields, serv
     """
     if not key_fields:
         return
+    if low_memory():
+        logger.warning("Low memory before loading %s for %s - pausing 10s", service, root_name)
+        gc.collect()
+        time.sleep(10)
     service_entities = load_raw_files_for_service(service)
     root = next((e for e in service_entities if e["entity_set"] == root_name), None)
     if not root:
@@ -556,6 +562,20 @@ def main():
     decisions = []
     entity_meta = []
     for service in services:
+        # Real backpressure, not just a log line: if the machine is genuinely low on memory
+        # right now (competing with whatever else is running on it), wait and let things settle
+        # rather than loading another potentially-large service on top of an already-tight
+        # situation - this is what export_full_csv.py didn't have the first time and got
+        # OOM-killed. Capped retries so a permanently memory-starved machine doesn't hang
+        # forever; it proceeds anyway after that, logging that it's doing so under pressure.
+        for attempt in range(5):
+            if not low_memory():
+                break
+            logger.warning("Low memory before loading %s (attempt %d/5) - pausing 10s for it "
+                           "to free up before continuing", service, attempt + 1)
+            gc.collect()
+            time.sleep(10)
+
         service_entities = load_raw_files_for_service(service)
         entity_files.extend(write_entity_csvs(service_entities))
         for entity in service_entities:
