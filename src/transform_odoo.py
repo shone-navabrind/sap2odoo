@@ -1572,6 +1572,16 @@ def build_credit_notes():
       khsupplierinvoice/SupplierInvoiceCollection      "Credit Memo"                (9)
       khcustomerinvoicerequest/...RequestCollection    "Manual Credit Memo Request" (21)
 
+    A THIRD customer-side source was added 2026-09-24: khcustomerreturn/CustomerReturnCollection
+    (found by coverage_gap.py - a whole service that had never been wired into SOURCES at all).
+    A "Customer Return" in ByDesign is physical goods coming back, but its CreditMemoStatusCode
+    means every finished one produces an actual credit memo - 796 of 810 rows here have
+    CreditMemoStatusCodeText "Finished". These are additional real credit notes, not a
+    duplicate of the khcustomerinvoicerequest set (checked: no ObjectID overlap, since they are
+    a structurally different document with its own ID sequence), so they're unioned into the
+    same account_move_credit_note.csv rather than kept as a separate Odoo object - a return-driven
+    credit note and a manually-requested one are the same account.move concept in Odoo.
+
     Odoo's move_type is what makes a credit note a credit note on import: out_refund reduces a
     customer balance, in_refund reduces a vendor balance.
     """
@@ -1614,6 +1624,33 @@ def build_credit_notes():
             "state": "posted",
             "currency_id/id": f"base.{currency}" if currency else "",
             "amount_total": request.get("TotalGrossAmount") or "",
+        })
+    return_parties = _group_by_parent(
+        load_raw("BuyerPartyCollection", service_hint="khcustomerreturn")["rows"])
+    for ret in load_raw("CustomerReturnCollection", service_hint="khcustomerreturn")["rows"]:
+        if ret.get("CreditMemoStatusCodeText") != "Finished":
+            continue
+        object_id = ret.get("ObjectID")
+        party = resolve_party(return_parties, object_id, prefer="customer")
+        currency = ret.get("CurrencyCode") or ""
+        # Unlike the other two sources, this entity's GrossAmount is signed negative (goods
+        # coming back reduce revenue); Odoo's amount_total expects a positive magnitude, with
+        # move_type=out_refund already conveying the direction - matches the positive
+        # TotalGrossAmount convention the supplier/customer-invoice-request sources use above.
+        amount = ret.get("GrossAmount") or ""
+        try:
+            amount = str(abs(float(amount)))
+        except ValueError:
+            pass
+        customer_rows.append({
+            "id": external_id("sap_creturn", ret.get("ID") or object_id),
+            "name": ret.get("Name") or ret.get("ID") or object_id,
+            "partner_id/id": external_id("sap_bp", party) if party else "",
+            "invoice_date": parse_sap_date(ret.get("DateTime")) or "",
+            "move_type": "out_refund",
+            "state": "posted",
+            "currency_id/id": f"base.{currency}" if currency else "",
+            "amount_total": amount,
         })
     write_csv("account_move_credit_note.csv", customer_rows, CREDIT_NOTE_FIELDNAMES)
 

@@ -256,10 +256,17 @@ REGISTRY = [
     ObjectSpec(65, "Sales", "Transaction", "Customer Invoices", False, "account.move", "account_move_customer_invoice", "built", "REAL DATA: khcustomerinvoice custom service, 524 invoices, 623 lines. Partner resolved via BuyerPartyCollection (513/524 resolved)",
                raw_sources=("khcustomerinvoice__CustomerInvoiceCollection.json", "khcustomerinvoice__ItemCollection.json", "khcustomerinvoice__BuyerPartyCollection.json")),
     ObjectSpec(66, "Sales", "Transaction", "Credit Notes", False, "account.move", "account_move_credit_note", "built",
-               "REAL DATA: khcustomerinvoicerequest/CustomerInvoiceRequestCollection, the 21 rows typed 'Manual Credit "
-               "Memo Request', mapped to Odoo move_type out_refund. This entity names the customer directly via "
-               "BuyerPartyID, so none of the party-resolution guesswork other document types need applies here.",
-               raw_sources=("khcustomerinvoicerequest__CustomerInvoiceRequestCollection.json",)),
+               "REAL DATA, two unioned sources: (1) khcustomerinvoicerequest/CustomerInvoiceRequestCollection, the 21 "
+               "rows typed 'Manual Credit Memo Request', mapped to Odoo move_type out_refund - this entity names the "
+               "customer directly via BuyerPartyID, so no party-resolution guesswork needed. (2) Added 2026-09-24: "
+               "khcustomerreturn/CustomerReturnCollection, 796 rows with CreditMemoStatusCodeText='Finished' (of 810 "
+               "total) - a whole service coverage_gap.py found was never wired into SOURCES at all. A ByDesign "
+               "'Customer Return' is physical goods coming back, but every finished one produces a real credit memo, "
+               "so these are additional genuine credit notes, not returns/RMA data - resolved via BuyerPartyCollection "
+               "the same way Purchase Orders/Sales Orders are.",
+               raw_sources=("khcustomerinvoicerequest__CustomerInvoiceRequestCollection.json",
+                            "khcustomerreturn__CustomerReturnCollection.json",
+                            "khcustomerreturn__BuyerPartyCollection.json")),
 
     # --- Added: relational data not on the sheet but required for the above to import cleanly ---
     ObjectSpec(0, "Common", "Master", "Currency Exchange Rates", False, "res.currency.rate", "res_currency_rate", "pending_mapping", "Odoo ships currencies/countries out of the box, but NOT historical FX rates - needed for FY20-21 through FY25-26 transactional data to post at the right value"),
