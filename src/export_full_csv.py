@@ -44,6 +44,7 @@ Run: python -m src.export_full_csv
 """
 
 import csv
+import gc
 import json
 import logging
 import os
@@ -152,11 +153,31 @@ MODEL_ROOTS = {
 }
 
 
-def load_raw_files():
-    """-> [{service, entity_set, fields, rows, filename}], sorted, one per output_raw file."""
+def list_service_names():
+    """
+    Every service with at least one output_raw/*.json file, sorted - just filenames, nothing
+    loaded into memory. Used to process one service's data at a time instead of holding the
+    entire tenant's raw JSON in memory simultaneously (see main()'s docstring note).
+    """
+    return sorted({f.split("__", 1)[0] for f in os.listdir(RAW_DIR) if f.endswith(".json")})
+
+
+def load_raw_files_for_service(service):
+    """
+    -> [{service, entity_set, fields, rows, filename}] for just ONE service's raw files.
+
+    Loading service-by-service (rather than the whole tenant via one load_raw_files() call
+    holding everything at once) is what keeps this module's peak memory bounded: on the live
+    tenant, several single entity sets are hundreds of MB of JSON on disk (khsupplierinvoice
+    alone has multiple 680k-row entities) - parsed into Python objects and held alongside
+    dozens of siblings, the whole-tenant version of this function grew past 7GB and got
+    OOM-killed by the OS. One service at a time keeps the peak to whatever that single
+    service's data costs, which every service on this tenant fits well within available memory.
+    """
     out = []
+    prefix = f"{service}__"
     for filename in sorted(os.listdir(RAW_DIR)):
-        if not filename.endswith(".json"):
+        if not filename.startswith(prefix) or not filename.endswith(".json"):
             continue
         with open(os.path.join(RAW_DIR, filename), encoding="utf-8") as f:
             payload = json.load(f)
@@ -316,11 +337,6 @@ def _sap_column(entity, field):
     return f"sap__{entity['service']}__{entity['entity_set']}__{field}"
 
 
-def _source_entity(entities_by_service, service, entity_set):
-    return next((entity for entity in entities_by_service.get(service, [])
-                 if entity["entity_set"] == entity_set), None)
-
-
 def _root_external_id(prefix, key_fields, row):
     for field in key_fields:
         value = row.get(field)
@@ -329,28 +345,78 @@ def _root_external_id(prefix, key_fields, row):
     return ""
 
 
-def _model_fieldnames(odoo_fields, roots, entities_by_service):
-    """Return Odoo fields followed by every SAP field that can be linked to a model row."""
-    fields = list(odoo_fields)
-    seen = set(fields)
-    for service, root_name, _, _ in roots:
-        root = _source_entity(entities_by_service, service, root_name)
-        if not root:
+def _apply_root_to_model(output_rows, matched_ids, fieldnames, seen_fields, service, root_name, prefix, key_fields):
+    """
+    Load ONE service's entities (on demand, discarded when this returns), join its root+children
+    onto `output_rows` in place, and append any newly-seen SAP columns to `fieldnames`.
+
+    This is the per-root building block write_odoo_model_csvs() calls once per (service,
+    root_name) pair in a model's MODEL_ROOTS entry - never loading more than one service's raw
+    data into memory at a time, which is what keeps this module's peak memory bounded (see
+    load_raw_files_for_service's docstring).
+    """
+    if not key_fields:
+        return
+    service_entities = load_raw_files_for_service(service)
+    root = next((e for e in service_entities if e["entity_set"] == root_name), None)
+    if not root:
+        return
+
+    for field in root["fields"]:
+        column = _sap_column(root, field)
+        if column not in seen_fields:
+            fieldnames.append(column)
+            seen_fields.add(column)
+
+    roots_by_id = {
+        _root_external_id(prefix, key_fields, row): row
+        for row in root["rows"]
+        if _root_external_id(prefix, key_fields, row)
+    }
+    # The root itself and ParentObjectID children are linkable. Other entity sets in this
+    # service stay in entities/ only, to avoid attaching unrelated records to every Odoo row.
+    children = [e for e in service_entities if e is not root and any(r.get("ParentObjectID") for r in e["rows"])]
+
+    # Index each child once by parent key instead of rescanning its full row list for every
+    # output row - a linear scan here made this O(rows * child_rows), which took hours (and had
+    # to be killed) on services like khsupplierinvoice where a 55k-row parent joins against
+    # 680k-row children.
+    children_indexed = []
+    for child in children:
+        for field in child["fields"]:
+            column = _sap_column(child, field)
+            if column not in seen_fields:
+                fieldnames.append(column)
+                seen_fields.add(column)
+        by_parent = {}
+        for row in child["rows"]:
+            parent = _parent_key(row)
+            if parent:
+                by_parent.setdefault(parent, []).append(row)
+        children_indexed.append((child, by_parent))
+
+    for out in output_rows:
+        source_row = roots_by_id.get(out.get("id", ""))
+        if not source_row:
             continue
-        for entity in entities_by_service.get(service, []):
-            # The root itself and ParentObjectID children are linkable.  Other entity sets stay
-            # in entities/ to avoid attaching unrelated records to every Odoo row.
-            if entity is not root and not any(r.get("ParentObjectID") for r in entity["rows"]):
+        matched_ids.add(out["id"])
+        for field in root["fields"]:
+            out[_sap_column(root, field)] = _cell(source_row.get(field))
+
+        object_id = source_row.get("ObjectID")
+        if not object_id:
+            continue
+        for child, by_parent in children_indexed:
+            child_rows = by_parent.get(object_id)
+            if not child_rows:
                 continue
-            for field in entity["fields"]:
-                column = _sap_column(entity, field)
-                if column not in seen:
-                    fields.append(column)
-                    seen.add(column)
-    return fields
+            for field in child["fields"]:
+                values = [_cell(row.get(field)) for row in child_rows]
+                # Scalar for a genuine 1:1 child, JSON array for all multi-row children.
+                out[_sap_column(child, field)] = values[0] if len(values) == 1 else json.dumps(values)
 
 
-def write_odoo_model_csvs(entities, entities_by_service):
+def write_odoo_model_csvs():
     """
     Write the business-facing full export: the same model-named files as output_odoo/, with
     Odoo import columns first and every safely linkable SAP column after them.
@@ -358,6 +424,10 @@ def write_odoo_model_csvs(entities, entities_by_service):
     Values from a one-to-many SAP child are a JSON array in one cell.  This preserves all child
     rows while retaining the Odoo model's one-row-per-record grain.  Raw entities that cannot
     be linked unambiguously remain available in entities/, the lossless audit layout.
+
+    Loads one service at a time (see _apply_root_to_model), never the whole tenant's raw data
+    at once - a model whose roots span several services (e.g. account_account.csv across 6
+    analytics services) costs one service's memory at a time, not all of them simultaneously.
     """
     os.makedirs(MODEL_DIR, exist_ok=True)
     for filename in os.listdir(MODEL_DIR):
@@ -374,53 +444,14 @@ def write_odoo_model_csvs(entities, entities_by_service):
             odoo_rows = list(reader)
 
         roots = MODEL_ROOTS.get(filename, [])
-        fieldnames = _model_fieldnames(odoo_fields, roots, entities_by_service)
+        fieldnames = list(odoo_fields)
+        seen_fields = set(fieldnames)
         output_rows = [dict(row) for row in odoo_rows]
         matched_ids = set()
 
         for service, root_name, prefix, key_fields in roots:
-            root = _source_entity(entities_by_service, service, root_name)
-            if not root or not key_fields:
-                continue
-            roots_by_id = {
-                _root_external_id(prefix, key_fields, row): row
-                for row in root["rows"]
-                if _root_external_id(prefix, key_fields, row)
-            }
-            children = [entity for entity in entities_by_service.get(service, []) if entity is not root]
-
-            # Index each child once by parent key instead of rescanning its full row list for
-            # every output row - the previous linear scan made this O(rows * child_rows), which
-            # took hours (and had to be killed) on services like khsupplierinvoice where a
-            # 55k-row parent joins against 680k-row children.
-            children_indexed = []
-            for child in children:
-                by_parent = {}
-                for row in child["rows"]:
-                    parent = _parent_key(row)
-                    if parent:
-                        by_parent.setdefault(parent, []).append(row)
-                children_indexed.append((child, by_parent))
-
-            for out in output_rows:
-                source_row = roots_by_id.get(out.get("id", ""))
-                if not source_row:
-                    continue
-                matched_ids.add(out["id"])
-                for field in root["fields"]:
-                    out[_sap_column(root, field)] = _cell(source_row.get(field))
-
-                object_id = source_row.get("ObjectID")
-                if not object_id:
-                    continue
-                for child, by_parent in children_indexed:
-                    child_rows = by_parent.get(object_id)
-                    if not child_rows:
-                        continue
-                    for field in child["fields"]:
-                        values = [_cell(row.get(field)) for row in child_rows]
-                        # Scalar for a genuine 1:1 child, JSON array for all multi-row children.
-                        out[_sap_column(child, field)] = values[0] if len(values) == 1 else json.dumps(values)
+            _apply_root_to_model(output_rows, matched_ids, fieldnames, seen_fields,
+                                  service, root_name, prefix, key_fields)
 
         path = os.path.join(MODEL_DIR, filename)
         with open(path, "w", newline="", encoding="utf-8") as f:
@@ -446,8 +477,14 @@ def write_odoo_model_csvs(entities, entities_by_service):
     return results
 
 
-def write_index(entities, decisions):
-    """One row per entity set, so the folder is navigable without opening 376 files."""
+def write_index(entity_meta, decisions):
+    """
+    One row per entity set, so the folder is navigable without opening 569 files.
+
+    `entity_meta` is lightweight - {filename, service, entity_set, row_count, field_count} per
+    entity, not the full row data - collected in main()'s per-service pass instead of requiring
+    a second full load of everything just to count rows and columns.
+    """
     from src.consolidated_report import _read_raw  # noqa: F401  (kept for symmetry of sources)
     from src.registry import REGISTRY
     from src.validate import FILENAME_OVERRIDES
@@ -461,7 +498,7 @@ def write_index(entities, decisions):
     decision_by_entity = {(s, e): (d, why) for s, e, d, why in decisions}
 
     rows = []
-    for entity in entities:
+    for entity in entity_meta:
         consumers = objects_by_raw.get(entity["filename"], [])
         odoo_files = sorted({
             FILENAME_OVERRIDES.get(o.filename_base, f"{o.filename_base}.csv") for o in consumers
@@ -472,8 +509,8 @@ def write_index(entities, decisions):
             "Entity CSV": f"entities/{entity['filename'].replace('.json', '.csv')}",
             "SAP Service": entity["service"],
             "SAP Entity Set": entity["entity_set"],
-            "Rows": len(entity["rows"]),
-            "Columns": len(entity["fields"]),
+            "Rows": entity["row_count"],
+            "Columns": entity["field_count"],
             "In object file": f"objects/{entity['service']}.csv" if decision == "merged" else "",
             "Merge decision": decision,
             "Why": reason,
@@ -493,26 +530,53 @@ def write_index(entities, decisions):
 
 
 def main():
+    """
+    Runs in three passes, each processing ONE SAP service's raw data at a time rather than
+    loading the whole tenant into memory at once (see load_raw_files_for_service's docstring -
+    the whole-tenant version of this got OOM-killed at 7+GB RSS on the live tenant's full
+    extraction). Pass 1 writes entities/ + objects/ and collects lightweight per-entity metadata
+    (row/column counts only) for the index. Pass 2 writes odoo_models/, loading each root's
+    service on demand as it's needed rather than requiring everything pre-loaded. Pass 3 writes
+    the index files from the metadata collected in pass 1.
+    """
     logging.basicConfig(level=logging.INFO, format="%(message)s")
     if not os.path.isdir(RAW_DIR):
         logger.error("%s/ does not exist - run `python -m src.extract_raw` first.", RAW_DIR)
         return 1
 
-    entities = load_raw_files()
-    if not entities:
+    services = list_service_names()
+    if not services:
         logger.error("No raw files in %s/ - run `python -m src.extract_raw` first.", RAW_DIR)
         return 1
 
     os.makedirs(OUT_DIR, exist_ok=True)
-    entity_files = write_entity_csvs(entities)
 
-    by_service = {}
-    for entity in entities:
-        by_service.setdefault(entity["service"], []).append(entity)
-    object_files, decisions = write_object_csvs(by_service)
-    model_files = write_odoo_model_csvs(entities, by_service)
+    entity_files = []
+    object_files = []
+    decisions = []
+    entity_meta = []
+    for service in services:
+        service_entities = load_raw_files_for_service(service)
+        entity_files.extend(write_entity_csvs(service_entities))
+        for entity in service_entities:
+            entity_meta.append({
+                "filename": entity["filename"], "service": entity["service"],
+                "entity_set": entity["entity_set"], "row_count": len(entity["rows"]),
+                "field_count": len(entity["fields"]),
+            })
+        service_object_files, service_decisions = write_object_csvs({service: service_entities})
+        object_files.extend(service_object_files)
+        decisions.extend(service_decisions)
+        # Free this service's row data before loading the next one - the largest single
+        # service on the live tenant is over 1GB of raw JSON text (several GB parsed), so an
+        # explicit collect here (rather than waiting for the next assignment's refcount drop)
+        # matters when running alongside other memory pressure on the machine.
+        del service_entities
+        gc.collect()
 
-    index_rows = write_index(entities, decisions)
+    model_files = write_odoo_model_csvs()
+
+    index_rows = write_index(entity_meta, decisions)
 
     total_rows = sum(count for _, count, _ in entity_files)
     total_cols = sum(cols for _, _, cols in entity_files)
