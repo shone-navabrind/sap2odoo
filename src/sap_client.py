@@ -27,7 +27,17 @@ def parse_sap_date(value):
 
 _ENTITY_TYPE_RE = re.compile(r'<EntityType Name="([^"]+)"[^>]*>(.*?)</EntityType>', re.DOTALL)
 _PROPERTY_RE = re.compile(r'<Property Name="([^"]+)"')
+_PROPERTY_TYPE_RE = re.compile(r'<Property Name="([^"]+)"[^>]*\bType="([^"]+)"')
 _ENTITY_SET_RE = re.compile(r'<EntitySet Name="([^"]+)"[^>]*EntityType="[^"]*\.([^"]+)"')
+
+# SAP rejects a bulk $select that includes one of these - confirmed by testing: e.g.
+# khcustomerinvoice/ItemAttachmentFolderCollection's "Binary" field (Edm.Binary, the raw file
+# content) returns "400 Bad Request" the moment it's in $select, even though every other field
+# on the same entity works fine. Binary/stream content needs its own dedicated $value request
+# per row, not a bulk list query - out of scope here, so these fields are excluded from $select
+# the same way P_*/PARA_* query-parameter fields already are, rather than failing the whole
+# entity set over one field that could never have worked this way.
+_UNSELECTABLE_TYPES = {"Edm.Binary", "Edm.Stream"}
 
 
 def parse_metadata(xml_text):
@@ -44,6 +54,25 @@ def parse_metadata(xml_text):
         fields_by_entity_set[set_name] = properties_by_type.get(type_name, [])
 
     return fields_by_entity_set
+
+
+def parse_metadata_unselectable_fields(xml_text):
+    """
+    {entity_set_name: {field_name, ...}} for fields whose Edm type can't go in a bulk $select
+    (see _UNSELECTABLE_TYPES) - mirrors parse_metadata's structure, from the same XML.
+    """
+    unselectable_by_type = {}
+    for type_name, body in _ENTITY_TYPE_RE.findall(xml_text):
+        unselectable_by_type[type_name] = {
+            name for name, edm_type in _PROPERTY_TYPE_RE.findall(body)
+            if edm_type in _UNSELECTABLE_TYPES
+        }
+
+    unselectable_by_entity_set = {}
+    for set_name, type_name in _ENTITY_SET_RE.findall(xml_text):
+        unselectable_by_entity_set[set_name] = unselectable_by_type.get(type_name, set())
+
+    return unselectable_by_entity_set
 
 
 def _olap_merge_key(fields):
@@ -179,7 +208,9 @@ class SAPODataClient:
 
     def get_entity_fields(self, service, entity_set):
         """
-        Return the full list of field names SAP declares for an entity set.
+        Return (field_names, unselectable_field_names) for an entity set - the full list SAP
+        declares, and the subset of those whose Edm type can't go in a bulk $select (see
+        _UNSELECTABLE_TYPES / parse_metadata_unselectable_fields).
 
         Prefers a static schema_snapshots/<service_basename>.metadata.xml file over a live
         $metadata call. On this tenant, live $metadata for BI/analytics ".svc" services turned
@@ -203,8 +234,9 @@ class SAPODataClient:
             source = "live $metadata"
 
         fields = parse_metadata(xml_text).get(entity_set, [])
+        unselectable = parse_metadata_unselectable_fields(xml_text).get(entity_set, set())
         logger.info("%s/%s: %d fields from %s", service, entity_set, len(fields), source)
-        return fields
+        return fields, unselectable
 
     def get_entity_set_all_fields(self, service, entity_set, chunk_size=8, expand=None, max_rows=None):
         """
@@ -234,9 +266,9 @@ class SAPODataClient:
            one request regardless of count - no chunking, no merge-key needed. "ID" is a real
            business field here (e.g. the PO number), not excluded.
         """
-        all_fields = self.get_entity_fields(service, entity_set)
+        all_fields, unselectable = self.get_entity_fields(service, entity_set)
         is_olap_entity = "TotaledProperties" in all_fields
-        excluded = {"TotaledProperties", "ID"} if is_olap_entity else set()
+        excluded = ({"TotaledProperties", "ID"} if is_olap_entity else set()) | unselectable
         fields = [
             f for f in all_fields
             if not f.startswith("P_") and not f.startswith("PARA_") and f not in excluded

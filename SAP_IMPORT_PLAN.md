@@ -156,9 +156,26 @@ below:
 `tmserviceconfirmation` are live, authorised, and return HTTP 200 - just 0 rows, meaning
 there is genuinely no quote/service-confirmation data in this tenant, not an access problem.
 `khcustomerreturn` is live, authorised, **and has 810 real rows** in `CustomerReturnCollection`
-- this is now extracted (was never wired into `SOURCES` at all until the 2026-09-24
-coverage_gap backfill) but not yet mapped to an Odoo object; #66 Credit Notes is closest but
-not verified as the same concept - worth a dedicated look.
+- was never wired into `SOURCES` at all until the 2026-09-24 coverage_gap backfill. Now
+mapped: 796 of the 810 rows (CreditMemoStatusCodeText='Finished') are unioned into #66
+Credit Notes (`account_move_credit_note.csv`) - a ByDesign Customer Return produces a real
+credit memo once finished, so this is a third genuine source for that same object.
+
+## Entity sets that exist but can't be queried at all
+
+Seven `*AttachmentFolderCollection`/`AttachmentCollection` entity sets (on `khcustomerinvoice`,
+`khcustomerinvoicerequest`, `khcustomerquote`, `khgoodsandserviceacknowledgement`,
+`khinbounddelivery`, `khsalesorder`, `khsupplierinvoice`) return **400 Bad Request** on this
+tenant no matter what's asked for - confirmed by testing with a single-field $select, no
+$select at all, and a $filter scoped to one specific parent: all still 400. This isn't the
+`Binary` (Edm.Binary) field being rejected - excluding it and testing every other field
+combination still fails, so the entity set itself is not exposed for a direct list query on
+this tenant, likely only reachable via `$expand` from its parent (not implemented) or not
+published for top-level access at all. Low priority: these hold document/attachment
+*metadata* (title, mime type, a link), not the file content itself, and not any of the 66
+sheet objects. `get_entity_fields()` now excludes Edm.Binary/Edm.Stream fields from $select
+generally (a real, separate fix, worth keeping even though it didn't resolve this one) -
+see `_UNSELECTABLE_TYPES` in `src/sap_client.py`.
 
 ## Previously thought broken on SAP's side - now confirmed working
 

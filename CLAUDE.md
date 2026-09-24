@@ -350,8 +350,17 @@ object gets wired up, so the report keeps tracing status back to real source fil
 
 ## Known limitations
 
-- **Only one SAP service confirmed so far.** 50 of 66 sheet objects are still `pending_mapping`
-  because their real ByDesign service names aren't known yet — see "How to extend."
+- **39/67 objects built** (see the README "Status" section for the current, live-computed
+  breakdown) — 13 optional objects are `pending_mapping` waiting on one of the remaining
+  custom service imports, 4 are blocked by SAP authorization (`khproject`, `khlead`,
+  `tmserviceorder`, `tmservicerequest`), and 14 are `not_in_bydesign` (Engineering/PLM,
+  Maintenance, Quality modules don't exist in standard ByDesign).
+- **Seven `*AttachmentFolderCollection`/`AttachmentCollection` entity sets return 400 Bad Request
+  no matter what's queried** (confirmed: single field, no field, and a parent-scoped `$filter` all
+  fail identically) — see "Entity sets that exist but can't be queried at all" in
+  `SAP_IMPORT_PLAN.md`. Low priority (document/attachment *metadata*, not any of the 66 sheet
+  objects), but worth knowing before assuming every entity set in `$metadata` is actually
+  reachable.
 - **`RPBPCSCONTB` (contacts)** extracted successfully but is mostly empty on this tenant (no
   contact persons linked to most accounts) — not yet transformed into an Odoo file since there's
   little real data to map.
