@@ -1135,12 +1135,13 @@ def build_pricelists():
                 ),
             }
         )
-    # The pricelist that build_pricelist_items() hangs its per-product list prices off. Odoo
-    # will not accept a product.pricelist.item whose pricelist does not exist, so it is written
-    # here rather than in that function, keeping all product.pricelist rows in one file.
+    # Fallback pricelist for the small number of orders build_pricelist_items() can't resolve to
+    # one of the real arrangements above (see _resolve_order_to_arrangement()'s docstring).
+    # Written here, not there, so every product.pricelist.item's pricelist_id/id always points
+    # at a row that exists in this same file.
     rows.append({
         "id": LIST_PRICE_PRICELIST_ID,
-        "name": "SAP List Prices",
+        "name": "SAP List Prices - Unmatched Sales Arrangement",
         "currency_id/id": "base.INR",
     })
     write_csv("product_pricelist.csv", rows, PRICELIST_FIELDNAMES)
@@ -1910,39 +1911,98 @@ PRICELIST_ITEM_FIELDNAMES = [
 LIST_PRICE_PRICELIST_ID = "sap_pricelist_list_prices"
 
 
+def _resolve_order_to_arrangement():
+    """
+    khsalesorder has no direct field pointing at its khsalesarrangement (SAP does not expose
+    that FK over OData on this tenant), so each order is matched to its real sales arrangement
+    by the same business key ByDesign itself uses to determine one: Customer + Sales
+    Organisation + Distribution Channel.
+
+    khsalesorder's own BuyerPartyCollection is NOT one row per order - it carries every party
+    role on the order (buyer, bill-to, payer, ship-to, sales unit, company, ...) all sharing the
+    same ParentObjectID, so naively building a dict from it silently keeps whichever role happens
+    to be iterated last (on this tenant that was role 8, the internal Sales Organisation ID, not
+    the customer) - a real bug caught by checking the actual joined data rather than trusting a
+    1:1 assumption the OData shape doesn't guarantee. Fixed by keeping, for each order, the
+    first PartyID that is actually a known customer/supplier InternalID.
+
+    Returns {order_object_id: arrangement_object_id}, covering ~99.8% of orders on this tenant
+    (4300/4308) - the rest have no resolvable customer party and are left out, not guessed.
+    """
+    customers = load_raw("CustomerCollection", service_hint="khcustomer")["rows"]
+    suppliers = load_raw("SupplierCollection", service_hint="khsupplier")["rows"]
+    internal_to_uuid = {
+        c["InternalID"]: c["UUID"].replace("-", "").upper()
+        for c in customers + suppliers if c.get("InternalID") and c.get("UUID")
+    }
+
+    from collections import defaultdict
+    party_roles_by_order = defaultdict(list)
+    for b in load_raw("BuyerPartyCollection", service_hint="khsalesorder")["rows"]:
+        party_roles_by_order[b["ParentObjectID"]].append(b.get("PartyID"))
+
+    order_to_customer_uuid = {}
+    for order_id, party_ids in party_roles_by_order.items():
+        for pid in party_ids:
+            if pid in internal_to_uuid:
+                order_to_customer_uuid[order_id] = internal_to_uuid[pid]
+                break
+
+    arrangements = load_raw("SalesArrangementCollection", service_hint="khsalesarrangement")["rows"]
+    arr_by_key = {}
+    for a in arrangements:
+        cust_uuid = (a.get("CustomerUUID") or "").replace("-", "").upper()
+        key = (cust_uuid, a.get("SalesOrganisationID", ""), a.get("DistributionChannelCode", ""))
+        arr_by_key.setdefault(key, a["ObjectID"])  # first arrangement wins on a rare duplicate key
+
+    order_to_arrangement = {}
+    for order in load_raw("SalesOrderCollection", service_hint="khsalesorder")["rows"]:
+        order_id = order.get("ObjectID")
+        cust_uuid = order_to_customer_uuid.get(order_id, "")
+        key = (cust_uuid, order.get("SalesOrganisationID", ""), order.get("DistributionChannelCode", ""))
+        if key in arr_by_key:
+            order_to_arrangement[order_id] = arr_by_key[key]
+    return order_to_arrangement
+
+
 def build_pricelist_items():
     """
     Sheet object #60 (Discount Rules) -> product.pricelist.item.
 
-    Stated plainly: **this tenant has no discount rules.** Of the 94 price components SAP
+    Stated plainly: **this tenant has no discount rules.** Of the price components SAP
     categorises as "Discount", every single non-zero one is a Rounding Difference; Item
     Discounts and Header Discounts are 0.00 throughout. Nothing was found to build discount
     rules from, and none was invented.
 
-    What the same price-component data does carry is real LIST PRICES - 269 components typed
-    "List Price" on sales order items, 97 distinct values - and product.pricelist.item is
-    exactly Odoo's model for "this product is priced at X". So this file holds price rules
-    rather than discount rules, under a dedicated "SAP List Prices" pricelist so it cannot be
-    confused with the sales arrangements written for #59.
+    What the same price-component data does carry is real LIST PRICES - product.pricelist.item
+    is exactly Odoo's model for "this product is priced at X". Each priced line is attached to
+    the REAL sales arrangement (pricelist) its order actually used, resolved by
+    _resolve_order_to_arrangement() - not dumped under one synthetic catch-all pricelist. Orders
+    that don't resolve to a specific arrangement (see that function's docstring - ~0.2% of
+    orders) fall back to a small dedicated "SAP List Prices - Unmatched" pricelist so that price
+    data is never silently dropped, just clearly separated from real per-customer pricing.
 
-    Where a product appears at several prices over time, the most frequently quoted price wins;
-    the full per-order history stays in output_full_csv/.
+    Where a product appears at several prices under the same pricelist, the most frequently
+    quoted price wins; the full per-order history stays in output_full_csv/.
     """
     from collections import Counter
 
-    items = {r["ObjectID"]: r for r in
+    order_to_arrangement = _resolve_order_to_arrangement()
+
+    items = {r["ObjectID"]: r["ParentObjectID"] for r in
              load_raw("ItemCollection", service_hint="khsalesorder")["rows"] if r.get("ObjectID")}
     product_by_item = {r.get("ParentObjectID"): r.get("ProductID") for r in
                        load_raw("ItemProductCollection", service_hint="khsalesorder")["rows"]}
 
-    prices_by_product = {}
+    prices_by_pricelist_product = {}
     for component in load_raw("ItemPriceComponentCollection", service_hint="khsalesorder")["rows"]:
         if component.get("TypeCodeText") != "List Price":
             continue
-        item = items.get(component.get("ParentObjectID"))
-        if not item:
+        line_id = component.get("ParentObjectID")
+        order_id = items.get(line_id)
+        if not order_id:
             continue
-        product_id = product_by_item.get(item.get("ObjectID"))
+        product_id = product_by_item.get(line_id)
         value = component.get("DecimalValue")
         if not (product_id and value):
             continue
@@ -1952,13 +2012,15 @@ def build_pricelist_items():
             continue
         if price <= 0:
             continue
-        prices_by_product.setdefault(product_id, []).append(round(price, 2))
+        pricelist_id = external_id("sap_pricelist", order_to_arrangement[order_id]) \
+            if order_id in order_to_arrangement else LIST_PRICE_PRICELIST_ID
+        prices_by_pricelist_product.setdefault((pricelist_id, product_id), []).append(round(price, 2))
 
     rows = []
-    for product_id, prices in sorted(prices_by_product.items()):
+    for (pricelist_id, product_id), prices in sorted(prices_by_pricelist_product.items()):
         rows.append({
-            "id": external_id("sap_plitem", product_id),
-            "pricelist_id/id": LIST_PRICE_PRICELIST_ID,
+            "id": external_id("sap_plitem", f"{pricelist_id}_{product_id}"),
+            "pricelist_id/id": pricelist_id,
             "applied_on": "1_product",
             "product_tmpl_id/id": external_id("sap_prod", product_id),
             "compute_price": "fixed",
@@ -1966,6 +2028,62 @@ def build_pricelist_items():
         })
     write_csv("product_pricelist_item_discount.csv", rows, PRICELIST_ITEM_FIELDNAMES)
     return {"product_pricelist_item_discount.csv": len(rows)}
+
+
+PRICELIST_COMBINED_FIELDNAMES = [
+    "id", "name", "currency_id/id",
+    "item_ids/applied_on", "item_ids/product_tmpl_id/id", "item_ids/compute_price",
+    "item_ids/fixed_price",
+]
+
+
+def build_pricelist_combined():
+    """
+    Deliverable convenience file: product_pricelist.csv (headers, built by build_pricelists())
+    and product_pricelist_item_discount.csv (lines, built by build_pricelist_items()) merged into
+    ONE file using Odoo's standard one2many CSV import convention - a pricelist header row
+    carries its first line item's item_ids/* columns, and each further line for the same
+    pricelist is a follow-up row with id/name/currency_id left blank so Odoo groups it under the
+    same parent. Must run after both build_pricelists() and build_pricelist_items() in TRANSFORMS.
+
+    Only "SAP List Prices" (sap_pricelist_list_prices) has real line items - the 226 sales
+    arrangement headers from khsalesarrangement have no product/price data on this tenant (see
+    build_pricelists()'s docstring) and are written here as header-only rows, exactly as they
+    already are in product_pricelist.csv.
+    """
+    headers = list(csv.DictReader(open(os.path.join(ODOO_DIR, "product_pricelist.csv"), encoding="utf-8")))
+    items = list(csv.DictReader(open(os.path.join(ODOO_DIR, "product_pricelist_item_discount.csv"), encoding="utf-8")))
+
+    items_by_pricelist = {}
+    for item in items:
+        items_by_pricelist.setdefault(item["pricelist_id/id"], []).append(item)
+
+    rows = []
+    for header in headers:
+        lines = items_by_pricelist.get(header["id"], [])
+        if not lines:
+            rows.append({
+                "id": header["id"],
+                "name": header["name"],
+                "currency_id/id": header["currency_id/id"],
+                "item_ids/applied_on": "",
+                "item_ids/product_tmpl_id/id": "",
+                "item_ids/compute_price": "",
+                "item_ids/fixed_price": "",
+            })
+            continue
+        for i, line in enumerate(lines):
+            rows.append({
+                "id": header["id"] if i == 0 else "",
+                "name": header["name"] if i == 0 else "",
+                "currency_id/id": header["currency_id/id"] if i == 0 else "",
+                "item_ids/applied_on": line["applied_on"],
+                "item_ids/product_tmpl_id/id": line["product_tmpl_id/id"],
+                "item_ids/compute_price": line["compute_price"],
+                "item_ids/fixed_price": line["fixed_price"],
+            })
+    write_csv("product_pricelist_with_items.csv", rows, PRICELIST_COMBINED_FIELDNAMES)
+    return {"product_pricelist_with_items.csv": len(rows)}
 
 
 def build_production_history():
@@ -2061,6 +2179,7 @@ TRANSFORMS = [
     ("stock_picking_transfer (inbound deliveries)", build_stock_transfers),
     ("stock_move_history (goods receipts)", build_stock_moves),
     ("product_pricelist_item (list prices)", build_pricelist_items),
+    ("product_pricelist_with_items (combined deliverable)", build_pricelist_combined),
     ("mrp_production_history (closed orders)", build_production_history),
     ("purchase_order_rfq (draft purchase orders)", build_rfqs),
     ("stock_quant_adjustment (inventory balances)", build_inventory),

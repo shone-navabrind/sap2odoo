@@ -275,9 +275,10 @@ from disk on every run. Highlights rather than a duplicate of those:
 | `product_template.csv` | 3065 | All of `vmumaterial`'s real per-material entities; `standard_price` from `vmumaterialvaluationdata` (994/3058 priced) |
 | `stock_quant_adjustment.csv` | 1805 | `SCMINBU03` Inventory Balance, grouped material x logistics area x site |
 | `res_bank.csv` | 10 | `khhousebankaccount/BankDirectoryEntryCollection` - the real bank directory |
-| `stock_location.csv` | 20 | 4 sites from `khlocation/LocationCollection` plus their 16 storage areas from `LogisticsAreaCollection` |
+| `stock_location.csv` | 19 | 1 site from `khlocation/LocationCollection` (was 4 sites earlier in this project; confirmed live on 2026-09-25 the tenant now only has 1, "Danlaw Technologies India Limited" - a real tenant-side change, not a pipeline bug) plus its 18 storage areas from `LogisticsAreaCollection` |
 | `purchase_order.csv` / `_line.csv` | 655 / 1861 | `khpurchaseorder`; partner via type-aware party resolution (91% valid) |
 | `product_supplierinfo.csv` | 34 | `vmumaterial/SupplierInformationCollection` - supplier part numbers and lead times |
+| `product_pricelist.csv` / `_item_discount.csv` | 226 / 1109 | `khsalesorder`, resolved via `_resolve_order_to_arrangement()` to each order's real SAP Sales Arrangement (Customer + SalesOrg + DistributionChannel business key) - not one synthetic catch-all pricelist. 61/226 pricelists carry real product/price lines; the remaining 8 unresolvable orders fall into a small "SAP List Prices - Unmatched Sales Arrangement" fallback |
 
 Odoo CSV conventions: every row's `id` is an external ID (`sap_bp_<CBP_UUID>`,
 `sap_bank_<name>`); relation columns use Odoo's `field/id` syntax (`partner_id/id`,

@@ -1645,59 +1645,59 @@ khgoodsandserviceacknowledgement__SellerPartyCollection.csv,ParentObjectID,24256
 khgoodsandserviceacknowledgement__SellerPartyCollection.csv,PartyID,24256,24256,0,30+,,70000 | 2009777 | G229 | 2015039 | 2009159
 khgoodsandserviceacknowledgement__SellerPartyNameCollection.csv,FormattedName,28036,28029,7,30+,,Tushar Desale | Sumit Walunj | Tushar Shinde | Vishal Navgan | Piyush
 khgoodsandserviceacknowledgement__SellerPartyNameCollection.csv,ObjectID,28036,28036,0,30+,,00163E5F7A721ED9888BBD76883F3460 | 00163E5F7A721ED9888BBD76883F9460 | 00163E5F7A721ED9888BBD7688401460 | 00163E5F7A721ED9888BBD7688407460 | 00163E5F7A721ED9888BBD768840D460
-khhousebankaccount__BankDirectoryEntryCollection.csv,BankGroupCode,5,0,5,0,,
-khhousebankaccount__BankDirectoryEntryCollection.csv,BankGroupCodeText,5,0,5,0,,
-khhousebankaccount__BankDirectoryEntryCollection.csv,BankStandardID,5,5,0,5,,UTIB0000341 | UTIB0000579 | ABHY0065111 | ANDB0000099 | ANDB0000192
-khhousebankaccount__BankDirectoryEntryCollection.csv,CityName,5,5,0,5,,Mumbai | Mysore | Pune | Bangalore | Hyderabad
-khhousebankaccount__BankDirectoryEntryCollection.csv,CommonBankStandardIDMainIndicator,5,5,0,1,,False
-khhousebankaccount__BankDirectoryEntryCollection.csv,CountryCode,5,5,0,1,,IN
-khhousebankaccount__BankDirectoryEntryCollection.csv,CountryCodeText,5,5,0,1,,India
-khhousebankaccount__BankDirectoryEntryCollection.csv,DeletedIndicator,5,5,0,1,,False
-khhousebankaccount__BankDirectoryEntryCollection.csv,LifeCycleStatusCode,5,5,0,1,,2
-khhousebankaccount__BankDirectoryEntryCollection.csv,LifeCycleStatusCodeText,5,5,0,1,,Active
-khhousebankaccount__BankDirectoryEntryCollection.csv,ObjectID,5,5,0,5,,00163E5F7A721ED987FB14A7DF7DA1B7 | 00163E5F7A721ED987FB14AA46A5A1B7 | 00163E5F7A721ED987FB14AC492261B7 | 00163E5F7A721ED987FB14AE4C96A1B7 | 00163E5F7A721ED987FB14B046D6A1B7
-khhousebankaccount__BankDirectoryEntryCollection.csv,OrganisationFormattedName,5,5,0,3,,AXIS BANK | Abhyudaya Cooperative Bank Ltd | Andhra Bank
-khhousebankaccount__BankDirectoryEntryCollection.csv,RegionCode,5,0,5,0,,
-khhousebankaccount__BankDirectoryEntryCollection.csv,RegionCodeText,5,0,5,0,,
-khhousebankaccount__BankDirectoryEntryCollection.csv,StreetName,5,0,5,0,,
-khhousebankaccount__DescriptionCollection.csv,Description,5,5,0,2,,Savings Account | SBI Commercial Branch CC Account
-khhousebankaccount__DescriptionCollection.csv,LanguageCode,5,5,0,1,,EN
-khhousebankaccount__DescriptionCollection.csv,LanguageCodeText,5,5,0,1,,English
-khhousebankaccount__DescriptionCollection.csv,ObjectID,5,5,0,5,,00163E5F7A721ED98AA5E5350C99996D | 00163E5F7A721ED98AA5FA54E67179D5 | 00163E5F7A721ED98AAE694146ACA542 | 00163E5F7A721ED98AAE8A59E327662F | 00163EA942DA1EDB8BB312E43E3CA8F8
-khhousebankaccount__DescriptionCollection.csv,ParentObjectID,5,5,0,5,,00163E5F7A721ED98AA5E5350C96796D | 00163E5F7A721ED98AA5FA54E66E79D5 | 00163E5F7A721ED98AAE694146A92542 | 00163E5F7A721ED98AAE8A59E324662F | 00163EA942DA1EDB8BB312E43E39E8F8
-khhousebankaccount__HouseBankAccountCollection.csv,AlternativeBankAccountID,5,0,5,0,,
-khhousebankaccount__HouseBankAccountCollection.csv,BankAccountID,5,5,0,5,,123456789 | 987456321 | 30571028998 | 510101002933518 | 39776744857_CC
-khhousebankaccount__HouseBankAccountCollection.csv,BankAccountStandardID,5,0,5,0,,
-khhousebankaccount__HouseBankAccountCollection.csv,BankAccountTypeCode,5,2,3,1,,SG
-khhousebankaccount__HouseBankAccountCollection.csv,BankAccountTypeCodeText,5,2,3,1,,Savings
-khhousebankaccount__HouseBankAccountCollection.csv,BlockedIndicator,5,5,0,1,,False
-khhousebankaccount__HouseBankAccountCollection.csv,CompanyHouseBankID,5,0,5,0,,
-khhousebankaccount__HouseBankAccountCollection.csv,CreationDateTime,5,5,0,5,,2019-02-05 10:19:53 | 2019-02-05 10:24:13 | 2019-02-05 18:29:04 | 2019-02-05 18:34:45 | 2020-11-23 14:31:01
-khhousebankaccount__HouseBankAccountCollection.csv,CurrencyCode,5,5,0,1,,INR
-khhousebankaccount__HouseBankAccountCollection.csv,CurrencyCodeText,5,5,0,1,,Indian Rupee
-khhousebankaccount__HouseBankAccountCollection.csv,HouseBankUUID,5,5,0,5,,00163E5F-7A72-1ED9-8AA5-DE70F608D914 | 00163E5F-7A72-1ED9-8AA5-F5397029597A | 00163E5F-7A72-1ED9-8AAE-58BB85AF84DE | 00163E5F-7A72-1ED9-8AAE-7E8FADACC5B5 | 00163EA9-42DA-1EDB-8BB2-FAB590C3288D
-khhousebankaccount__HouseBankAccountCollection.csv,InternalID,5,5,0,5,,1 | 2 | 3 | 4 | 39776744857
-khhousebankaccount__HouseBankAccountCollection.csv,LastChangeDateTime,5,5,0,5,,2019-02-05 10:19:53 | 2019-02-05 10:24:13 | 2019-02-05 18:29:04 | 2019-02-05 18:34:45 | 2025-11-20 07:19:27
-khhousebankaccount__HouseBankAccountCollection.csv,LifeCycleStatusCode,5,5,0,1,,3
-khhousebankaccount__HouseBankAccountCollection.csv,LifeCycleStatusCodeText,5,5,0,1,,Active
-khhousebankaccount__HouseBankAccountCollection.csv,MaximumBalanceAmount,5,5,0,2,,999999999.000000 | 99999999.000000
-khhousebankaccount__HouseBankAccountCollection.csv,MinimumBalanceAmount,5,5,0,2,,100.000000 | 500.000000
-khhousebankaccount__HouseBankAccountCollection.csv,ObjectID,5,5,0,5,,00163E5F7A721ED98AA5E5350C96796D | 00163E5F7A721ED98AA5FA54E66E79D5 | 00163E5F7A721ED98AAE694146A92542 | 00163E5F7A721ED98AAE8A59E324662F | 00163EA942DA1EDB8BB312E43E39E8F8
-khhousebankaccount__HouseBankAccountCollection.csv,OverdraftLimitBalanceAmount,5,5,0,1,,100.000000
-khhousebankaccount__HouseBankAccountCollection.csv,UUID,5,5,0,5,,00163E5F-7A72-1ED9-8AA5-E5350C96796D | 00163E5F-7A72-1ED9-8AA5-FA54E66E79D5 | 00163E5F-7A72-1ED9-8AAE-694146A92542 | 00163E5F-7A72-1ED9-8AAE-8A59E324662F | 00163EA9-42DA-1EDB-8BB3-12E43E39E8F8
+khhousebankaccount__BankDirectoryEntryCollection.csv,BankGroupCode,956,2,954,2,,04 | 03
+khhousebankaccount__BankDirectoryEntryCollection.csv,BankGroupCodeText,956,2,954,2,,Corporation Bank | State Bank of India
+khhousebankaccount__BankDirectoryEntryCollection.csv,BankStandardID,956,951,5,30+,,UTIB0000341 | UTIB0000579 | ABHY0065111 | ANDB0000099 | ANDB0000192
+khhousebankaccount__BankDirectoryEntryCollection.csv,CityName,956,937,19,30+,,Mumbai | Mysore | Pune | Bangalore | Hyderabad
+khhousebankaccount__BankDirectoryEntryCollection.csv,CommonBankStandardIDMainIndicator,956,956,0,2,,False | True
+khhousebankaccount__BankDirectoryEntryCollection.csv,CountryCode,956,956,0,23,,IN | SG | US | DE | HK
+khhousebankaccount__BankDirectoryEntryCollection.csv,CountryCodeText,956,956,0,23,,India | Singapore | United States | Germany | Hong Kong
+khhousebankaccount__BankDirectoryEntryCollection.csv,DeletedIndicator,956,956,0,2,,False | True
+khhousebankaccount__BankDirectoryEntryCollection.csv,LifeCycleStatusCode,956,956,0,2,,2 | 4
+khhousebankaccount__BankDirectoryEntryCollection.csv,LifeCycleStatusCodeText,956,956,0,2,,Active | Obsolete
+khhousebankaccount__BankDirectoryEntryCollection.csv,ObjectID,956,956,0,30+,,00163E5F7A721ED987FB14A7DF7DA1B7 | 00163E5F7A721ED987FB14AA46A5A1B7 | 00163E5F7A721ED987FB14AC492261B7 | 00163E5F7A721ED987FB14AE4C96A1B7 | 00163E5F7A721ED987FB14B046D6A1B7
+khhousebankaccount__BankDirectoryEntryCollection.csv,OrganisationFormattedName,956,956,0,30+,,AXIS BANK | Abhyudaya Cooperative Bank Ltd | Andhra Bank | Axis Bank | Axis Bank Ltd
+khhousebankaccount__BankDirectoryEntryCollection.csv,RegionCode,956,432,524,27,,05 | SG | NY | HK | 020
+khhousebankaccount__BankDirectoryEntryCollection.csv,RegionCodeText,956,432,524,30+,,Goa | Singapore | New York | Hong Kong Island | Shanghai
+khhousebankaccount__BankDirectoryEntryCollection.csv,StreetName,956,165,791,30+,,"Collyer Quay Branch | 15th Floor,4 New York Plaza, | D-79003 Freiburg BLZ 60050101 | OUE Bayfrount #14-01,50 | #01-01 Republic Plaza,"
+khhousebankaccount__DescriptionCollection.csv,Description,6,6,0,3,,Savings Account | SBI Commercial Branch CC Account | SBI Commercial Branch Term Loan Account
+khhousebankaccount__DescriptionCollection.csv,LanguageCode,6,6,0,1,,EN
+khhousebankaccount__DescriptionCollection.csv,LanguageCodeText,6,6,0,1,,English
+khhousebankaccount__DescriptionCollection.csv,ObjectID,6,6,0,6,,00163E5F7A721ED98AA5E5350C99996D | 00163E5F7A721ED98AA5FA54E67179D5 | 00163E5F7A721ED98AAE694146ACA542 | 00163E5F7A721ED98AAE8A59E327662F | 00163EA942DA1EDB8BB312E43E3CA8F8
+khhousebankaccount__DescriptionCollection.csv,ParentObjectID,6,6,0,6,,00163E5F7A721ED98AA5E5350C96796D | 00163E5F7A721ED98AA5FA54E66E79D5 | 00163E5F7A721ED98AAE694146A92542 | 00163E5F7A721ED98AAE8A59E324662F | 00163EA942DA1EDB8BB312E43E39E8F8
+khhousebankaccount__HouseBankAccountCollection.csv,AlternativeBankAccountID,6,0,6,0,,
+khhousebankaccount__HouseBankAccountCollection.csv,BankAccountID,6,6,0,6,,123456789 | 987456321 | 30571028998 | 510101002933518 | 39776744857_CC
+khhousebankaccount__HouseBankAccountCollection.csv,BankAccountStandardID,6,0,6,0,,
+khhousebankaccount__HouseBankAccountCollection.csv,BankAccountTypeCode,6,2,4,1,,SG
+khhousebankaccount__HouseBankAccountCollection.csv,BankAccountTypeCodeText,6,2,4,1,,Savings
+khhousebankaccount__HouseBankAccountCollection.csv,BlockedIndicator,6,6,0,1,,False
+khhousebankaccount__HouseBankAccountCollection.csv,CompanyHouseBankID,6,0,6,0,,
+khhousebankaccount__HouseBankAccountCollection.csv,CreationDateTime,6,6,0,5,,2019-02-05 10:19:53 | 2019-02-05 10:24:13 | 2019-02-05 18:29:04 | 2019-02-05 18:34:45 | 2020-11-23 14:31:01
+khhousebankaccount__HouseBankAccountCollection.csv,CurrencyCode,6,6,0,1,,INR
+khhousebankaccount__HouseBankAccountCollection.csv,CurrencyCodeText,6,6,0,1,,Indian Rupee
+khhousebankaccount__HouseBankAccountCollection.csv,HouseBankUUID,6,6,0,5,,00163E5F-7A72-1ED9-8AA5-DE70F608D914 | 00163E5F-7A72-1ED9-8AA5-F5397029597A | 00163E5F-7A72-1ED9-8AAE-58BB85AF84DE | 00163E5F-7A72-1ED9-8AAE-7E8FADACC5B5 | 00163EA9-42DA-1EDB-8BB2-FAB590C3288D
+khhousebankaccount__HouseBankAccountCollection.csv,InternalID,6,6,0,6,,1 | 2 | 3 | 4 | 39776744857
+khhousebankaccount__HouseBankAccountCollection.csv,LastChangeDateTime,6,6,0,5,,2019-02-05 10:19:53 | 2019-02-05 10:24:13 | 2019-02-05 18:29:04 | 2019-02-05 18:34:45 | 2025-11-20 07:19:27
+khhousebankaccount__HouseBankAccountCollection.csv,LifeCycleStatusCode,6,6,0,1,,3
+khhousebankaccount__HouseBankAccountCollection.csv,LifeCycleStatusCodeText,6,6,0,1,,Active
+khhousebankaccount__HouseBankAccountCollection.csv,MaximumBalanceAmount,6,6,0,2,,999999999.000000 | 99999999.000000
+khhousebankaccount__HouseBankAccountCollection.csv,MinimumBalanceAmount,6,6,0,2,,100.000000 | 500.000000
+khhousebankaccount__HouseBankAccountCollection.csv,ObjectID,6,6,0,6,,00163E5F7A721ED98AA5E5350C96796D | 00163E5F7A721ED98AA5FA54E66E79D5 | 00163E5F7A721ED98AAE694146A92542 | 00163E5F7A721ED98AAE8A59E324662F | 00163EA942DA1EDB8BB312E43E39E8F8
+khhousebankaccount__HouseBankAccountCollection.csv,OverdraftLimitBalanceAmount,6,6,0,1,,100.000000
+khhousebankaccount__HouseBankAccountCollection.csv,UUID,6,6,0,6,,00163E5F-7A72-1ED9-8AA5-E5350C96796D | 00163E5F-7A72-1ED9-8AA5-FA54E66E79D5 | 00163E5F-7A72-1ED9-8AAE-694146A92542 | 00163E5F-7A72-1ED9-8AAE-8A59E324662F | 00163EA9-42DA-1EDB-8BB3-12E43E39E8F8
 khhousebankaccount__HouseBankCollection.csv,BusinessPartnerFormattedName,5,5,0,5,,Generic Customer Bank | Generic Supplier Bank | State Bank Of India | CORPORATION BANK | SBI Commercial Branch
 khhousebankaccount__HouseBankCollection.csv,InternalID,5,5,0,5,,8000013 | 8000014 | 8000015 | 8000016 | 8000561
 khhousebankaccount__HouseBankCollection.csv,LifeCycleStatusCode,5,5,0,1,,2
 khhousebankaccount__HouseBankCollection.csv,LifeCycleStatusCodeText,5,5,0,1,,Active
 khhousebankaccount__HouseBankCollection.csv,ObjectID,5,5,0,5,,00163E5F7A721ED98AA5DE70F608D914 | 00163E5F7A721ED98AA5F5397029597A | 00163E5F7A721ED98AAE58BB85AF84DE | 00163E5F7A721ED98AAE7E8FADACC5B5 | 00163EA942DA1EDB8BB2FAB590C3288D
 khhousebankaccount__HouseBankCollection.csv,UUID,5,5,0,5,,00163E5F-7A72-1ED9-8AA5-DE70F608D914 | 00163E5F-7A72-1ED9-8AA5-F5397029597A | 00163E5F-7A72-1ED9-8AAE-58BB85AF84DE | 00163E5F-7A72-1ED9-8AAE-7E8FADACC5B5 | 00163EA9-42DA-1EDB-8BB2-FAB590C3288D
-khhousebankaccount__NationalBankIdentificationCollection.csv,BankRoutingID,5,5,0,5,,CORP0000280 | CORP0000362 | SBIN0004338 | HDFC0000440 | SBTR0000843
-khhousebankaccount__NationalBankIdentificationCollection.csv,BankRoutingIDTypeCode,5,5,0,1,,IN
-khhousebankaccount__NationalBankIdentificationCollection.csv,BankRoutingIDTypeCodeText,5,5,0,1,,Indian Financial System Code (IFSC)
-khhousebankaccount__NationalBankIdentificationCollection.csv,CommonBankRoutingIDMainIndicator,5,5,0,1,,False
-khhousebankaccount__NationalBankIdentificationCollection.csv,DefaultIndicator,5,5,0,1,,True
-khhousebankaccount__NationalBankIdentificationCollection.csv,ObjectID,5,5,0,5,,00163E5F7A721ED98AADF93EBD99E2B2 | 00163E5F7A721ED98AAE06D7E4F5232E | 00163E5F7A721ED98AAE10A3A3626330 | 00163E5F7A721ED98AAE260DB9B0E3B2 | 00163E5F7A721ED98AAE330E829B640E
-khhousebankaccount__NationalBankIdentificationCollection.csv,ParentObjectID,5,5,0,5,,00163E5F7A721ED987FB157670F9A1B7 | 00163E5F7A721ED987FB15339E3DE1B7 | 00163E5F7A721ED987FB1767C908A1C0 | 00163E5F7A721ED987FB163066C2E1C0 | 00163E5F7A721ED987FB17ACF3AB61C0
+khhousebankaccount__NationalBankIdentificationCollection.csv,BankRoutingID,846,846,0,30+,,CORP0000280 | CORP0000362 | SBIN0004338 | HDFC0000440 | SBTR0000843
+khhousebankaccount__NationalBankIdentificationCollection.csv,BankRoutingIDTypeCode,846,846,0,11,,IN | SG | ABA | HK | TW
+khhousebankaccount__NationalBankIdentificationCollection.csv,BankRoutingIDTypeCodeText,846,846,0,11,,Indian Financial System Code (IFSC) | Monetary Authority of Singapore Electronic Payment (MEPS) Code | US Federal Reserve Identification Code | Hong Kong Clearing and Branch Code | Taiwanese Routing Number (Bank/Branch Code)
+khhousebankaccount__NationalBankIdentificationCollection.csv,CommonBankRoutingIDMainIndicator,846,846,0,2,,False | True
+khhousebankaccount__NationalBankIdentificationCollection.csv,DefaultIndicator,846,846,0,1,,True
+khhousebankaccount__NationalBankIdentificationCollection.csv,ObjectID,846,846,0,30+,,00163E5F7A721ED98AADF93EBD99E2B2 | 00163E5F7A721ED98AAE06D7E4F5232E | 00163E5F7A721ED98AAE10A3A3626330 | 00163E5F7A721ED98AAE260DB9B0E3B2 | 00163E5F7A721ED98AAE330E829B640E
+khhousebankaccount__NationalBankIdentificationCollection.csv,ParentObjectID,846,846,0,30+,,00163E5F7A721ED987FB157670F9A1B7 | 00163E5F7A721ED987FB15339E3DE1B7 | 00163E5F7A721ED987FB1767C908A1C0 | 00163E5F7A721ED987FB163066C2E1C0 | 00163E5F7A721ED987FB17ACF3AB61C0
 khhousebankstatement__HouseBankStatementCollection.csv,odoo_external_id,404,404,0,30+,,sap_stmt_00163E5F7A721ED98ADF8681D9C1641A | sap_stmt_00163E5F7A721ED98ADF86C64DEF641A | sap_stmt_00163E5F7A721EE98CEC3697111C3AEF | sap_stmt_00163E876A901ED9B6BA57B9C6AE76B5 | sap_stmt_00163E876A901ED9B6F0370602169FF9
 khhousebankstatement__HouseBankStatementCollection.csv,AccountingTransactionDate,404,404,0,30+,,2019-01-31 00:00:00 | 2019-09-17 00:00:00 | 2019-09-19 00:00:00 | 2019-09-28 00:00:00 | 2019-09-30 00:00:00
 khhousebankstatement__HouseBankStatementCollection.csv,BankAccountDescription,404,404,0,3,,Savings Account | SBI Commercial Branch CC Account | SBI Commercial Branch Term Loan Account

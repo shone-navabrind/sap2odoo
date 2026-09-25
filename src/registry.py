@@ -128,9 +128,9 @@ REGISTRY = [
     ObjectSpec(26, "Engineering", "Master", "Drawings", False, "ir.attachment", "ir_attachment_drawings", "not_in_bydesign"),
 
     # --- Inventory ---
-    ObjectSpec(27, "Inventory", "Master", "Warehouses", True, "stock.warehouse", "stock_warehouse", "built", "REAL DATA: same khlocation source as #28, filtered on InventoryManagedLocationIndicator (ByDesign's own signal for 'this location tracks inventory') - 1/4 locations qualify",
+    ObjectSpec(27, "Inventory", "Master", "Warehouses", True, "stock.warehouse", "stock_warehouse", "built", "REAL DATA: same khlocation source as #28, filtered on InventoryManagedLocationIndicator (ByDesign's own signal for 'this location tracks inventory') - 1/1 locations qualify as of 2026-09-25 (tenant used to have 4 sites; confirmed live it now has only 1, 'Danlaw Technologies India Limited' - a tenant-side change, not a pipeline gap)",
                raw_sources=("khlocation__LocationCollection.json",)),
-    ObjectSpec(28, "Inventory", "Master", "Locations", True, "stock.location", "stock_location", "built", "REAL DATA: khlocation custom service, 4 locations",
+    ObjectSpec(28, "Inventory", "Master", "Locations", True, "stock.location", "stock_location", "built", "REAL DATA: khlocation custom service, 1 site as of 2026-09-25 (was 4; confirmed live - see #27 note) plus its storage areas",
                raw_sources=("khlocation__LocationCollection.json",)),
     ObjectSpec(29, "Inventory", "Master", "UOM", True, "uom.uom", "uom_uom", "built", "REAL DATA: vmumaterial's MaterialBaseMeasureUnitCodeCollection codelist, already-imported service, no new upload needed - 23 units",
                raw_sources=("vmumaterial__MaterialBaseMeasureUnitCodeCollection.json",)),
@@ -184,7 +184,7 @@ REGISTRY = [
                "components. Options for the user: expose the PBOM data sources via Business Configuration > Analytics, or "
                "extract BOMs by a non-OData route (UI export / file download) and hand over a CSV."),
     ObjectSpec(41, "Manufacturing", "Master", "Routings", False, "mrp.routing.workcenter", "mrp_routing_workcenter", "pending_mapping", "Data source confirmed: 'Released Execution Production Model Operation' (SCM_REPM_OPER)"),
-    ObjectSpec(42, "Manufacturing", "Master", "Work Centers", True, "mrp.workcenter", "mrp_workcenter", "built", "REAL DATA: derived from khproductionorder's OperationCollection (ResourceID/ResourceDescription), deduplicated - no dedicated Work Center master service found, but this data was already on hand (used for #44) - 18 distinct work centers",
+    ObjectSpec(42, "Manufacturing", "Master", "Work Centers", True, "mrp.workcenter", "mrp_workcenter", "built", "REAL DATA: derived from khproductionorder's OperationCollection (ResourceID/ResourceDescription), deduplicated - no dedicated Work Center master service found, but this data was already on hand (used for #44) - 17 distinct work centers as of 2026-09-25 (was 18 earlier - minor drift in the source data, negligible)",
                raw_sources=("khproductionorder__OperationCollection.json",)),
     ObjectSpec(43, "Manufacturing", "Master", "Operations", False, "mrp.routing.workcenter", "mrp_routing_workcenter_ops", "pending_mapping"),
     ObjectSpec(44, "Manufacturing", "Transaction", "Manufacturing Orders", False, "mrp.production", "mrp_production", "built", "REAL DATA: khproductionorder custom service, 152 orders. Header only - MainProductOutputCollection's 2842 rows don't carry a ParentObjectID and don't reliably join back to a specific order, so product_id/product_qty are left blank; OperationCollection (1158 rows, joins correctly via ParentObjectID) is raw-extracted but not yet transformed into routing lines",
@@ -235,16 +235,21 @@ REGISTRY = [
                raw_sources=("vmumaterial__MaterialCollection.json", "vmumaterial__TextCollection.json", "vmumaterial__PurchasingCollection.json", "vmumaterial__SalesCollection.json", "vmumaterial__ProductCategoryCollection.json", "vmumaterial__PlanningCollection.json", "vmumaterial__IdentificationCollection.json", "vmumaterial__LogisticsCollection.json", "vmumaterial__ValuationCollection.json", "vmumaterial__AvailabilityConfirmationCollection.json", "vmumaterial__PlanningForecastGroupCollection.json", "vmumaterial__QuantityConversionCollection.json", "vmumaterial__DeviantTaxClassificationCollection.json", "vmumaterialvaluationdata__MaterialValuationDataCollection.json", "vmumaterialvaluationdata__ValuationPriceCollection.json")),
     ObjectSpec(58, "Sales", "Master", "Product Categories", True, "product.category", "product_category", "built", "REAL DATA: vmumaterial's ProductCategoryCollection, already-imported service, no new upload needed - deduplicated from 3058 material rows to distinct categories",
                raw_sources=("vmumaterial__ProductCategoryCollection.json",)),
-    ObjectSpec(59, "Sales", "Master", "Pricelists", True, "product.pricelist", "product_pricelist", "built", "REAL DATA: khsalesarrangement custom service, 35 arrangements. partner_id/id NOT populated - CustomerUUID here is a hyphenated GUID that doesn't match res_partner's numeric-ID-based external IDs, and this tenant hasn't exposed a UUID->numeric-ID lookup",
+    ObjectSpec(59, "Sales", "Master", "Pricelists", True, "product.pricelist", "product_pricelist", "built", "REAL DATA: 226 pricelists, one per real SAP Sales Arrangement resolved from khsalesorder via "
+               "_resolve_order_to_arrangement() (Customer + SalesOrg + DistributionChannel business key) - not one "
+               "synthetic catch-all. partner_id/id NOT populated - CustomerUUID here is a hyphenated GUID that doesn't "
+               "match res_partner's numeric-ID-based external IDs, and this tenant hasn't exposed a UUID->numeric-ID "
+               "lookup",
                raw_sources=("khsalesarrangement__SalesArrangementCollection.json",)),
     ObjectSpec(60, "Sales", "Transaction", "Discount Rules", False, "product.pricelist.item", "product_pricelist_item_discount", "built",
                "THIS TENANT HAS NO DISCOUNT RULES - checked, not assumed: of the 94 price components SAP categorises as "
                "'Discount', every non-zero one is a Rounding Difference, and Item Discounts / Header Discounts are 0.00 "
                "throughout. Nothing was invented to fill the gap. What the same price-component data does carry is real "
-               "LIST PRICES (269 components typed 'List Price', 97 distinct values), and product.pricelist.item is Odoo's "
-               "model for 'this product is priced at X' - so this file holds 41 price rules under a dedicated 'SAP List "
-               "Prices' pricelist, kept separate from the sales arrangements written for #59. Where a product was quoted "
-               "at several prices the most frequent wins; the full per-order history is in output_full_csv/.",
+               "LIST PRICES, and product.pricelist.item is Odoo's model for 'this product is priced at X' - so this file "
+               "holds 1109 price lines attached to their real resolved #59 pricelists (61 of 226 carry lines); only the "
+               "8 orders whose Sales Arrangement couldn't be resolved fall into a small 'SAP List Prices - Unmatched "
+               "Sales Arrangement' fallback pricelist. Where a product was quoted at several prices the most frequent "
+               "wins; the full per-order history is in output_full_csv/.",
                raw_sources=("khsalesorder__ItemPriceComponentCollection.json", "khsalesorder__ItemCollection.json",
                             "khsalesorder__ItemProductCollection.json")),
     ObjectSpec(61, "Sales", "Master", "Customer Price Lists", False, "product.pricelist", "product_pricelist_customer", "pending_mapping", "Same source as #59 but without a working partner link (see #59's note), so this isn't meaningfully 'by customer' yet - left pending until the UUID->partner mapping is solved"),

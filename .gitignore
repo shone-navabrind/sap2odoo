@@ -14,4 +14,5 @@ __pycache__/
 # Real business data pulled from the tenant (same policy as output_raw/ and output_odoo/):
 # regenerate with `python -m src.probe_gl_accounts`
 schema_snapshots/gl_account_sources.json
-deliverables/
+deliverables/*
+!deliverables/*.zip

@@ -1584,24 +1584,31 @@ purchase_order_rfq.csv,sap__khpurchaseorder__PurchasingUnitCollection__PartyID,1
 purchase_order_rfq.csv,sap__khpurchaseorder__SupplierCollection__ObjectID,139,139,0,30+,JSON_ARRAY,"[""00163EA941891EECB1D6007548867020"", ""00163EA941891EECB1D6007548869020"", ""00163EA941891EECB1D600754886B020"", ""00163EA941891EECB1D6007548891020""] | [""00163EA9426E1EDCA4DF27475E4CC0AA"", ""00163EA9426E1EDCA4DF27475E4CE0AA"", ""00163EA9426E1EDCA4DF27475E4D00AA"", ""00163EA9426E1EDCA4DF27475E4F60AA"", ""00163EA9426E1EECA5AC06A09A5DBF05""] | [""00163EA9426E1EDCA9CFC0518819DC8C"", ""00163EA9426E1EDCA9CFC0518819FC8C"", ""00163EA9426E1EDCA9CFC051881A1C8C"", ""00163EA9426E1EDCA9CFC051881C7C8C""] | [""00163EA9426E1EDCA9A9696D79695CF6"", ""00163EA9426E1EECA99D4D25C70062A1"", ""00163EA9426E1EECA99D4D25C70082A1"", ""00163EA9426E1EECA99D4D25C702C2A1"", ""00163EA9426E1EECA99D4DEAB2D002AF""] | [""00163EA942DA1EDBAEC1661B6D48EF92"", ""00163EA942DA1EDBAEC1661B6D490F92"", ""00163EA942DA1EDBAEC1661B6D4B6F92"", ""00163EA942DA1EDBAEC16A4192436F95"", ""00163EA942DA1EDBAEC22DC7493D9376""]"
 purchase_order_rfq.csv,sap__khpurchaseorder__SupplierCollection__ParentObjectID,139,139,0,30+,,00163EA941891EECB1D6007548863020 | 00163EA9426E1EDCA4DF27475E4C80AA | 00163EA9426E1EDCA9CFC05188199C8C | 00163EA9426E1EECA99D4D25C6FF02A1 | 00163EA942DA1EDBAEC1661B6D478F92
 purchase_order_rfq.csv,sap__khpurchaseorder__SupplierCollection__PartyID,139,139,0,30+,JSON_ARRAY,"[""70000"", ""70000"", ""1001688"", ""G233""] | [""70000"", ""70000"", ""2015361"", ""G233"", ""G232""] | [""70000"", ""70000"", ""1003737"", ""G233""] | [""G232"", ""70000"", ""G233"", ""70000"", ""1001688""] | [""70000"", ""G020"", ""70000"", ""8000280"", ""G232""]"
-res_bank.csv,id,279,279,0,30+,,sap_bank_AXIS_BANK | sap_bank_Abhyudaya_Cooperative_Bank_Ltd | sap_bank_Andhra_Bank | sap_bank_ICICI_Bank | sap_bank_Indian_Bank
-res_bank.csv,name,279,279,0,30+,,AXIS BANK | Abhyudaya Cooperative Bank Ltd | Andhra Bank | ICICI Bank | Indian Bank
-res_bank.csv,country_id/id,279,279,0,22,,base.in | base.sg | base.jp | base.ch | base.de
-res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__BankGroupCode,279,0,279,0,,
-res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__BankGroupCodeText,279,0,279,0,,
-res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__BankStandardID,279,3,276,3,,UTIB0000579 | ABHY0065111 | ANDB0000192
-res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__CityName,279,3,276,3,,Mysore | Pune | Hyderabad
-res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__CommonBankStandardIDMainIndicator,279,3,276,1,,False
-res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__CountryCode,279,3,276,1,,IN
-res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__CountryCodeText,279,3,276,1,,India
-res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__DeletedIndicator,279,3,276,1,,False
-res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__LifeCycleStatusCode,279,3,276,1,,2
-res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__LifeCycleStatusCodeText,279,3,276,1,,Active
-res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__ObjectID,279,3,276,3,,00163E5F7A721ED987FB14AA46A5A1B7 | 00163E5F7A721ED987FB14AC492261B7 | 00163E5F7A721ED987FB14B046D6A1B7
-res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__OrganisationFormattedName,279,3,276,3,,AXIS BANK | Abhyudaya Cooperative Bank Ltd | Andhra Bank
-res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__RegionCode,279,0,279,0,,
-res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__RegionCodeText,279,0,279,0,,
-res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__StreetName,279,0,279,0,,
+res_bank.csv,id,287,287,0,30+,,sap_bank_AXIS_BANK | sap_bank_Abhyudaya_Cooperative_Bank_Ltd | sap_bank_Andhra_Bank | sap_bank_Axis_Bank | sap_bank_Axis_Bank_Ltd
+res_bank.csv,name,287,287,0,30+,,AXIS BANK | Abhyudaya Cooperative Bank Ltd | Andhra Bank | Axis Bank | Axis Bank Ltd
+res_bank.csv,country_id/id,287,287,0,23,,base.in | base.us | base.ae | base.de | base.sg
+res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__BankGroupCode,287,1,286,1,,04
+res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__BankGroupCodeText,287,1,286,1,,Corporation Bank
+res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__BankStandardID,287,285,2,30+,,UTIB0003721 | ABHY0065111 | ANDB0001140 | UTIB0001264 | UTIB0001622
+res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__CityName,287,271,16,30+,,PANAJI | Pune | Bangalore | Gurgaon | Mumbai
+res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__CommonBankStandardIDMainIndicator,287,287,0,2,,False | True
+res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__CountryCode,287,287,0,23,,IN | US | AE | DE | SG
+res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__CountryCodeText,287,287,0,23,,India | United States | United Arab Emirates | Germany | Singapore
+res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__DeletedIndicator,287,287,0,2,,False | True
+res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__LifeCycleStatusCode,287,287,0,2,,2 | 4
+res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__LifeCycleStatusCodeText,287,287,0,2,,Active | Obsolete
+res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__ObjectID,287,287,0,30+,,FA163E39381E1FE0A08247A737368B0C | 00163E5F7A721ED987FB14AC492261B7 | 00163EA9430C1EEB91E61057A6B281EF | FA163EE3F7811FD0A98156C29B8A0567 | FA163E39381E1FD096FC2BFE19DD9C98
+res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__OrganisationFormattedName,287,287,0,30+,,AXIS BANK | Abhyudaya Cooperative Bank Ltd | Andhra Bank | Axis Bank | Axis Bank Ltd
+res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__RegionCode,287,149,138,26,,05 | 10 | 07 | 13 | NY
+res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__RegionCodeText,287,149,138,29,,Goa | Karnataka | Haryana | Maharashtra | New York
+res_bank.csv,sap__khhousebankaccount__BankDirectoryEntryCollection__StreetName,287,125,162,30+,,"PATTO PLAZA | 100 West 33rd Street | MAJORDA | Sanghavi Nagar, Aundh, | Raia"
+res_bank.csv,sap__khhousebankaccount__NationalBankIdentificationCollection__BankRoutingID,287,182,105,30+,,UTIB0003721 | ABHY0065111 | ANDB0001140 | UTIB0001264 | UTIB0001622
+res_bank.csv,sap__khhousebankaccount__NationalBankIdentificationCollection__BankRoutingIDTypeCode,287,182,105,11,,IN | ABA | SG | HK | TW
+res_bank.csv,sap__khhousebankaccount__NationalBankIdentificationCollection__BankRoutingIDTypeCodeText,287,182,105,11,,Indian Financial System Code (IFSC) | US Federal Reserve Identification Code | Monetary Authority of Singapore Electronic Payment (MEPS) Code | Hong Kong Clearing and Branch Code | Taiwanese Routing Number (Bank/Branch Code)
+res_bank.csv,sap__khhousebankaccount__NationalBankIdentificationCollection__CommonBankRoutingIDMainIndicator,287,182,105,2,,False | True
+res_bank.csv,sap__khhousebankaccount__NationalBankIdentificationCollection__DefaultIndicator,287,182,105,1,,True
+res_bank.csv,sap__khhousebankaccount__NationalBankIdentificationCollection__ObjectID,287,182,105,30+,,FA163E39381E1FE0A0824AD9B6A16B0C | 00163E5F7A721EE98AC0577F2EA4E4D8 | 00163EA9430C1EEB91E61754776EE250 | FA163EE3F7811FD0A98159BA35BAA567 | FA163E39381E1FD096FC2F170C453C98
+res_bank.csv,sap__khhousebankaccount__NationalBankIdentificationCollection__ParentObjectID,287,182,105,30+,,FA163E39381E1FE0A08247A737368B0C | 00163E5F7A721ED987FB14AC492261B7 | 00163EA9430C1EEB91E61057A6B281EF | FA163EE3F7811FD0A98156C29B8A0567 | FA163E39381E1FD096FC2BFE19DD9C98
 res_partner.csv,id,2404,2404,0,30+,,sap_bp_1113761 | sap_bp_1116013 | sap_bp_1120645 | sap_bp_1121595 | sap_bp_1121709
 res_partner.csv,name,2404,2404,0,30+,,TE CONNECTIVITY INDIA PVT LTD (EOU | SIEMENS LTD | ABB INDIA LIMITED | DURA AUTO SYSTEMS (I) PVT. LTD | Dellorto India Pvt Ltd
 res_partner.csv,street,2404,385,2019,30+,,"GAT NO.1122, 1129, 1140, 1295, 1296 | Gat No. 376 & 377/1 | Plot No. B-42, MIDC INdustrial Area | E&A-ESP Vadodara Manufacturing Plan | S-7, SECOND FLOOR, PAI HOUSE"
