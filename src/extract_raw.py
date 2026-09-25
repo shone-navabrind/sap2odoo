@@ -915,6 +915,13 @@ def _extract_one(client, output_dir, source, limit):
         "row_count": len(rows),
         "fields_present": fields_present,
         "rows": [{k: v for k, v in row.items() if k != "__metadata"} for row in rows],
+        # Recorded so --resume can tell a genuinely-complete file from a --limit test pull that
+        # happened to be left on disk - a real incident: a --limit 5 connectivity check for
+        # khhousebankaccount left 6 files at 5-6 rows each; a later --resume run saw the files
+        # already existed and silently kept them, degrading res_bank.csv (287 -> 279 rows, real
+        # region/state data lost) for a full day before it was noticed. Without this marker,
+        # row_count alone can't distinguish "limited" from "genuinely has few rows."
+        "limited": bool(limit),
     }
 
     path = os.path.join(output_dir, raw_filename(service, entity_set))
@@ -956,11 +963,30 @@ def extract_all(client, output_dir, only=None, limit=None, workers=1, resume=Fal
 
     if resume:
         before = len(sources)
-        sources = [
-            s for s in sources
-            if not os.path.isfile(os.path.join(output_dir, raw_filename(s[0], s[1])))
-        ]
-        logger.info("--resume: skipping %d sources already in %s/, %d remaining",
+        limited_found = []
+
+        def _is_complete(source):
+            path = os.path.join(output_dir, raw_filename(source[0], source[1]))
+            if not os.path.isfile(path):
+                return False
+            try:
+                with open(path, encoding="utf-8") as f:
+                    payload = json.load(f)
+            except (json.JSONDecodeError, OSError):
+                return False  # unreadable/corrupt - treat as incomplete, re-pull it
+            if payload.get("limited"):
+                limited_found.append(path)
+                return False  # a --limit pull left this file - never resume-skip it
+            return True
+
+        sources = [s for s in sources if not _is_complete(s)]
+        if limited_found:
+            logger.warning(
+                "--resume: %d file(s) on disk were from a --limit pull, not the full data - "
+                "re-extracting them instead of skipping: %s",
+                len(limited_found), ", ".join(limited_found),
+            )
+        logger.info("--resume: skipping %d sources already complete in %s/, %d remaining",
                     before - len(sources), output_dir, len(sources))
 
     if workers <= 1:

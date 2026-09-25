@@ -175,6 +175,19 @@ without re-pulling). `--only`/`--limit` were added because the full
 tenant pull is a multi-hour, many-hundred-call operation, and until now there was no way to
 re-pull or re-test just one object without re-running everything.
 
+> **Real incident, fixed 2026-09-25**: a `--limit 5` connectivity check on `khhousebankaccount`
+> left 6 files on disk at 5-6 rows each. A later `--resume` run saw those files already existed
+> and treated them as done, since `--resume` originally only checked "does the file exist," not
+> whether it was a full pull. Result: `res_bank.csv` silently degraded from 287 to 279 real bank
+> directory records for about a day, losing real region/state data (432 of 956 banks have a
+> populated `RegionCode`/`RegionCodeText`) until a user noticed banks were missing region data
+> they'd seen before. Fixed at the source: every extracted file now records `"limited": true`
+> in its JSON when `--limit` was used, and `--resume` skips a file only when that flag is absent
+> - a limited pull can never again be mistaken for a complete one, and a warning is logged
+> listing exactly which files it's re-pulling for this reason. If you ever run a `--limit` test
+> and then want the FULL data, `--resume` now handles it correctly on its own - no manual
+> cleanup needed.
+
 ## Source system: SAP Business ByDesign, not S/4HANA
 
 Tenant: originally `my345654.sapbydesign.com` (documented below); the user has since pointed
