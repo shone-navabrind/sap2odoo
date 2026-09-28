@@ -451,6 +451,44 @@ object gets wired up, so the report keeps tracing status back to real source fil
 - **Large transactional extracts**, once mapped, should be bounded with `SAP_DATE_FROM`/
   `SAP_DATE_TO` in `.env` to avoid pulling a system's entire history in one run.
 
+## Ad-hoc field-name exports (`src/export_by_fields.py`)
+
+For "give me a CSV with just these fields, named the way they appear on the SAP screen" requests:
+
+```bash
+python -m src.export_by_fields --list-objects
+python -m src.export_by_fields --object products --list-fields
+python -m src.export_by_fields --object products --fields "Product ID,Product Description,Base UoM"
+```
+
+Works entirely offline against `output_full_csv/odoo_models/` - no SAP calls, instant regardless
+of object size. Each object has a curated `{SAP screen label: real column}` mapping in
+`FIELD_MAPS`, built by opening the actual SAP screen and matching every visible field to a real
+extracted column - **never by guessing from a label alone**. A label mapped to `(None, reason)`
+means the field is visible on the SAP screen but was checked directly against that service's
+live `$metadata` and confirmed absent - passing it still produces a column, filled with the
+reason instead of silently blank data.
+
+**Currently only `products` is mapped** (31 fields, validated live 2026-09-28 against product
+730511 "Cover Assy with PCB Bajaj", checked tab-by-tab: General/Purchasing/Logistics/Sales/
+Valuation/Taxes). That pass found a real, confirmed gap: **HSN Code for India, MRP for India,
+Batch Managed, Storage Location, and Manufacturer Name are all visible on the live Products
+screen but genuinely do not exist anywhere in the `vmumaterial` custom OData service** -
+confirmed via its live `$metadata`, not just unextracted. Closing this needs the same
+OData-Editor self-service work used for `khbomvariant`/`khequipmentresource`/`khbatch` (adding
+fields to the existing `vmumaterial` service, if the underlying Business Object node has them) -
+not yet done, flagged here as a known gap. Every other field checked on that screen (Purchasing,
+Logistics, Sales, Taxes, and the Valuation cost history - confirmed the exact real cost figures
+shown on screen, e.g. ₹184,446.06, already sit in `vmumaterialvaluationdata`) is captured.
+
+**Adding a new object**: open its real SAP maintenance screen (ideally via the Claude in Chrome
+extension against the live tenant), and for each field, find - or confirm the genuine absence
+of - the matching column in `output_full_csv/odoo_models/<file>.csv`, then add one `FIELD_MAPS`
+entry. This is deliberately a manual, validated process: custom `kh*`/`vmumaterial` services
+carry no `sap:label` UI-text metadata (unlike the analytics `RP*` reports, which do), so there is
+no automatic way to map a screen label to a technical field name - only checking the real screen
+against the real data gets this right.
+
 ## Running
 
 ```bash
