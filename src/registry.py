@@ -114,11 +114,17 @@ REGISTRY = [
                "BLOCKED BY AUTHORISATION, not by a missing service: khlead is imported and live, but every one of its 19 "
                "entity sets returns RBAM_ERROR (Not Authorized) for the SDK user. Granting that user the Leads work center "
                "makes it readable - an SAP role change, not another import."),
-    ObjectSpec(20, "CRM", "Transaction", "Opportunities", False, "crm.lead", "crm_lead", "built", "REAL DATA: khopportunity custom service, 15 opportunities (all, unfiltered)",
+    ObjectSpec(20, "CRM", "Transaction", "Opportunities", False, "crm.lead", "crm_lead", "built", "khopportunity custom service - transform code is real and correct, but confirmed live on "
+               "2026-09-26 (direct curl, $inlinecount=allpages) that OpportunityCollection currently has 0 rows on this "
+               "tenant - down from the 15 this note previously described. Not a pipeline bug: crm_lead.csv/_open/_closed "
+               "are correctly empty because the source data is currently empty. Re-check live if this matters before "
+               "go-live; the code will pick up real rows automatically the moment the tenant has any.",
                raw_sources=("khopportunity__OpportunityCollection.json",)),
-    ObjectSpec(21, "CRM", "Transaction", "Open Opportunities", True, "crm.lead", "crm_lead_open", "built", "REAL DATA: same khopportunity source as #20, filtered on LifeCycleStatusCode (Open=1, In Process=2) - 8/15 open",
+    ObjectSpec(21, "CRM", "Transaction", "Open Opportunities", True, "crm.lead", "crm_lead_open", "built", "Same khopportunity source and same currently-empty-tenant caveat as #20 (filter logic: LifeCycleStatusCode "
+               "Open=1/In Process=2, confirmed correct in code, just has nothing to filter right now).",
                raw_sources=("khopportunity__OpportunityCollection.json",)),
-    ObjectSpec(22, "CRM", "Transaction", "Closed Opportunities", False, "crm.lead", "crm_lead_closed", "built", "REAL DATA: same khopportunity source as #20, filtered on LifeCycleStatusCode (Won=4, Lost=5) - 7/15 closed",
+    ObjectSpec(22, "CRM", "Transaction", "Closed Opportunities", False, "crm.lead", "crm_lead_closed", "built", "Same khopportunity source and same currently-empty-tenant caveat as #20 (filter logic: LifeCycleStatusCode "
+               "Won=4/Lost=5, confirmed correct in code, just has nothing to filter right now).",
                raw_sources=("khopportunity__OpportunityCollection.json",)),
 
     # --- Engineering ---
@@ -171,18 +177,24 @@ REGISTRY = [
     ObjectSpec(39, "Maintenance", "Transaction", "Maintenance History", False, "maintenance.request", "maintenance_request_history", "not_in_bydesign"),
 
     # --- Manufacturing ---
-    ObjectSpec(40, "Manufacturing", "Master", "BOMs", True, "mrp.bom", "mrp_bom", "pending_mapping",
-               "NOT OBTAINABLE OVER ODATA FROM THIS TENANT - the strongest negative result in the project, and the one "
-               "mandatory object that genuinely cannot be closed from here. Searched for bom / 'bill of material' / "
-               "'production model' / recipe / component / routing / explosion across BOTH (a) all 1485 entity sets of all 48 "
-               "services the tenant publishes to this user (schema_snapshots/service_catalog.json, SERVICE_CATALOG.csv) and "
-               "(b) all 609 entity sets defined across all 47 custom service .xml files - zero matches in either. Importing "
-               "more custom services cannot produce it: no BOM service definition exists in the sample set. "
-               "The design-time catalog does list PBOM data sources (SCMPBOMU02 etc), but they are NOT published as OData on "
-               "this tenant - that catalog tracks report definitions, not published services. "
-               "khproductionorder REFERENCES a BOM via ProductionModelID/ProductionModelVersionID but never exposes its "
-               "components. Options for the user: expose the PBOM data sources via Business Configuration > Analytics, or "
-               "extract BOMs by a non-OData route (UI export / file download) and hand over a CSV."),
+    ObjectSpec(40, "Manufacturing", "Master", "BOMs", True, "mrp.bom", "mrp_bom", "built",
+               "REAL DATA, closed 2026-09-25. Confirmed unobtainable via the tenant's 1485 built-in + 609 custom-.xml entity "
+               "sets (an exhaustive negative result, still true of THAT set) - but the data itself was real, visible live in "
+               "the ByDesign UI under Enterprise Search > 'Bills of Material Variants'. Closed by building a brand new "
+               "custom OData service (khbomvariant) directly via the OData Editor - self-service, no .xml import needed - "
+               "exposing the underlying ProductionBillOfMaterial standard Business Object for the first time. "
+               "400 BOM headers, 448 variants (447 non-obsolete -> mrp_bom.csv rows), 14,947 component lines -> "
+               "mrp_bom_line.csv. product_tmpl_id/id and each line's product_id/id resolve via the same MaterialUUID -> "
+               "InternalID lookup used for product_template.csv (1/447 boms and 0/14947 lines unresolved). Verified against "
+               "the live UI screen for one real BOM (CS90861DOOO): all 5 components shown on screen matched exactly "
+               "(products + quantities), plus 8 more from other item groups not visible in that screen's scroll position. "
+               "Known limitation: components attach to the BOM header, not a specific variant, so the 48 headers with "
+               "multiple variants get the same component list per variant - matches what the raw data actually supports. "
+               "Full story + screenshots: sap_odata_editor_walkthrough/bom_service_setup/README.md.",
+               raw_sources=("khbomvariant__ProductionBillOfMaterialCollection.json",
+                             "khbomvariant__ProductionBillOfMaterialVariantCollection.json",
+                             "khbomvariant__ProductionBillOfMaterialItemGroupCollection.json",
+                             "khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection.json")),
     ObjectSpec(41, "Manufacturing", "Master", "Routings", False, "mrp.routing.workcenter", "mrp_routing_workcenter", "pending_mapping", "Data source confirmed: 'Released Execution Production Model Operation' (SCM_REPM_OPER)"),
     ObjectSpec(42, "Manufacturing", "Master", "Work Centers", True, "mrp.workcenter", "mrp_workcenter", "built", "REAL DATA: derived from khproductionorder's OperationCollection (ResourceID/ResourceDescription), deduplicated - no dedicated Work Center master service found, but this data was already on hand (used for #44) - 17 distinct work centers as of 2026-09-25 (was 18 earlier - minor drift in the source data, negligible)",
                raw_sources=("khproductionorder__OperationCollection.json",)),
@@ -253,7 +265,10 @@ REGISTRY = [
                raw_sources=("khsalesorder__ItemPriceComponentCollection.json", "khsalesorder__ItemCollection.json",
                             "khsalesorder__ItemProductCollection.json")),
     ObjectSpec(61, "Sales", "Master", "Customer Price Lists", False, "product.pricelist", "product_pricelist_customer", "pending_mapping", "Same source as #59 but without a working partner link (see #59's note), so this isn't meaningfully 'by customer' yet - left pending until the UUID->partner mapping is solved"),
-    ObjectSpec(62, "Sales", "Transaction", "Quotations", False, "sale.order", "sale_order_quotation", "pending_mapping", "khcustomerquote custom service is imported and live (metadata confirmed, CustomerQuoteCollection has real fields) but data reads are blocked by SAP authorization restrictions for the SDK user (RBAM_ERROR) - needs broader permissions granted on this tenant before it can be extracted"),
+    ObjectSpec(62, "Sales", "Transaction", "Quotations", False, "sale.order", "sale_order_quotation", "pending_mapping", "UPDATED 2026-09-26: the authorization block described here is resolved - live curl now returns HTTP 200 with "
+               "$inlinecount __count=0 (not RBAM_ERROR). khcustomerquote is imported, live, and authorized; the tenant "
+               "genuinely just has zero customer quotes right now. Still pending_mapping because there's no data to "
+               "confirm a transform against, not because of access - re-check if the tenant gets real quote data later."),
     ObjectSpec(63, "Sales", "Transaction", "Sales Orders", True, "sale.order", "sale_order", "built", "REAL DATA: khsalesorder custom service, 196 orders, 263 lines. Partner resolved via BuyerPartyCollection (195/196 resolved)",
                raw_sources=("khsalesorder__SalesOrderCollection.json", "khsalesorder__ItemCollection.json", "khsalesorder__BuyerPartyCollection.json", "khsalesorder__ItemProductCollection.json")),
     ObjectSpec(64, "Sales", "Transaction", "Deliveries", False, "stock.picking", "stock_picking_delivery", "built", "REAL DATA: khoutbounddelivery custom service, 130 deliveries, 157 lines. Partner resolved via BuyerPartyCollection (121/130 resolved)",

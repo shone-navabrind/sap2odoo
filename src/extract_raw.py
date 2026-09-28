@@ -858,6 +858,24 @@ SOURCES = [
     ("sap/byd/odata/cust/v1/vmumaterial", "WithholdingTaxClassificationCollection"),           # 5 fields
     ("sap/byd/odata/cust/v1/vmumaterial", "GlobalTradeItemNumberCollection"),                  # 4 fields
 
+    # --- khbomvariant: real BOM data (sheet object #40), closes the last open mandatory gap.
+    # Built via the OData Editor directly (self-service, no .xml import) - see
+    # sap_odata_editor_walkthrough/bom_service_setup/README.md for the full story.
+    #
+    # Component product/quantity data lives on ItemGroupItemChangeState, not ItemGroupItem
+    # itself - ItemGroupItem is a thin pointer node (ObjectID only) whose $expand navigation to
+    # its own parent ItemGroup is broken server-side ("ParentObjectID property is missing in
+    # entity ProductionBillOfMaterialItemGroup", confirmed via direct curl), so it's dropped
+    # entirely here - it offers no usable link and no fields of its own. Instead,
+    # ItemGroupItemChangeState's OWN nav property straight back to the BOM header
+    # (ProductionBillOfMaterial) resolves correctly and in bulk via $expand, confirmed via curl
+    # against a live sample and used here instead of the broken intermediate hop.
+    ("sap/byd/odata/cust/v1/khbomvariant", "ProductionBillOfMaterialCollection"),                       # 400 BOM headers
+    ("sap/byd/odata/cust/v1/khbomvariant", "ProductionBillOfMaterialVariantCollection"),                # 448 variants
+    ("sap/byd/odata/cust/v1/khbomvariant", "ProductionBillOfMaterialItemGroupCollection"),              # 982 item groups
+    ("sap/byd/odata/cust/v1/khbomvariant", "ProductionBillOfMaterialItemGroupItemChangeStateCollection",
+     {"expand": "ProductionBillOfMaterial"}),                                                           # 12,945 real component lines, each with its BOM header inline
+
 ]
 
 

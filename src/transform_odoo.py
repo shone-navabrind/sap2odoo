@@ -2150,6 +2150,147 @@ def build_rfqs():
     return {"purchase_order_rfq.csv": len(rows)}
 
 
+BOM_FIELDNAMES = ["id", "product_tmpl_id/id", "product_qty", "code", "type"]
+BOM_LINE_FIELDNAMES = ["id", "bom_id/id", "product_id/id", "product_qty"]
+
+
+def build_boms():
+    """
+    Sheet object #40 (BOMs, mandatory) -> mrp.bom / mrp.bom.line.
+
+    The one mandatory object this project spent the longest searching for - a full sweep of all
+    1485 entity sets across every built-in service, plus all 609 entity sets across all 47
+    original custom service .xml files, found zero matches. The data was real (confirmed live in
+    the ByDesign UI under Enterprise Search -> "Bills of Material Variants"), it just had never
+    been published as an OData service on this tenant. Closed by building a new custom service,
+    khbomvariant, directly via the OData Editor (self-service, no .xml import needed) - see
+    sap_odata_editor_walkthrough/bom_service_setup/README.md for the full story and screenshots.
+
+    Structure (confirmed live): a BOM header (ProductionBillOfMaterialCollection) has one or more
+    Variants, each producing a specific product+quantity (ProductionBillOfMaterialVariantCollection,
+    MaterialUUID = the variant's own output product). Each BOM header separately owns a set of
+    component lines - the real product/quantity data lives on ItemGroupItemChangeState, not on
+    ItemGroupItem (which is a thin pointer node with no fields of its own and a broken
+    $expand back to its parent ItemGroup - confirmed via direct curl, "ParentObjectID property is
+    missing in entity ProductionBillOfMaterialItemGroup"). ItemGroupItemChangeState's own nav
+    property straight back to the BOM header works correctly in bulk via $expand and is what
+    extract_raw.py uses (SOURCES entry has expand="ProductionBillOfMaterial"), giving each
+    component row a ProductionBillOfMaterial.ObjectID column to join on directly - no intermediate
+    hop needed.
+
+    Known limitation: components are attached to the BOM header, not to a specific variant, so
+    where a header has more than one variant (48 of this tenant's 400 headers - 448 variants
+    total), every variant of that header gets the same component list here. This matches what the
+    raw data actually supports; nothing is guessed to split components per variant.
+
+    product_tmpl_id/id and each line's product_id/id resolve via the same MaterialUUID ->
+    InternalID lookup already used for product_template.csv, so an unresolvable reference (no
+    matching material on this tenant) is left blank rather than guessed, and doesn't break the
+    rest of the row - matching this project's product_id/id handling everywhere else (e.g.
+    purchase_order_line.csv).
+    """
+    headers = {r["ObjectID"]: r for r in load_raw("ProductionBillOfMaterialCollection")["rows"]
+               if r.get("ObjectID")}
+    variants = load_raw("ProductionBillOfMaterialVariantCollection")["rows"]
+    components = load_raw("ProductionBillOfMaterialItemGroupItemChangeStateCollection")["rows"]
+
+    materials = load_raw("MaterialCollection", service_hint="vmumaterial")["rows"]
+    internal_id_by_uuid = {m["UUID"]: m.get("InternalID") for m in materials if m.get("UUID")}
+
+    def product_ref(material_uuid):
+        internal_id = internal_id_by_uuid.get(material_uuid)
+        return external_id("sap_prod", internal_id) if internal_id else ""
+
+    components_by_bom = {}
+    for c in components:
+        if c.get("DeletedIndicator"):
+            continue
+        bom_object_id = c.get("ProductionBillOfMaterial.ObjectID")
+        if not bom_object_id:
+            continue
+        components_by_bom.setdefault(bom_object_id, []).append(c)
+
+    bom_rows = []
+    line_rows = []
+    for variant in variants:
+        if variant.get("ObsoleteIndicator"):
+            continue
+        variant_object_id = variant.get("ObjectID")
+        bom_object_id = variant.get("ParentObjectID")
+        header = headers.get(bom_object_id)
+        if not variant_object_id or not header:
+            continue
+        bom_id = external_id("sap_bom", variant_object_id)
+        bom_rows.append({
+            "id": bom_id,
+            "product_tmpl_id/id": product_ref(variant.get("MaterialUUID")),
+            "product_qty": variant.get("Quantity") or "1",
+            "code": header.get("ID", ""),
+            "type": "normal",
+        })
+        for component in components_by_bom.get(bom_object_id, []):
+            line_rows.append({
+                "id": external_id("sap_bomline", f"{variant_object_id}_{component.get('ObjectID')}"),
+                "bom_id/id": bom_id,
+                "product_id/id": product_ref(component.get("MaterialUUID")),
+                "product_qty": component.get("Quantity") or "1",
+            })
+
+    write_csv("mrp_bom.csv", bom_rows, BOM_FIELDNAMES)
+    write_csv("mrp_bom_line.csv", line_rows, BOM_LINE_FIELDNAMES)
+    return {"mrp_bom.csv": len(bom_rows), "mrp_bom_line.csv": len(line_rows)}
+
+
+BOM_COMBINED_FIELDNAMES = [
+    "id", "product_tmpl_id/id", "product_qty", "code", "type",
+    "bom_line_ids/product_id/id", "bom_line_ids/product_qty",
+]
+
+
+def build_bom_combined():
+    """
+    Deliverable convenience file: mrp_bom.csv (headers, build_boms()) and mrp_bom_line.csv
+    (lines, same function) merged into ONE file using Odoo's standard one2many CSV import
+    convention - a bom header row carries its own id/product_tmpl_id/product_qty/code/type plus
+    its first line's bom_line_ids/* columns; every further line for that same bom is a follow-up
+    row with the header columns left blank, so Odoo groups it under the bom directly above it.
+    Must run after build_boms() in TRANSFORMS. Same pattern as build_pricelist_combined().
+    """
+    boms = list(csv.DictReader(open(os.path.join(ODOO_DIR, "mrp_bom.csv"), encoding="utf-8")))
+    lines = list(csv.DictReader(open(os.path.join(ODOO_DIR, "mrp_bom_line.csv"), encoding="utf-8")))
+
+    lines_by_bom = {}
+    for line in lines:
+        lines_by_bom.setdefault(line["bom_id/id"], []).append(line)
+
+    rows = []
+    for bom in boms:
+        bom_lines = lines_by_bom.get(bom["id"], [])
+        if not bom_lines:
+            rows.append({
+                "id": bom["id"],
+                "product_tmpl_id/id": bom["product_tmpl_id/id"],
+                "product_qty": bom["product_qty"],
+                "code": bom["code"],
+                "type": bom["type"],
+                "bom_line_ids/product_id/id": "",
+                "bom_line_ids/product_qty": "",
+            })
+            continue
+        for i, line in enumerate(bom_lines):
+            rows.append({
+                "id": bom["id"] if i == 0 else "",
+                "product_tmpl_id/id": bom["product_tmpl_id/id"] if i == 0 else "",
+                "product_qty": bom["product_qty"] if i == 0 else "",
+                "code": bom["code"] if i == 0 else "",
+                "type": bom["type"] if i == 0 else "",
+                "bom_line_ids/product_id/id": line["product_id/id"],
+                "bom_line_ids/product_qty": line["product_qty"],
+            })
+    write_csv("mrp_bom_with_lines.csv", rows, BOM_COMBINED_FIELDNAMES)
+    return {"mrp_bom_with_lines.csv": len(rows)}
+
+
 TRANSFORMS = [
     ("account_account (chart of accounts)", build_chart_of_accounts),
     ("account_analytic_plan / account_analytic_account (cost centers)", build_cost_centers),
@@ -2183,6 +2324,8 @@ TRANSFORMS = [
     ("mrp_production_history (closed orders)", build_production_history),
     ("purchase_order_rfq (draft purchase orders)", build_rfqs),
     ("stock_quant_adjustment (inventory balances)", build_inventory),
+    ("mrp_bom / mrp_bom_line (bills of material)", build_boms),
+    ("mrp_bom_with_lines (combined deliverable)", build_bom_combined),
 ]
 
 

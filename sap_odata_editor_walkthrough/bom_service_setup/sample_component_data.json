@@ -1,0 +1,78 @@
+{
+    "d": {
+        "results": [
+            {
+                "__metadata": {
+                    "uri": "https://my346623.sapbydesign.com/sap/byd/odata/cust/v1/khbomvariant/ProductionBillOfMaterialItemGroupItemChangeStateCollection('00163E5F7A721ED9898C368946036402')",
+                    "type": "cust.ProductionBillOfMaterialItemGroupItemChangeState"
+                },
+                "ObjectID": "00163E5F7A721ED9898C368946036402",
+                "DeletedIndicator": false,
+                "EngineeringChangeOrderID": "BGMBETTCARD7",
+                "MaterialUUID": "00163E5F-7A72-1ED9-88DC-8CE74D157AE0",
+                "QuantityFixedIndicator": false,
+                "UUID": "00163E5F-7A72-1ED9-898C-368946036402",
+                "Quantity": "1.00000000000000",
+                "unitCode": "ZNO",
+                "ProductionBillOfMaterialItemGroupItem": {
+                    "__deferred": {
+                        "uri": "https://my346623.sapbydesign.com/sap/byd/odata/cust/v1/khbomvariant/ProductionBillOfMaterialItemGroupItemChangeStateCollection('00163E5F7A721ED9898C368946036402')/ProductionBillOfMaterialItemGroupItem"
+                    }
+                },
+                "ProductionBillOfMaterial": {
+                    "__deferred": {
+                        "uri": "https://my346623.sapbydesign.com/sap/byd/odata/cust/v1/khbomvariant/ProductionBillOfMaterialItemGroupItemChangeStateCollection('00163E5F7A721ED9898C368946036402')/ProductionBillOfMaterial"
+                    }
+                }
+            },
+            {
+                "__metadata": {
+                    "uri": "https://my346623.sapbydesign.com/sap/byd/odata/cust/v1/khbomvariant/ProductionBillOfMaterialItemGroupItemChangeStateCollection('00163E5F7A721ED9898C36894603E402')",
+                    "type": "cust.ProductionBillOfMaterialItemGroupItemChangeState"
+                },
+                "ObjectID": "00163E5F7A721ED9898C36894603E402",
+                "DeletedIndicator": false,
+                "EngineeringChangeOrderID": "BGMBETTCARD7",
+                "MaterialUUID": "00163E5F-7A72-1ED9-88DC-8CE74D159AE0",
+                "QuantityFixedIndicator": false,
+                "UUID": "00163E5F-7A72-1ED9-898C-36894603E402",
+                "Quantity": "1.00000000000000",
+                "unitCode": "ZNO",
+                "ProductionBillOfMaterialItemGroupItem": {
+                    "__deferred": {
+                        "uri": "https://my346623.sapbydesign.com/sap/byd/odata/cust/v1/khbomvariant/ProductionBillOfMaterialItemGroupItemChangeStateCollection('00163E5F7A721ED9898C36894603E402')/ProductionBillOfMaterialItemGroupItem"
+                    }
+                },
+                "ProductionBillOfMaterial": {
+                    "__deferred": {
+                        "uri": "https://my346623.sapbydesign.com/sap/byd/odata/cust/v1/khbomvariant/ProductionBillOfMaterialItemGroupItemChangeStateCollection('00163E5F7A721ED9898C36894603E402')/ProductionBillOfMaterial"
+                    }
+                }
+            },
+            {
+                "__metadata": {
+                    "uri": "https://my346623.sapbydesign.com/sap/byd/odata/cust/v1/khbomvariant/ProductionBillOfMaterialItemGroupItemChangeStateCollection('00163E5F7A721ED9898C36971FF62402')",
+                    "type": "cust.ProductionBillOfMaterialItemGroupItemChangeState"
+                },
+                "ObjectID": "00163E5F7A721ED9898C36971FF62402",
+                "DeletedIndicator": false,
+                "EngineeringChangeOrderID": "BGTPETTCARD4",
+                "MaterialUUID": "00163E5F-7A72-1ED9-88DC-8E62A8083AE0",
+                "QuantityFixedIndicator": false,
+                "UUID": "00163E5F-7A72-1ED9-898C-36971FF62402",
+                "Quantity": "1.00000000000000",
+                "unitCode": "ZNO",
+                "ProductionBillOfMaterialItemGroupItem": {
+                    "__deferred": {
+                        "uri": "https://my346623.sapbydesign.com/sap/byd/odata/cust/v1/khbomvariant/ProductionBillOfMaterialItemGroupItemChangeStateCollection('00163E5F7A721ED9898C36971FF62402')/ProductionBillOfMaterialItemGroupItem"
+                    }
+                },
+                "ProductionBillOfMaterial": {
+                    "__deferred": {
+                        "uri": "https://my346623.sapbydesign.com/sap/byd/odata/cust/v1/khbomvariant/ProductionBillOfMaterialItemGroupItemChangeStateCollection('00163E5F7A721ED9898C36971FF62402')/ProductionBillOfMaterial"
+                    }
+                }
+            }
+        ]
+    }
+}

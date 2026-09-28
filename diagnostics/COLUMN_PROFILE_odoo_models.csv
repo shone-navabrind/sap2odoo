@@ -808,6 +808,22 @@ crm_lead_open.csv,name,0,0,0,0,,
 crm_lead_open.csv,expected_revenue,0,0,0,0,,
 crm_lead_open.csv,probability,0,0,0,0,,
 crm_lead_open.csv,type,0,0,0,0,,
+mrp_bom.csv,id,447,447,0,30+,,sap_bom_00163E5F7A721ED9898C368946022402 | sap_bom_00163E5F7A721ED9898C36971FF4A402 | sap_bom_00163E5F7A721ED9898C36972832A402 | sap_bom_00163E5F7A721ED9898C369731896402 | sap_bom_00163E5F7A721ED9898C36B647642402
+mrp_bom.csv,product_tmpl_id/id,447,446,1,30+,,sap_prod_BGMBETTCARD7 | sap_prod_BGTPETTCARD4 | sap_prod_BGTPETTCARD5 | sap_prod_BGTPETTCARD6 | sap_prod_BGTPCNTRL
+mrp_bom.csv,product_qty,447,447,0,2,,1.00000000000000 | 0.00000000000000
+mrp_bom.csv,code,447,447,0,30+,,BGMBETTCARD7 | BGTPETTCARD4 | BGTPETTCARD5 | BGTPETTCARD6 | BGTPCNTRL
+mrp_bom.csv,type,447,447,0,1,,normal
+mrp_bom_line.csv,id,14947,14947,0,30+,,sap_bomline_00163E5F7A721ED9898C368946022402_00163E5F7A721ED9898C368946036402 | sap_bomline_00163E5F7A721ED9898C368946022402_00163E5F7A721ED9898C36894603E402 | sap_bomline_00163E5F7A721ED9898C36971FF4A402_00163E5F7A721ED9898C36971FF62402 | sap_bomline_00163E5F7A721ED9898C36971FF4A402_00163E5F7A721ED9898C36971FF6A402 | sap_bomline_00163E5F7A721ED9898C36971FF4A402_00163E5F7A721ED9898C36971FF72402
+mrp_bom_line.csv,bom_id/id,14947,14947,0,30+,,sap_bom_00163E5F7A721ED9898C368946022402 | sap_bom_00163E5F7A721ED9898C36971FF4A402 | sap_bom_00163E5F7A721ED9898C36972832A402 | sap_bom_00163E5F7A721ED9898C369731896402 | sap_bom_00163E5F7A721ED9898C36B647642402
+mrp_bom_line.csv,product_id/id,14947,14947,0,30+,,sap_prod_BGGMSCON226 | sap_prod_BGGMMPCB007 | sap_prod_BGTPTOTH326 | sap_prod_BGTPMPCB005 | sap_prod_BGTPTCON223
+mrp_bom_line.csv,product_qty,14947,14947,0,30+,,1.00000000000000 | 4.00000000000000 | 41.00000000000000 | 2.00000000000000 | 7.00000000000000
+mrp_bom_with_lines.csv,id,14948,447,14501,30+,,sap_bom_00163E5F7A721ED9898C368946022402 | sap_bom_00163E5F7A721ED9898C36971FF4A402 | sap_bom_00163E5F7A721ED9898C36972832A402 | sap_bom_00163E5F7A721ED9898C369731896402 | sap_bom_00163E5F7A721ED9898C36B647642402
+mrp_bom_with_lines.csv,product_tmpl_id/id,14948,446,14502,30+,,sap_prod_BGMBETTCARD7 | sap_prod_BGTPETTCARD4 | sap_prod_BGTPETTCARD5 | sap_prod_BGTPETTCARD6 | sap_prod_BGTPCNTRL
+mrp_bom_with_lines.csv,product_qty,14948,447,14501,2,,1.00000000000000 | 0.00000000000000
+mrp_bom_with_lines.csv,code,14948,447,14501,30+,,BGMBETTCARD7 | BGTPETTCARD4 | BGTPETTCARD5 | BGTPETTCARD6 | BGTPCNTRL
+mrp_bom_with_lines.csv,type,14948,447,14501,1,,normal
+mrp_bom_with_lines.csv,bom_line_ids/product_id/id,14948,14947,1,30+,,sap_prod_BGGMSCON226 | sap_prod_BGGMMPCB007 | sap_prod_BGTPTOTH326 | sap_prod_BGTPMPCB005 | sap_prod_BGTPTCON223
+mrp_bom_with_lines.csv,bom_line_ids/product_qty,14948,14947,1,30+,,1.00000000000000 | 4.00000000000000 | 41.00000000000000 | 2.00000000000000 | 7.00000000000000
 mrp_production.csv,id,9557,9557,0,30+,,sap_mo_00163E5F7A721ED98AF06F504168FBE0 | sap_mo_00163E5F7A721ED98AF0F6A3FB073EA9 | sap_mo_00163E5F7A721ED98B849DEBBC5AE81C | sap_mo_00163E5F7A721ED98B84D87EB26268F4 | sap_mo_00163E5F7A721ED98B84E445071EA948
 mrp_production.csv,name,9557,9557,0,30+,,1 | 2 | 7 | 8 | 9
 mrp_production.csv,product_id/id,9557,9557,0,30+,,sap_prod_730511 | sap_prod_LF90044 | sap_prod_19239000048 | sap_prod_LF91127 | sap_prod_LF90286
@@ -1003,12 +1019,19 @@ product_pricelist.csv,sap__khsalesarrangement__SalesArrangementCollection__Payme
 product_pricelist.csv,sap__khsalesarrangement__SalesArrangementCollection__SalesOrganisationID,226,225,1,1,,71000
 product_pricelist.csv,sap__khsalesarrangement__SalesArrangementCollection__SalesOrganisationUUID,226,225,1,1,,00163E5F-7A72-1EE9-87A8-35E9FA7EEA67
 product_pricelist.csv,sap__khsalesarrangement__SalesArrangementCollection__UUID,226,225,1,30+,,00163E5F-7A72-1ED9-888B-BD7687F2F460 | 00163E5F-7A72-1ED9-888B-BD7687F31460 | 00163E5F-7A72-1ED9-888B-BD7687F33460 | 00163E5F-7A72-1ED9-888B-BD7687F35460 | 00163E5F-7A72-1ED9-888B-BD7687F37460
-product_pricelist_item_discount.csv,id,932,932,0,30+,,sap_plitem_0007_2025_010_064 | sap_plitem_10007_8A00W | sap_plitem_1000750301 | sap_plitem_1000755470 | sap_plitem_10030_18475
-product_pricelist_item_discount.csv,pricelist_id/id,932,932,0,1,,sap_pricelist_list_prices
-product_pricelist_item_discount.csv,applied_on,932,932,0,1,,1_product
-product_pricelist_item_discount.csv,product_tmpl_id/id,932,932,0,30+,,sap_prod_0007_2025_010_064 | sap_prod_10007_8A00W | sap_prod_1000750301 | sap_prod_1000755470 | sap_prod_10030_18475
-product_pricelist_item_discount.csv,compute_price,932,932,0,1,,fixed
-product_pricelist_item_discount.csv,fixed_price,932,932,0,30+,,55000.00 | 305.00 | 501.08 | 144.93 | 290.45
+product_pricelist_item_discount.csv,id,1109,1109,0,30+,,sap_plitem_sap_pricelist_00163E5F7A721ED9888BBD7687F2F460_10007_8A00W | sap_plitem_sap_pricelist_00163E5F7A721ED9888BBD7687F2F460_10030_18475 | sap_plitem_sap_pricelist_00163E5F7A721ED9888BBD7687F2F460_10107_8A00W | sap_plitem_sap_pricelist_00163E5F7A721ED9888BBD7687F2F460_10130_18475 | sap_plitem_sap_pricelist_00163E5F7A721ED9888BBD7687F2F460_IJ23MOTH601
+product_pricelist_item_discount.csv,pricelist_id/id,1109,1109,0,30+,,sap_pricelist_00163E5F7A721ED9888BBD7687F2F460 | sap_pricelist_00163E5F7A721ED9888BBD7687F31460 | sap_pricelist_00163E5F7A721ED9888BBD7687F35460 | sap_pricelist_00163E5F7A721ED9888BBD7687F37460 | sap_pricelist_00163E5F7A721ED9888BBD7687F39460
+product_pricelist_item_discount.csv,applied_on,1109,1109,0,1,,1_product
+product_pricelist_item_discount.csv,product_tmpl_id/id,1109,1109,0,30+,,sap_prod_10007_8A00W | sap_prod_10030_18475 | sap_prod_10107_8A00W | sap_prod_10130_18475 | sap_prod_IJ23MOTH601
+product_pricelist_item_discount.csv,compute_price,1109,1109,0,1,,fixed
+product_pricelist_item_discount.csv,fixed_price,1109,1109,0,30+,,305.00 | 290.45 | 11.30 | 31.78 | 61.70
+product_pricelist_with_items.csv,id,1274,226,1048,30+,,sap_pricelist_00163E5F7A721ED9888BBD7687F2F460 | sap_pricelist_00163E5F7A721ED9888BBD7687F31460 | sap_pricelist_00163E5F7A721ED9888BBD7687F33460 | sap_pricelist_00163E5F7A721ED9888BBD7687F35460 | sap_pricelist_00163E5F7A721ED9888BBD7687F37460
+product_pricelist_with_items.csv,name,1274,226,1048,30+,,SAP Sales Arrangement 00163E5F7A72 | SAP Sales Arrangement 00163E876ABA | SAP Sales Arrangement 00163E876AD0 | SAP Sales Arrangement 00163E876AF1 | SAP Sales Arrangement 00163EA0C8E4
+product_pricelist_with_items.csv,currency_id/id,1274,225,1049,5,,base.INR | base.USD | base.GBP | base.EUR | base.JPY
+product_pricelist_with_items.csv,item_ids/applied_on,1274,1109,165,1,,1_product
+product_pricelist_with_items.csv,item_ids/product_tmpl_id/id,1274,1109,165,30+,,sap_prod_10007_8A00W | sap_prod_10030_18475 | sap_prod_10107_8A00W | sap_prod_10130_18475 | sap_prod_IJ23MOTH601
+product_pricelist_with_items.csv,item_ids/compute_price,1274,1109,165,1,,fixed
+product_pricelist_with_items.csv,item_ids/fixed_price,1274,1109,165,30+,,305.00 | 290.45 | 11.30 | 31.78 | 61.70
 product_supplierinfo.csv,id,8556,8556,0,30+,,sap_supinfo_8000220_LTTTPL0007 | sap_supinfo_8000222_LTTTPL0007 | sap_supinfo_8000221_LTTTPL0007 | sap_supinfo_8000222_DL3SMPCB011 | sap_supinfo_8000033_VCAP0015C
 product_supplierinfo.csv,partner_id/id,8556,8556,0,10,,sap_bp_8000220 | sap_bp_8000222 | sap_bp_8000221 | sap_bp_8000033 | sap_bp_8000034
 product_supplierinfo.csv,product_tmpl_id/id,8556,8556,0,30+,,sap_prod_LTTTPL0007 | sap_prod_DL3SMPCB011 | sap_prod_VCAP0015C | sap_prod_VCAP0011C | sap_prod_VCAP0009C

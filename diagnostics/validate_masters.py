@@ -33,6 +33,8 @@ MASTER_FILES = [
     ("product_template.csv", "product.template", ["product_category.csv", "uom_uom.csv"], ["#57 Products"]),
     ("product_supplierinfo.csv", "product.supplierinfo", ["res_partner.csv", "product_template.csv"], ["#47 Vendor Pricelists"]),
     ("product_pricelist.csv", "product.pricelist", [], ["#59 Pricelists"]),
+    ("mrp_bom.csv", "mrp.bom", ["product_template.csv"], ["#40 BOMs"]),
+    ("mrp_bom_line.csv", "mrp.bom.line", ["mrp_bom.csv", "product_template.csv"], ["(child of #40)"]),
 ]
 
 # Every mandatory master object per src/registry.py, and which of the files above covers it.
@@ -40,7 +42,7 @@ MASTER_FILES = [
 MANDATORY_SHEETS = {
     "#1 Chart of Accounts", "#2 Taxes", "#4 Payment Terms", "#5 Banks", "#17 Customers",
     "#18 Salespersons", "#27 Warehouses", "#28 Locations", "#29 UOM", "#42 Work Centers",
-    "#46 Vendors", "#57 Products", "#58 Product Categories", "#59 Pricelists",
+    "#46 Vendors", "#57 Products", "#58 Product Categories", "#59 Pricelists", "#40 BOMs",
 }
 
 

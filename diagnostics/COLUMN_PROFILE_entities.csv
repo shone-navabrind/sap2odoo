@@ -305,6 +305,43 @@ fin_taxmanagement_analytics.svc__RPGLOTAXB01_Q0001QueryResults.csv,CRESULT_TAX_E
 fin_taxmanagement_analytics.svc__RPGLOTAXB01_Q0001QueryResults.csv,CRESULT_TAX_TYPE,324,324,0,11,,1-VAT | 12-Service Tax | 25-Basic Customs Duty | 26-Education Cess on Customs | 27-Sec and HCESS on Customs
 fin_taxmanagement_analytics.svc__RPGLOTAXB01_Q0001QueryResults.csv,CTAX_DEDUCTIBLE,324,324,0,2,,True | False
 fin_taxmanagement_analytics.svc__RPGLOTAXB01_Q0001QueryResults.csv,CTRP_TAX_TYPE,324,324,0,11,,1 | 12 | 25 | 26 | 27
+khbomvariant__ProductionBillOfMaterialCollection.csv,Description,400,399,1,30+,,PCBA FOR GEAR MOTOR | PCBA Limit Switch 2 | PCBA Limit Switch 3 | PCBA DC JACK PCB | CONTROLLER CARD
+khbomvariant__ProductionBillOfMaterialCollection.csv,ID,400,400,0,30+,,BGMBETTCARD7 | BGTPETTCARD4 | BGTPETTCARD5 | BGTPETTCARD6 | BGTPCNTRL
+khbomvariant__ProductionBillOfMaterialCollection.csv,LogisticsPreparationFunctionalUnitID,400,0,400,0,,
+khbomvariant__ProductionBillOfMaterialCollection.csv,LogisticsPreparationFunctionalUnitUUID,400,0,400,0,,
+khbomvariant__ProductionBillOfMaterialCollection.csv,ObjectID,400,400,0,30+,,00163E5F7A721ED9898C36894601C402 | 00163E5F7A721ED9898C36971FF44402 | 00163E5F7A721ED9898C369728324402 | 00163E5F7A721ED9898C369731890402 | 00163E5F7A721ED9898C36B64763C402
+khbomvariant__ProductionBillOfMaterialCollection.csv,UUID,400,400,0,30+,,00163E5F-7A72-1ED9-898C-36894601C402 | 00163E5F-7A72-1ED9-898C-36971FF44402 | 00163E5F-7A72-1ED9-898C-369728324402 | 00163E5F-7A72-1ED9-898C-369731890402 | 00163E5F-7A72-1ED9-898C-36B64763C402
+khbomvariant__ProductionBillOfMaterialItemGroupCollection.csv,BillOfMaterialID,982,982,0,30+,,BGMBETTCARD7 | BGTPETTCARD4 | BGTPETTCARD5 | BGTPETTCARD6 | BGTPCNTRL
+khbomvariant__ProductionBillOfMaterialItemGroupCollection.csv,BillOfMaterialItemGroupID,982,982,0,5,,1 | 2 | 4 | 5 | 3
+khbomvariant__ProductionBillOfMaterialItemGroupCollection.csv,ID,982,982,0,5,,1 | 2 | 4 | 5 | 3
+khbomvariant__ProductionBillOfMaterialItemGroupCollection.csv,ItemRequiredIndicator,982,982,0,1,,False
+khbomvariant__ProductionBillOfMaterialItemGroupCollection.csv,MultipleSelectionAllowedIndicator,982,982,0,1,,True
+khbomvariant__ProductionBillOfMaterialItemGroupCollection.csv,ObjectID,982,982,0,30+,,00163E5F7A721ED9898C368946028402 | 00163E5F7A721ED9898C36971FF50402 | 00163E5F7A721ED9898C369728330402 | 00163E5F7A721ED9898C36973189C402 | 00163E5F7A721ED9898C36B647648402
+khbomvariant__ProductionBillOfMaterialItemGroupCollection.csv,ParentObjectID,982,982,0,30+,,00163E5F7A721ED9898C36894601C402 | 00163E5F7A721ED9898C36971FF44402 | 00163E5F7A721ED9898C369728324402 | 00163E5F7A721ED9898C369731890402 | 00163E5F7A721ED9898C36B64763C402
+khbomvariant__ProductionBillOfMaterialItemGroupCollection.csv,UUID,982,982,0,30+,,00163E5F-7A72-1ED9-898C-368946028402 | 00163E5F-7A72-1ED9-898C-36971FF50402 | 00163E5F-7A72-1ED9-898C-369728330402 | 00163E5F-7A72-1ED9-898C-36973189C402 | 00163E5F-7A72-1ED9-898C-36B647648402
+khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection.csv,DeletedIndicator,12945,12945,0,2,,False | True
+khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection.csv,EngineeringChangeOrderID,12945,12945,0,30+,,BGMBETTCARD7 | BGTPETTCARD4 | BGTPETTCARD5 | BGTPETTCARD6 | BGTPCNTRL
+khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection.csv,MaterialUUID,12945,12737,208,30+,,00163E5F-7A72-1ED9-88DC-8CE74D157AE0 | 00163E5F-7A72-1ED9-88DC-8CE74D159AE0 | 00163E5F-7A72-1ED9-88DC-8E62A8083AE0 | 00163E5F-7A72-1ED9-88DC-8D1556C03AE0 | 00163E5F-7A72-1ED9-88DC-8E62A8087AE0
+khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection.csv,ObjectID,12945,12945,0,30+,,00163E5F7A721ED9898C368946036402 | 00163E5F7A721ED9898C36894603E402 | 00163E5F7A721ED9898C36971FF62402 | 00163E5F7A721ED9898C36971FF6A402 | 00163E5F7A721ED9898C36971FF72402
+khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection.csv,ProductionBillOfMaterial.Description,12945,12945,0,30+,,PCBA FOR GEAR MOTOR | PCBA Limit Switch 2 | PCBA Limit Switch 3 | PCBA DC JACK PCB | CONTROLLER CARD
+khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection.csv,ProductionBillOfMaterial.ID,12945,12945,0,30+,,BGMBETTCARD7 | BGTPETTCARD4 | BGTPETTCARD5 | BGTPETTCARD6 | BGTPCNTRL
+khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection.csv,ProductionBillOfMaterial.LogisticsPreparationFunctionalUnitID,12945,0,12945,0,,
+khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection.csv,ProductionBillOfMaterial.LogisticsPreparationFunctionalUnitUUID,12945,0,12945,0,,
+khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection.csv,ProductionBillOfMaterial.ObjectID,12945,12945,0,30+,,00163E5F7A721ED9898C36894601C402 | 00163E5F7A721ED9898C36971FF44402 | 00163E5F7A721ED9898C369728324402 | 00163E5F7A721ED9898C369731890402 | 00163E5F7A721ED9898C36B64763C402
+khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection.csv,ProductionBillOfMaterial.UUID,12945,12945,0,30+,,00163E5F-7A72-1ED9-898C-36894601C402 | 00163E5F-7A72-1ED9-898C-36971FF44402 | 00163E5F-7A72-1ED9-898C-369728324402 | 00163E5F-7A72-1ED9-898C-369731890402 | 00163E5F-7A72-1ED9-898C-36B64763C402
+khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection.csv,Quantity,12945,12945,0,30+,,1.00000000000000 | 4.00000000000000 | 41.00000000000000 | 2.00000000000000 | 7.00000000000000
+khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection.csv,QuantityFixedIndicator,12945,12945,0,2,,False | True
+khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection.csv,UUID,12945,12945,0,30+,,00163E5F-7A72-1ED9-898C-368946036402 | 00163E5F-7A72-1ED9-898C-36894603E402 | 00163E5F-7A72-1ED9-898C-36971FF62402 | 00163E5F-7A72-1ED9-898C-36971FF6A402 | 00163E5F-7A72-1ED9-898C-36971FF72402
+khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection.csv,__metadata.type,12945,12945,0,1,,cust.ProductionBillOfMaterialItemGroupItemChangeState
+khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection.csv,__metadata.uri,12945,12945,0,30+,,https://my346623.sapbydesign.com/sap/byd/odata/cust/v1/khbomvariant/ProductionBillOfMaterialItemGroupItemChangeStateCollection('00163E5F7A721ED9898C368946036402') | https://my346623.sapbydesign.com/sap/byd/odata/cust/v1/khbomvariant/ProductionBillOfMaterialItemGroupItemChangeStateCollection('00163E5F7A721ED9898C36894603E402') | https://my346623.sapbydesign.com/sap/byd/odata/cust/v1/khbomvariant/ProductionBillOfMaterialItemGroupItemChangeStateCollection('00163E5F7A721ED9898C36971FF62402') | https://my346623.sapbydesign.com/sap/byd/odata/cust/v1/khbomvariant/ProductionBillOfMaterialItemGroupItemChangeStateCollection('00163E5F7A721ED9898C36971FF6A402') | https://my346623.sapbydesign.com/sap/byd/odata/cust/v1/khbomvariant/ProductionBillOfMaterialItemGroupItemChangeStateCollection('00163E5F7A721ED9898C36971FF72402')
+khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection.csv,unitCode,12945,12737,208,7,,ZNO | CMT | GRM | MMT | MTR
+khbomvariant__ProductionBillOfMaterialVariantCollection.csv,ID,448,448,0,10,,1 | 2 | 3 | 4 | 5
+khbomvariant__ProductionBillOfMaterialVariantCollection.csv,MaterialUUID,448,447,1,30+,,00163E5F-7A72-1ED9-88DC-8CE74D155AE0 | 00163E5F-7A72-1ED9-88DC-8D1455B8DAE0 | 00163E5F-7A72-1ED9-88DC-8D1455B8BAE0 | 00163E5F-7A72-1ED9-88DC-8D1455B89AE0 | 00163E5F-7A72-1ED9-88DC-8CE74D15BAE0
+khbomvariant__ProductionBillOfMaterialVariantCollection.csv,ObjectID,448,448,0,30+,,00163E5F7A721ED9898C368946022402 | 00163E5F7A721ED9898C36971FF4A402 | 00163E5F7A721ED9898C36972832A402 | 00163E5F7A721ED9898C369731896402 | 00163E5F7A721ED9898C36B647642402
+khbomvariant__ProductionBillOfMaterialVariantCollection.csv,ObsoleteIndicator,448,448,0,2,,False | True
+khbomvariant__ProductionBillOfMaterialVariantCollection.csv,ParentObjectID,448,448,0,30+,,00163E5F7A721ED9898C36894601C402 | 00163E5F7A721ED9898C36971FF44402 | 00163E5F7A721ED9898C369728324402 | 00163E5F7A721ED9898C369731890402 | 00163E5F7A721ED9898C36B64763C402
+khbomvariant__ProductionBillOfMaterialVariantCollection.csv,Quantity,448,448,0,2,,1.00000000000000 | 0.00000000000000
+khbomvariant__ProductionBillOfMaterialVariantCollection.csv,unitCode,448,447,1,1,,ZNO
 khbusinesspartner__BusinessPartnerCollection.csv,odoo_external_id,2542,2542,0,30+,,sap_bp_1113761 | sap_bp_8000005 | sap_bp_1116013 | sap_bp_8000004 | sap_bp_1120645
 khbusinesspartner__BusinessPartnerCollection.csv,BusinessPartnerFormattedName,2542,2542,0,30+,,TE CONNECTIVITY INDIA PVT LTD (EOU | Tushar Desale | SIEMENS LTD | Jagtap Yuvraj | ABB INDIA LIMITED
 khbusinesspartner__BusinessPartnerCollection.csv,CategoryCode,2542,2542,0,2,,2 | 1

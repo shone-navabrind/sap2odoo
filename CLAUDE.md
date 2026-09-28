@@ -324,20 +324,30 @@ matches 0 of 44, on the first 32 characters matches 44 of 44. `_join_by_parent()
 ## Registry validation (`python -m src.validate`)
 
 Cross-checks `src/registry.py`'s 66+1 objects against what's actually in `output_odoo/`. Current
-state: **39/67 objects have real data, including 19 of the 21 mandatory ones.** 14 objects have a
-decided Odoo target but no confirmed SAP source yet (`pending_mapping`); most are waiting on one
-of the 9 custom services still to be imported — `SAP_IMPORT_PLAN.md` says exactly which file
-closes which object. 14 objects (Engineering/PLM, Maintenance/PM, Quality/QM) are
-`not_in_bydesign` — standard ByDesign has no equivalent module.
+state: **37/67 objects have real data** (`python -m src.validate` is the live count — always
+re-run rather than trusting this number, since tenant data can go empty between runs; see the
+crm_lead caveat below). 14 objects have a decided Odoo target but no confirmed SAP source yet
+(`pending_mapping`); most are waiting on one of the remaining custom services still to be
+imported — `SAP_IMPORT_PLAN.md` says exactly which file closes which object. 14 objects
+(Engineering/PLM, Maintenance/PM, Quality/QM) are `not_in_bydesign` — standard ByDesign has no
+equivalent module.
 
-The two mandatory objects still open:
-- **#40 BOMs** — searched every one of the 1485 entity sets the tenant publishes AND every one of
-  the 609 entity sets across all 47 custom service `.xml` files, for bom / "bill of material" /
-  "production model" / recipe / routing / explosion: **zero matches in either**. Importing more
-  services cannot produce it. Needs the PBOM data sources exposed via Business Configuration, or
-  a non-OData export.
+Only one mandatory object is still open:
 - **#34 Equipment** — ByDesign has no Preventive Maintenance module; equipment is modelled as a
   serialized product instance, not master data. Verified three times.
+
+**#40 BOMs is now closed (2026-09-26).** Real component data was found via the ByDesign UI
+("Bills of Material Variants") and, since it had never been published as an OData service on this
+tenant, exposed as a brand-new custom service (`khbomvariant`) built directly through SAP's
+self-service **OData Editor** — no Cloud Applications Studio `.xml` import needed. See
+`sap_odata_editor_walkthrough/bom_service_setup/README.md` for the full build story (Business
+Object `ProductionBillOfMaterial`, Work Center View `SCM_PRODNBILLSOFMATERIAL`) and
+`build_boms()`/`build_bom_combined()` in `src/transform_odoo.py` for the extraction/transform
+code: 400 BOM headers, 448 product variants, 14,948 component lines, written to `mrp_bom.csv` /
+`mrp_bom_line.csv` / the combined deliverable `mrp_bom_with_lines.csv`. Known limitation:
+components are attached to the BOM header, not to a specific variant, so a header with more than
+one variant (48 of 400) repeats the same component list for each of its variants — a real limit
+of what the tenant's data supports, not a guess.
 
 ## Team status report (`PROJECT_STATUS.csv`, `python -m src.status_report`)
 
