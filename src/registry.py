@@ -173,7 +173,13 @@ REGISTRY = [
                "khbomvariant/khequipmentresource). 52,101 real batch records, 51,864 (99.5%) with a real production "
                "date, 1,743 (3.3%) with a real expiration date - most materials on this tenant aren't expiry-tracked, "
                "so a blank expiration_date is real data, not a gap. MaterialUUID lives directly on this entity, so no "
-               "join through InventoryChangeItemCollection is needed any more for this object.",
+               "join through InventoryChangeItemCollection is needed any more for this object. Extended again "
+               "2026-09-28 after the user pasted a real screenshot of the live Identified Stock edit screen showing "
+               "Supplier ID/Status/Valuation Level Type populated but absent from the CSV - khbatch had only ever "
+               "selected 5 of its real Root fields. Re-opened the OData Editor and added IdentifiedStockPartyID, "
+               "SupplierUUID, LifeCycleStatusCode, ProductValuationLevelTypeCode; codes decoded via khbatch's own "
+               "live codelist entity sets. 1,317/52,101 rows (2.5%) carry a real supplier - most identified stock on "
+               "this tenant has none, confirmed not a join failure.",
                raw_sources=("khbatch__IdentifiedStockCollection.json",)),
     ObjectSpec(31, "Inventory", "Transaction", "Inventory Adjustments", False, "stock.quant", "stock_quant_adjustment", "built",
                "REAL DATA: 'Inventory Balance' (SCMINBU03) on scm_physicalinventory_analytics.svc, grouped by material x "

@@ -1996,7 +1996,16 @@ def build_stock_moves():
     return {"stock_move_history.csv": len(rows)}
 
 
-LOT_FIELDNAMES = ["id", "name", "product_id/id", "production_date", "expiration_date"]
+LOT_FIELDNAMES = ["id", "name", "product_id/id", "production_date", "expiration_date",
+                   "supplier_id/id", "lot_status", "valuation_level_type", "stock_type"]
+
+# IdentifiedStockLifeCycleStatusCodeCollection / IdentifiedStockProductValuationLevelTypeCodeCollection /
+# IdentifiedStockIdentifiedStockTypeCodeCollection, read live via curl 2026-09-28 (khbatch's own
+# codelist entity sets - not guessed, not the vmumaterial codelists which use different codes).
+LOT_STATUS_TEXT = {"1": "In Preparation", "2": "Active", "3": "Blocked", "4": "Obsolete"}
+LOT_VALUATION_LEVEL_TEXT = {"1": "Business Residence", "3": "Consignee"}
+LOT_STOCK_TYPE_TEXT = {"01": "Batch", "02": "Lot", "03": "Optional Specified Stock",
+                        "04": "Mandatory Specified Stock"}
 
 
 def build_stock_lots():
@@ -2020,10 +2029,24 @@ def build_stock_lots():
 
     MaterialUUID lives directly on this entity now, so the InventoryChangeItemCollection join
     that build_stock_moves() still needs (no MaterialUUID there) is no longer needed here.
+
+    Extended again 2026-09-28: the user pasted a real screenshot of the live "Identified Stock"
+    edit screen (Supplier ID, Status, Valuation Level Type all populated, none of them in the
+    CSV) - khbatch had only ever selected 5 of its real Root fields when it was first built.
+    Re-opened the service in the OData Editor and added IdentifiedStockPartyID, SupplierUUID,
+    LifeCycleStatusCode and ProductValuationLevelTypeCode. Confirmed live via curl: only 1,317 of
+    52,101 rows (2.5%) carry a real SupplierUUID and 3 carry an IdentifiedStockPartyID - most
+    identified stock on this tenant genuinely has no supplier attached, not a join failure.
+    LifeCycleStatusCode/ProductValuationLevelTypeCode/IdentifiedStockTypeCode are decoded via
+    khbatch's own codelist entity sets (IdentifiedStock*CodeCollection), read live - not the
+    vmumaterial codelists, which use different code values for similarly-named fields.
     """
     stocks = load_raw("IdentifiedStockCollection", service_hint="khbatch")["rows"]
     materials = load_raw("MaterialCollection", service_hint="vmumaterial")["rows"]
     internal_id_by_uuid = {m["UUID"]: m.get("InternalID") for m in materials if m.get("UUID")}
+
+    suppliers = load_raw("SupplierCollection", service_hint="khsupplier")["rows"]
+    supplier_internal_id_by_uuid = {s["UUID"]: s.get("InternalID") for s in suppliers if s.get("UUID")}
 
     rows = []
     for stock in stocks:
@@ -2031,12 +2054,17 @@ def build_stock_lots():
         internal_id = internal_id_by_uuid.get(stock.get("MaterialUUID"))
         if not object_id or not internal_id:
             continue
+        supplier_internal_id = supplier_internal_id_by_uuid.get(stock.get("SupplierUUID"))
         rows.append({
             "id": external_id("sap_lot", object_id),
             "name": stock.get("ID", ""),
             "product_id/id": external_id("sap_prod", internal_id),
             "production_date": parse_sap_date(stock.get("ProductionDateTime")) or "",
             "expiration_date": parse_sap_date(stock.get("ExpirationDateTime")) or "",
+            "supplier_id/id": external_id("sap_bp", supplier_internal_id) if supplier_internal_id else "",
+            "lot_status": LOT_STATUS_TEXT.get(stock.get("LifeCycleStatusCode"), ""),
+            "valuation_level_type": LOT_VALUATION_LEVEL_TEXT.get(stock.get("ProductValuationLevelTypeCode"), ""),
+            "stock_type": LOT_STOCK_TYPE_TEXT.get(stock.get("IdentifiedStockTypeCode"), ""),
         })
     write_csv("stock_lot.csv", rows, LOT_FIELDNAMES)
     return {"stock_lot.csv": len(rows)}
