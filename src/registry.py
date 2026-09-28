@@ -203,7 +203,12 @@ REGISTRY = [
                "mismatches) are merged into single two-sided stock.move rows with real source/destination logistics "
                "areas; every other row keeps its one known real location and uses Odoo's own built-in Suppliers/"
                "Customers/Inventory-adjustment virtual location for the side SAP genuinely didn't attach a second area "
-               "to. 260,682 rows, 0 missing product_id, 0 missing quantity.",
+               "to. 260,682 rows, 0 missing product_id, 0 missing quantity. lot_id/id added 2026-09-28 after the user "
+               "asked why #30's lot data wasn't showing up here - real gap, not a data gap: InventoryChangeItemCollection "
+               "carries IdentifiedStockUUID on 185,158/366,585 raw lines (50.5%), every one matching a real khbatch "
+               "record, but the field was never read. Now resolved to stock_lot.csv's own external ID - 156,714/260,682 "
+               "output rows (60.1%) carry a real lot_id/id, 0 broken references. The remaining rows have no "
+               "IdentifiedStockUUID on this tenant at all (not every movement is of batch/lot-tracked stock).",
                raw_sources=("khgoodsandactivityconfirmation__GoodsAndActivityConfirmationCollection.json",
                             "khgoodsandactivityconfirmation__InventoryChangeItemCollection.json",
                             "khgoodsandactivityconfirmation__ItemChangeQuantityCollection.json")),

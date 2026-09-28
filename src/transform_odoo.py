@@ -1871,7 +1871,7 @@ def build_stock_transfers():
 
 STOCK_MOVE_FIELDNAMES = [
     "id", "name", "reference", "product_id/id", "product_uom_qty", "product_uom/id",
-    "date", "state", "location_id/id", "location_dest_id/id",
+    "date", "state", "location_id/id", "location_dest_id/id", "lot_id/id",
 ]
 
 # Odoo's own built-in virtual locations (present in every install, not something this project
@@ -1925,6 +1925,14 @@ def build_stock_moves():
     receipt, e.g. "Issue for Customer" or scrapping) keeps its one known real location and uses
     Odoo's own built-in virtual location for the unknown side - not a guess about where the
     goods started/ended, since SAP genuinely didn't attach a second logistics area to that row.
+
+    lot_id/id added 2026-09-28: the user asked why stock_lot.csv's data wasn't showing up here.
+    Real gap, not a data gap - InventoryChangeItemCollection carries IdentifiedStockUUID on
+    185,158/366,585 raw lines (50.5%), and every one matches a real khbatch record, but this
+    transform never read the field. Now resolved to stock_lot.csv's own sap_lot_<ObjectID>
+    external ID. The other 49.5% of lines have no IdentifiedStockUUID on this tenant at all -
+    not every movement is of identified (batch/lot-tracked) stock, so a blank lot_id/id there is
+    real, not a join failure.
     """
     confirmations = {h["ObjectID"]: h for h in load_raw(
         "GoodsAndActivityConfirmationCollection",
@@ -1940,7 +1948,12 @@ def build_stock_moves():
         internal_id = internal_id_by_uuid.get(material_uuid)
         return external_id("sap_prod", internal_id) if internal_id else ""
 
-    def move_row(object_id, name, date_, state, product_id_ref, qty_row, location_id, location_dest_id):
+    def lot_ref(identified_stock_uuid):
+        if not identified_stock_uuid:
+            return ""
+        return external_id("sap_lot", identified_stock_uuid.replace("-", "").upper())
+
+    def move_row(object_id, name, date_, state, product_id_ref, qty_row, location_id, location_dest_id, lot_id_ref):
         qty = qty_row.get("Quantity") if qty_row else ""
         unit = qty_row.get("QuantityUnitCode") if qty_row else ""
         return {
@@ -1954,6 +1967,7 @@ def build_stock_moves():
             "state": state,
             "location_id/id": location_id,
             "location_dest_id/id": location_dest_id,
+            "lot_id/id": lot_id_ref,
         }
 
     groups = {}
@@ -1976,8 +1990,12 @@ def build_stock_moves():
             issue, receipt = issue_legs[0], receipt_legs[0]
             source = _resolve_area(issue.get("LogisticsAreaUUID"), area_lookup) or _VIRTUAL_LOCATION_INVENTORY
             dest = _resolve_area(receipt.get("LogisticsAreaUUID"), area_lookup) or _VIRTUAL_LOCATION_INVENTORY
+            # The two legs of a real transfer can carry different IdentifiedStockUUIDs (a
+            # re-batching move) - confirmed on 9,748/116,090 pairs (8.4%). The issue leg's lot
+            # is used since it names what physically left that location.
             rows.append(move_row(issue["ObjectID"], reason, date_, state, product_id_ref,
-                                  quantities.get(issue["ObjectID"]), source, dest))
+                                  quantities.get(issue["ObjectID"]), source, dest,
+                                  lot_ref(issue.get("IdentifiedStockUUID"))))
             continue
 
         for leg in group:
@@ -1990,7 +2008,8 @@ def build_stock_moves():
                 source = area or _VIRTUAL_LOCATION_INVENTORY
                 dest = _VIRTUAL_LOCATION_CUSTOMERS
             rows.append(move_row(leg["ObjectID"], reason, date_, state, product_id_ref,
-                                  quantities.get(leg["ObjectID"]), source, dest))
+                                  quantities.get(leg["ObjectID"]), source, dest,
+                                  lot_ref(leg.get("IdentifiedStockUUID"))))
 
     write_csv("stock_move_history.csv", rows, STOCK_MOVE_FIELDNAMES)
     return {"stock_move_history.csv": len(rows)}
