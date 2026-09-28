@@ -1996,7 +1996,7 @@ def build_stock_moves():
     return {"stock_move_history.csv": len(rows)}
 
 
-LOT_FIELDNAMES = ["id", "name", "product_id/id"]
+LOT_FIELDNAMES = ["id", "name", "product_id/id", "note"]
 
 
 def build_stock_lots():
@@ -2012,18 +2012,37 @@ def build_stock_lots():
     IdentifiedStockUUID AND carries that same row's own MaterialUUID, and confirmed clean -
     every IdentifiedStockUUID across 185,158 linked movement rows maps to exactly one material,
     never more than one. That gives every batch a real, unambiguous product.
+
+    No created-date/created-by field exists anywhere for this entity - confirmed via live
+    $metadata, IdentifiedStock declares exactly 4 properties (ObjectID, ID,
+    IdentifiedStockTypeCode, IdentifiedStockTypeCodeText), nothing else. `note` instead carries
+    a derived "first seen" date: the earliest CreationDateTime among the confirmation documents
+    that reference this batch - not the same thing as when the batch record itself was created
+    (SAP doesn't track that), so it is written into `note` rather than a real date field, to
+    avoid implying a guarantee the source data doesn't back up.
     """
     identified_stocks = {s["ObjectID"]: s for s in load_raw(
         "IdentifiedStockCollection", service_hint="khgoodsandactivityconfirmation")["rows"] if s.get("ObjectID")}
     items = load_raw("InventoryChangeItemCollection", service_hint="khgoodsandactivityconfirmation")["rows"]
+    confirmations = {c["ObjectID"]: c for c in load_raw(
+        "GoodsAndActivityConfirmationCollection", service_hint="khgoodsandactivityconfirmation")["rows"] if c.get("ObjectID")}
     materials = load_raw("MaterialCollection", service_hint="vmumaterial")["rows"]
     internal_id_by_uuid = {m["UUID"]: m.get("InternalID") for m in materials if m.get("UUID")}
 
     material_by_stock = {}
+    earliest_date_by_stock = {}
     for item in items:
         stock_uuid = item.get("IdentifiedStockUUID")
-        if stock_uuid and stock_uuid not in material_by_stock:
+        if not stock_uuid:
+            continue
+        if stock_uuid not in material_by_stock:
             material_by_stock[stock_uuid] = item.get("MaterialUUID")
+        confirmation = confirmations.get(item.get("ParentObjectID"))
+        raw_date = confirmation.get("CreationDateTime") if confirmation else None
+        if raw_date:
+            parsed = parse_sap_date(raw_date)
+            if parsed and (stock_uuid not in earliest_date_by_stock or parsed < earliest_date_by_stock[stock_uuid]):
+                earliest_date_by_stock[stock_uuid] = parsed
 
     rows = []
     for stock_uuid, material_uuid in material_by_stock.items():
@@ -2031,8 +2050,10 @@ def build_stock_lots():
         internal_id = internal_id_by_uuid.get(material_uuid)
         if not stock or not internal_id:
             continue
+        first_seen = earliest_date_by_stock.get(stock_uuid)
         rows.append({
             "id": external_id("sap_lot", stock_uuid),
+            "note": f"First seen in a stock movement on {first_seen}" if first_seen else "",
             "name": stock.get("ID", ""),
             "product_id/id": external_id("sap_prod", internal_id),
         })

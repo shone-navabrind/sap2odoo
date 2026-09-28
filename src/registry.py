@@ -168,9 +168,13 @@ REGISTRY = [
                "khgoodsandactivityconfirmation/IdentifiedStockCollection (51,980 real batch records), joined to a product "
                "via InventoryChangeItemCollection, which links every IdentifiedStockUUID to a MaterialUUID - confirmed "
                "clean, every one of the 185,158 linked movement rows maps to exactly one material. 51,077 lots written, "
-               "all with a resolved product_id.",
+               "all with a resolved product_id. No created-date/created-by field exists anywhere for this entity "
+               "(confirmed via live $metadata - IdentifiedStock declares exactly 4 properties, nothing else); `note` "
+               "instead carries a derived 'first seen' date (earliest confirmation CreationDateTime referencing that "
+               "batch), explicitly labeled as derived rather than a real SAP creation date.",
                raw_sources=("khgoodsandactivityconfirmation__IdentifiedStockCollection.json",
-                            "khgoodsandactivityconfirmation__InventoryChangeItemCollection.json")),
+                            "khgoodsandactivityconfirmation__InventoryChangeItemCollection.json",
+                            "khgoodsandactivityconfirmation__GoodsAndActivityConfirmationCollection.json")),
     ObjectSpec(31, "Inventory", "Transaction", "Inventory Adjustments", False, "stock.quant", "stock_quant_adjustment", "built",
                "REAL DATA: 'Inventory Balance' (SCMINBU03) on scm_physicalinventory_analytics.svc, grouped by material x "
                "logistics area x site - exactly Odoo's stock.quant grain. 1805 on-hand balances; location_id resolves to the "

@@ -2389,6 +2389,7 @@ stock_location.csv,sap__khlocation__LocationCollection__WorkingDayCalendarCodeTe
 stock_lot.csv,id,51077,51077,0,30+,,sap_lot_00163E5F_7A72_1EE9_8AF1_E0657D480331 | sap_lot_00163E5F_7A72_1ED9_8AF1_2BEFCA469FBF | sap_lot_00163E5F_7A72_1ED9_8B87_11FE4F3213A5 | sap_lot_00163E5F_7A72_1EE9_8B8B_227150BBC767 | sap_lot_00163E5F_7A72_1EE9_8B8B_2E52C6EEC7B9
 stock_lot.csv,name,51077,51077,0,30+,,2 | 1 | 4 | 10 | 11
 stock_lot.csv,product_id/id,51077,51077,0,30+,,sap_prod_LF90044 | sap_prod_730511 | sap_prod_19239000048 | sap_prod_10130_18475 | sap_prod_LF90286
+stock_lot.csv,note,51077,51077,0,30+,,First seen in a stock movement on 2019-02-08 | First seen in a stock movement on 2019-02-09 | First seen in a stock movement on 2019-02-11 | First seen in a stock movement on 2019-02-12 | First seen in a stock movement on 2019-02-13
 stock_move_history.csv,id,260682,260682,0,30+,,sap_move_00163E5F7A721ED98ADFC81C81E6455F | sap_move_00163E5F7A721ED98ADFC81C81E6855F | sap_move_00163E5F7A721ED98ADFC81C81E6C55F | sap_move_00163E5F7A721ED98ADFC81C81E7055F | sap_move_00163E5F7A721ED98ADFC81C81E7455F
 stock_move_history.csv,name,260682,260682,0,7,,Initial Balance Setting | Issue for Customer | Transfer | Consumption | Inventory Difference
 stock_move_history.csv,reference,260682,260682,0,7,,Initial Balance Setting | Issue for Customer | Transfer | Consumption | Inventory Difference
