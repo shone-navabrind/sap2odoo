@@ -324,7 +324,7 @@ matches 0 of 44, on the first 32 characters matches 44 of 44. `_join_by_parent()
 ## Registry validation (`python -m src.validate`)
 
 Cross-checks `src/registry.py`'s 66+1 objects against what's actually in `output_odoo/`. Current
-state: **37/67 objects have real data** (`python -m src.validate` is the live count — always
+state: **38/67 objects have real data** (`python -m src.validate` is the live count — always
 re-run rather than trusting this number, since tenant data can go empty between runs; see the
 crm_lead caveat below). 14 objects have a decided Odoo target but no confirmed SAP source yet
 (`pending_mapping`); most are waiting on one of the remaining custom services still to be
@@ -332,22 +332,33 @@ imported — `SAP_IMPORT_PLAN.md` says exactly which file closes which object. 1
 (Engineering/PLM, Maintenance/PM, Quality/QM) are `not_in_bydesign` — standard ByDesign has no
 equivalent module.
 
-Only one mandatory object is still open:
-- **#34 Equipment** — ByDesign has no Preventive Maintenance module; equipment is modelled as a
-  serialized product instance, not master data. Verified three times.
+**Every mandatory object is now closed (2026-09-28) — #40 BOMs and #34 Equipment were the last
+two, both closed the same way: real standard ByDesign master data that had simply never been
+published as OData on this tenant, exposed by building a brand-new custom service directly
+through SAP's self-service **OData Editor** (no Cloud Applications Studio `.xml` import needed).**
 
-**#40 BOMs is now closed (2026-09-26).** Real component data was found via the ByDesign UI
-("Bills of Material Variants") and, since it had never been published as an OData service on this
-tenant, exposed as a brand-new custom service (`khbomvariant`) built directly through SAP's
-self-service **OData Editor** — no Cloud Applications Studio `.xml` import needed. See
-`sap_odata_editor_walkthrough/bom_service_setup/README.md` for the full build story (Business
-Object `ProductionBillOfMaterial`, Work Center View `SCM_PRODNBILLSOFMATERIAL`) and
-`build_boms()`/`build_bom_combined()` in `src/transform_odoo.py` for the extraction/transform
-code: 400 BOM headers, 448 product variants, 14,948 component lines, written to `mrp_bom.csv` /
+**#40 BOMs** — real component data was found via the ByDesign UI ("Bills of Material Variants"),
+exposed as `khbomvariant` (Business Object `ProductionBillOfMaterial`, Work Center View
+`SCM_PRODNBILLSOFMATERIAL`). See `sap_odata_editor_walkthrough/bom_service_setup/README.md` for
+the full build story and `build_boms()`/`build_bom_combined()` in `src/transform_odoo.py`: 400 BOM
+headers, 448 product variants, 14,948 component lines, written to `mrp_bom.csv` /
 `mrp_bom_line.csv` / the combined deliverable `mrp_bom_with_lines.csv`. Known limitation:
 components are attached to the BOM header, not to a specific variant, so a header with more than
 one variant (48 of 400) repeats the same component list for each of its variants — a real limit
 of what the tenant's data supports, not a guess.
+
+**#34 Equipment** — earlier notes in this file (now superseded) correctly found no standalone
+"Equipment" master data object anywhere in this tenant's standard or custom services; ByDesign
+genuinely has no Preventive Maintenance module. What actually resolves the sheet requirement is
+the real standard Business Object `EquipmentResource` ("Supply Chain Design Master Data" ->
+"Resources" in the live UI) — 18 real records (SMT lines, wave soldering, final inspection, etc.),
+genuinely typed "Equipment Resource" on this tenant. Exposed as `khequipmentresource`, Work Center
+View `SCM_RESOURCES` — found by searching the OData Editor's Work Center View picker for
+"Resources"; the picker only matches a view's own display name, never its technical ID or parent
+Work Center name, which is why searching "Equipment"/"Design"/"Master Data" all returned zero
+results first. See `build_equipment()` in `src/transform_odoo.py`: writes `maintenance_equipment.csv`
+(`id`, `name`, `serial_no` — the only fields this entity has real data for; category/technician/
+location would all be guesses with no source).
 
 ## Team status report (`PROJECT_STATUS.csv`, `python -m src.status_report`)
 

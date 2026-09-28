@@ -12,6 +12,14 @@ file.
 so that's 16 physical files). Of the 16 mandatory master objects, 14 are done - only Equipment
 and BOMs are missing, and neither is fixable by importing more data (see `STATUS.md` for why).
 
+> **Update 2026-09-28**: both BOMs (#40, `mrp_bom.csv`/`mrp_bom_line.csv`/
+> `mrp_bom_with_lines.csv`) and Equipment (#34, `maintenance_equipment.csv`) are now built - see
+> `CLAUDE.md`'s "Registry validation" section for the full story on each. **Every mandatory
+> master object is now built.** The per-object field tables below predate both and have not yet
+> been regenerated to include them; the "Regenerating this file" section at the bottom explains
+> how, once a generator script exists again (the one used to build the tables below was a
+> scratch script, not part of this repo).
+
 **Total custom fields available across all master data: 688** (after excluding fields that don't
 add anything - see "A note on ObjectID/UUID fields" below). Two-phase pattern for every object:
 

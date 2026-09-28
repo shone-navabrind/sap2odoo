@@ -808,6 +808,21 @@ crm_lead_open.csv,name,0,0,0,0,,
 crm_lead_open.csv,expected_revenue,0,0,0,0,,
 crm_lead_open.csv,probability,0,0,0,0,,
 crm_lead_open.csv,type,0,0,0,0,,
+maintenance_equipment.csv,id,18,18,0,18,,sap_equip_00163E5F7A721EE989AE67C5DD490CF0 | sap_equip_00163E5F7A721EE989AE67FAA6C6CCF0 | sap_equip_00163E5F7A721EE989AE682F4160CCF0 | sap_equip_00163E5F7A721EE989AE68631ABF4CF0 | sap_equip_00163E5F7A721EE989AE689B11724CF0
+maintenance_equipment.csv,name,18,18,0,18,,"SMT LINES WITH PRINTER, SPI, PLACEMENT & | AUTOMATED INSPECTION USING INLINE OR OFF | FORMING OF TH COMPONENTS | MANUAL INSERTION OF COMPONENTS | WAVE SOLDERING"
+maintenance_equipment.csv,serial_no,18,18,0,18,,10100 | 10200 | 10300 | 10400 | 10500
+maintenance_equipment.csv,sap__khequipmentresource__EquipmentResourceCollection__CategoryCode,18,18,0,1,,1
+maintenance_equipment.csv,sap__khequipmentresource__EquipmentResourceCollection__Description,18,18,0,18,,"SMT LINES WITH PRINTER, SPI, PLACEMENT & | AUTOMATED INSPECTION USING INLINE OR OFF | FORMING OF TH COMPONENTS | MANUAL INSERTION OF COMPONENTS | WAVE SOLDERING"
+maintenance_equipment.csv,sap__khequipmentresource__EquipmentResourceCollection__FinancialRelevanceIndicator,18,18,0,1,,True
+maintenance_equipment.csv,sap__khequipmentresource__EquipmentResourceCollection__ID,18,18,0,18,,10100 | 10200 | 10300 | 10400 | 10500
+maintenance_equipment.csv,sap__khequipmentresource__EquipmentResourceCollection__ObjectID,18,18,0,18,,00163E5F7A721EE989AE67C5DD490CF0 | 00163E5F7A721EE989AE67FAA6C6CCF0 | 00163E5F7A721EE989AE682F4160CCF0 | 00163E5F7A721EE989AE68631ABF4CF0 | 00163E5F7A721EE989AE689B11724CF0
+maintenance_equipment.csv,sap__khequipmentresource__EquipmentResourceCollection__ProductionSchedulingRelevanceIndicator,18,18,0,1,,True
+maintenance_equipment.csv,sap__khequipmentresource__EquipmentResourceCollection__ResourceMultipleIndicator,18,18,0,1,,False
+maintenance_equipment.csv,sap__khequipmentresource__EquipmentResourceCollection__ResourceTimeZoneCode,18,18,0,1,,INDIA
+maintenance_equipment.csv,sap__khequipmentresource__EquipmentResourceCollection__SupplyPlanningRelevanceIndicator,18,18,0,1,,True
+maintenance_equipment.csv,sap__khequipmentresource__EquipmentResourceCollection__UUID,18,18,0,18,,00163E5F-7A72-1EE9-89AE-67C5DD490CF0 | 00163E5F-7A72-1EE9-89AE-67FAA6C6CCF0 | 00163E5F-7A72-1EE9-89AE-682F4160CCF0 | 00163E5F-7A72-1EE9-89AE-68631ABF4CF0 | 00163E5F-7A72-1EE9-89AE-689B11724CF0
+maintenance_equipment.csv,sap__khequipmentresource__EquipmentResourceCollection__WorkingDayCalendarCode,18,18,0,1,,Z98Z
+maintenance_equipment.csv,sap__khequipmentresource__EquipmentResourceCollection__languageCode,18,18,0,1,,EN
 mrp_bom.csv,id,447,447,0,30+,,sap_bom_00163E5F7A721ED9898C368946022402 | sap_bom_00163E5F7A721ED9898C36971FF4A402 | sap_bom_00163E5F7A721ED9898C36972832A402 | sap_bom_00163E5F7A721ED9898C369731896402 | sap_bom_00163E5F7A721ED9898C36B647642402
 mrp_bom.csv,product_tmpl_id/id,447,446,1,30+,,sap_prod_BGMBETTCARD7 | sap_prod_BGTPETTCARD4 | sap_prod_BGTPETTCARD5 | sap_prod_BGTPETTCARD6 | sap_prod_BGTPCNTRL
 mrp_bom.csv,product_qty,447,447,0,2,,1.00000000000000 | 0.00000000000000

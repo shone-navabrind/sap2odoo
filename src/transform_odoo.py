@@ -2291,6 +2291,37 @@ def build_bom_combined():
     return {"mrp_bom_with_lines.csv": len(rows)}
 
 
+EQUIPMENT_FIELDNAMES = ["id", "name", "serial_no"]
+
+
+def build_equipment():
+    """
+    Sheet object #34 (Equipment, mandatory) -> maintenance.equipment.
+
+    Real standard ByDesign master data ("Supply Chain Design Master Data" -> "Resources" in the
+    live UI, Business Object EquipmentResource) - never published as OData on this tenant until
+    built directly via the OData Editor (self-service, no .xml import), the same path used for
+    khbomvariant. See sap_odata_editor_walkthrough/ for the build story.
+
+    Only `name` (the resource's own Description) and `serial_no` (its business ID, e.g. "10100")
+    are mapped - the entity has no fields Odoo's maintenance.equipment has a home for beyond
+    these (category, technician, location, etc. would all be guesses with no source data).
+    """
+    rows = load_raw("EquipmentResourceCollection")["rows"]
+    out_rows = []
+    for r in rows:
+        object_id = r.get("ObjectID")
+        if not object_id:
+            continue
+        out_rows.append({
+            "id": external_id("sap_equip", object_id),
+            "name": r.get("Description") or r.get("ID") or object_id,
+            "serial_no": r.get("ID", ""),
+        })
+    write_csv("maintenance_equipment.csv", out_rows, EQUIPMENT_FIELDNAMES)
+    return {"maintenance_equipment.csv": len(out_rows)}
+
+
 TRANSFORMS = [
     ("account_account (chart of accounts)", build_chart_of_accounts),
     ("account_analytic_plan / account_analytic_account (cost centers)", build_cost_centers),
@@ -2326,6 +2357,7 @@ TRANSFORMS = [
     ("stock_quant_adjustment (inventory balances)", build_inventory),
     ("mrp_bom / mrp_bom_line (bills of material)", build_boms),
     ("mrp_bom_with_lines (combined deliverable)", build_bom_combined),
+    ("maintenance_equipment (equipment resources)", build_equipment),
 ]
 
 

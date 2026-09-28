@@ -92,6 +92,7 @@ ODOO_KEY = {
     ("khsalesarrangement", "SalesArrangementCollection"): ("sap_pricelist", "ObjectID"),
     ("khprofitcentre", "ProfitCentreCollection"): ("sap_pc", "ID"),
     ("costcentre", "CostCentreCollection"): ("sap_cost_center", "UUID"),
+    ("khequipmentresource", "EquipmentResourceCollection"): ("sap_equip", "ObjectID"),
 }
 
 # Odoo CSV filename -> root SAP records that create its rows.  This is deliberately separate
@@ -154,6 +155,7 @@ MODEL_ROOTS = {
     "stock_picking_transfer_line.csv": [("khinbounddelivery", "ItemCollection", "sap_inbdel_item", ("ObjectID",))],
     "stock_move_history.csv": [("khgoodsandserviceacknowledgement", "ItemCollection", "sap_move", ("ObjectID",))],
     "uom_uom.csv": [("vmumaterial", "MaterialBaseMeasureUnitCodeCollection", "sap_uom", ("Code",))],
+    "maintenance_equipment.csv": [("khequipmentresource", "EquipmentResourceCollection", "sap_equip", ("ObjectID",))],
 }
 
 

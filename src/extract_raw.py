@@ -876,6 +876,15 @@ SOURCES = [
     ("sap/byd/odata/cust/v1/khbomvariant", "ProductionBillOfMaterialItemGroupItemChangeStateCollection",
      {"expand": "ProductionBillOfMaterial"}),                                                           # 12,945 real component lines, each with its BOM header inline
 
+    # --- khequipmentresource: real Equipment data (sheet object #34, mandatory), closes the last
+    # open mandatory gap. Same story as khbomvariant: real standard ByDesign master data
+    # ("Supply Chain Design Master Data -> Resources" in the live UI, 18 rows), never published
+    # as OData on this tenant until built directly via the OData Editor (self-service). Business
+    # Object EquipmentResource, Work Center View SCM_RESOURCES (found by searching the Work
+    # Center View picker for "Resources" - the picker only searches the View's own display name,
+    # not its technical ID or parent Work Center name, which is why "Equipment"/"Design"/"Master
+    # Data" all returned zero matches before this one was found).
+    ("sap/byd/odata/cust/v1/khequipmentresource", "EquipmentResourceCollection"),                        # 18 equipment resources
 ]
 
 
