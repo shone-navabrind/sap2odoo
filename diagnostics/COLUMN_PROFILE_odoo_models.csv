@@ -2350,104 +2350,60 @@ stock_location.csv,sap__khlocation__LocationCollection__TimeZoneCodeText,19,1,18
 stock_location.csv,sap__khlocation__LocationCollection__UUID,19,1,18,1,,00163E5F-7A72-1EE9-87A8-E185FB7F8E14
 stock_location.csv,sap__khlocation__LocationCollection__WorkingDayCalendarCode,19,1,18,1,,Z98Z
 stock_location.csv,sap__khlocation__LocationCollection__WorkingDayCalendarCodeText,19,1,18,1,,India with 6 working days
-stock_move_history.csv,id,15337,15337,0,30+,,sap_move_00163E5F7A721ED98B87CCF57F05B707 | sap_move_00163E5F7A721ED98B87CCF57F05D707 | sap_move_00163E5F7A721ED98CEDC4DA925D0221 | sap_move_00163E5F7A721ED98CFEE3D53CCF0FBA | sap_move_00163E5F7A721ED98CFEE3D53CCF2FBA
-stock_move_history.csv,name,15337,15337,0,30+,,"TPKG -0031 corrugated boxes | TPKG-0004  corrugated boxes | TDD-0251-1 Rev-1 FLIP CARRIER PLATE | Aluminium Tape for KIR PROFILIER | Thermocouple set of 7 TC,3FT,Type K,30G"
-stock_move_history.csv,reference,15337,15337,0,30+,,1 | 9 | 10 | 14 | 16
-stock_move_history.csv,product_id/id,15337,83,15254,30+,,sap_prod_MCPM01ORNGMSMN | sap_prod_MCPM02ORNGMSMN | sap_prod_SCDG01BATRY24V | sap_prod_MCPM01MSMATSEL | sap_prod_MCPM01ORNGMS42
-stock_move_history.csv,product_uom_qty,15337,15337,0,30+,,150.00000000000000 | 250.00000000000000 | 30.00000000000000 | 1.00000000000000 | 9400.00000000000000
-stock_move_history.csv,product_uom/id,15337,15337,0,17,,sap_uom_ZNO | sap_uom_SET | sap_uom_EA | sap_uom_MTR | sap_uom_XRO
-stock_move_history.csv,date,15337,15337,0,30+,,2019-02-09 | 2019-02-18 | 2019-02-19 | 2019-02-21 | 2019-02-22
-stock_move_history.csv,state,15337,15337,0,1,,done
-stock_move_history.csv,partner_id/id,15337,15337,0,30+,,sap_bp_2009777 | sap_bp_2015039 | sap_bp_2009159 | sap_bp_2012190 | sap_bp_2015071
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__AcceptanceStatusCode,15337,0,15337,0,,
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__AcceptanceStatusCodeText,15337,0,15337,0,,
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__CancellationStatusCode,15337,15333,4,2,,4 | 1
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__CancellationStatusCodeText,15337,15333,4,2,,Canceled | Not Canceled
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__DeliveredQuantity,15337,15337,0,30+,,150.00000000000000 | 250.00000000000000 | 30.00000000000000 | 1.00000000000000 | 9400.00000000000000
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__DeliveredQuantityUnitCode,15337,15337,0,17,,ZNO | SET | EA | MTR | XRO
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__DeliveredQuantityUnitCodeText,15337,15337,0,17,,Number | Set | Each | Meter | Roll
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__DeliveryEndDateTime,15337,15337,0,30+,,2019-02-09 13:00:00 | 2019-02-18 13:00:00 | 2019-02-19 13:00:00 | 2019-02-21 13:00:00 | 2019-02-22 13:00:00
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__DeliveryEndTimeZoneCode,15337,14940,397,2,,INDIA | UTC
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__DeliveryStartDateTime,15337,15337,0,30+,,2019-02-08 13:00:00 | 2019-02-17 13:00:00 | 2019-02-18 13:00:00 | 2019-02-20 13:00:00 | 2019-02-21 13:00:00
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__DeliveryStartTimeZoneCode,15337,14940,397,2,,INDIA | UTC
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__Description,15337,15337,0,30+,,"TPKG -0031 corrugated boxes | TPKG-0004  corrugated boxes | TDD-0251-1 Rev-1 FLIP CARRIER PLATE | Aluminium Tape for KIR PROFILIER | Thermocouple set of 7 TC,3FT,Type K,30G"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__GoodsReturnStatusCode,15337,15306,31,3,,1 | 3 | 2
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__GoodsReturnStatusCodeText,15337,15306,31,3,,Not Returned | Returned | Partially Returned
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__ID,15337,15337,0,30+,,2 | 1 | 3 | 5 | 4
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__ItemLifeCycleStatusCode,15337,15337,0,4,,9 | 7 | 11 | 10
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__ItemLifeCycleStatusCodeText,15337,15337,0,4,,Canceled | Released | Goods Returned | Goods Partially Returned
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__NetAmount,15337,15337,0,30+,,25500.000000 | 4950.000000 | 206700.000000 | 1100.000000 | 5180.000000
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__NetAmountCurrencyCode,15337,15337,0,5,,INR | EUR | USD | JPY | SGD
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__NetAmountCurrencyCodeText,15337,15337,0,5,,Indian Rupee | Euro | US Dollar | Yen | Singapore Dollar
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__NetUnitPriceAmount,15337,15337,0,30+,,170.000000 | 19.800000 | 6890.000000 | 1100.000000 | 5180.000000
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__NetUnitPriceAmountBaseQuantity,15337,15337,0,4,,1.00000000000000 | 2.00000000000000 | 100.00000000000000 | 10.00000000000000
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__NetUnitPriceAmountBaseQuantityUnitCode,15337,15337,0,17,,ZNO | SET | EA | MTR | XRO
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__NetUnitPriceAmountCurrencyCode,15337,15337,0,5,,INR | EUR | USD | JPY | SGD
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__ObjectID,15337,15337,0,30+,,00163E5F7A721ED98B87CCF57F05B707 | 00163E5F7A721ED98B87CCF57F05D707 | 00163E5F7A721ED98CEDC4DA925D0221 | 00163E5F7A721ED98CFEE3D53CCF0FBA | 00163E5F7A721ED98CFEE3D53CCF2FBA
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__OpenQuantityCancelledIndicator,15337,15337,0,1,,False
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__ParentObjectID,15337,15337,0,30+,,00163E5F7A721ED98B87CCDE4EC31707 | 00163E5F7A721ED98CEDC4DA92568221 | 00163E5F7A721ED98CFEE3D53CC88FBA | 00163E5F7A721ED98DB51162551B61A4 | 00163E5F7A721ED98DD2B74419162708
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__ProductCategoryInternalID,15337,15337,0,26,,OTH | Z410 | Z350 | Z430 | Z240
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__ProductID,15337,83,15254,30+,,MCPM01ORNGMSMN | MCPM02ORNGMSMN | SCDG01BATRY24V | MCPM01MSMATSEL | MCPM01ORNGMS42
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__ProductSellerID,15337,0,15337,0,,
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__TotalDeliveredQuantity,15337,15337,0,30+,,0.00000000000000 | -30.00000000000000 | -350.00000000000000 | -1.00000000000000 | -50000.00000000000000
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__TotalDeliveredQuantityUnitCode,15337,14051,1286,17,,ZFT | ZNO | SET | XRO | EA
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__TotalDeliveredQuantityUnitCodeText,15337,14051,1286,17,,Square Feet | Number | Set | Roll | Each
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__TypeCode,15337,15337,0,3,,18 | 84 | 19
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemCollection__TypeCodeText,15337,15337,0,3,,Material | Expense | Service
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemDocumentReferenceCollection__ID,15337,15337,0,30+,JSON_ARRAY,"[""30000001"", ""28""] | [""30000015"", ""71""] | [""30000054"", ""50""] | [""30000148"", ""29""] | [""30000172"", ""32""]"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemDocumentReferenceCollection__ItemID,15337,15337,0,30+,JSON_ARRAY,"2 | 1 | 3 | [""1"", ""2""] | 4"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemDocumentReferenceCollection__ItemTypeCode,15337,15337,0,3,,18 | 84 | 19
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemDocumentReferenceCollection__ItemTypeCodeText,15337,15337,0,3,,Material | Expense | Service
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemDocumentReferenceCollection__ObjectID,15337,15337,0,30+,JSON_ARRAY,"[""00163E5F7A721ED98B87CCF57F091707"", ""00163E5F7A721EE98EFBE66814EDBF7A""] | [""00163E5F7A721ED98B87CCF57F083707"", ""00163E5F7A721EE98EFBE66814ED9F7A""] | [""00163E5F7A721ED98CEDC4DA925F8221"", ""00163E708BF91ED990C7AC222051472D""] | [""00163E5F7A721ED98CFEE3D53CD36FBA"", ""00163E5F7A721EE98F969CEA005BD3E8""] | [""00163E5F7A721ED98CFEE3D53CD28FBA"", ""00163E5F7A721EE98F969CEA005BB3E8""]"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemDocumentReferenceCollection__ParentObjectID,15337,15337,0,30+,,00163E5F7A721ED98B87CCF57F05B707 | 00163E5F7A721ED98B87CCF57F05D707 | 00163E5F7A721ED98CEDC4DA925D0221 | 00163E5F7A721ED98CFEE3D53CCF0FBA | 00163E5F7A721ED98CFEE3D53CCF2FBA
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemDocumentReferenceCollection__TypeCode,15337,15337,0,9,JSON_ARRAY,"[""001"", ""282""] | [""282"", ""001""] | 001 | [""001"", ""283""] | [""283"", ""001""]"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemDocumentReferenceCollection__TypeCodeText,15337,15337,0,9,JSON_ARRAY,"[""Purchase Order"", ""Goods And Service Confirmation""] | [""Goods And Service Confirmation"", ""Purchase Order""] | Purchase Order | [""Purchase Order"", ""Goods Return""] | [""Goods Return"", ""Purchase Order""]"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemPartyCollection__ObjectID,15337,15337,0,30+,JSON_ARRAY,"[""00163E5F7A721ED98B87CCF57F087707"", ""00163E5F7A721ED98B87CCF57F089707""] | [""00163E5F7A721ED98B87CCF57F061707"", ""00163E5F7A721ED98B87CCF57F063707""] | [""00163E5F7A721ED98CEDC4DA925D4221"", ""00163E5F7A721ED98CEDC4DA925EE221"", ""00163E5F7A721ED98CEDC4DA925F0221""] | [""00163E5F7A721ED98CFEE3D53CD2CFBA"", ""00163E5F7A721ED98CFEE3D53CD2EFBA""] | [""00163E5F7A721ED98CFEE3D53CD1EFBA"", ""00163E5F7A721ED98CFEE3D53CD20FBA""]"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemPartyCollection__ParentObjectID,15337,15337,0,30+,,00163E5F7A721ED98B87CCF57F05B707 | 00163E5F7A721ED98B87CCF57F05D707 | 00163E5F7A721ED98CEDC4DA925D0221 | 00163E5F7A721ED98CFEE3D53CCF0FBA | 00163E5F7A721ED98CFEE3D53CCF2FBA
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemPartyCollection__PartyID,15337,15337,0,30+,JSON_ARRAY,"[""71000"", ""G160""] | [""G137"", ""71000"", ""G137""] | [""71000"", ""G196""] | [""G229"", ""71000"", ""G229""] | [""G160"", ""71000"", ""G160""]"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemPartyCollection__RoleCode,15337,15337,0,10,JSON_ARRAY,"[""202"", ""5""] | [""13"", ""202"", ""5""] | [""5"", ""202""] | [""5"", ""202"", ""13""] | [""13"", ""202""]"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemPartyCollection__RoleCodeText,15337,15337,0,10,JSON_ARRAY,"[""Tax Reporting Unit"", ""Product Recipient""] | [""Requestor"", ""Tax Reporting Unit"", ""Product Recipient""] | [""Product Recipient"", ""Tax Reporting Unit""] | [""Product Recipient"", ""Tax Reporting Unit"", ""Requestor""] | [""Requestor"", ""Tax Reporting Unit""]"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemPurchaseOrderReferenceCollection__ID,15337,15337,0,30+,JSON_ARRAY,"[""30000001"", ""28""] | [""30000015"", ""71""] | [""30000054"", ""50""] | [""30000148"", ""29""] | [""30000172"", ""32""]"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemPurchaseOrderReferenceCollection__ItemID,15337,15337,0,30+,JSON_ARRAY,"2 | 1 | 3 | [""1"", ""2""] | 4"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemPurchaseOrderReferenceCollection__ItemTypeCode,15337,15337,0,3,,18 | 84 | 19
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemPurchaseOrderReferenceCollection__ItemTypeCodeText,15337,15337,0,3,,Material | Expense | Service
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemPurchaseOrderReferenceCollection__ObjectID,15337,15337,0,30+,JSON_ARRAY,"[""00163E5F7A721ED98B87CCF57F091707"", ""00163E5F7A721EE98EFBE66814EDBF7A""] | [""00163E5F7A721ED98B87CCF57F083707"", ""00163E5F7A721EE98EFBE66814ED9F7A""] | [""00163E5F7A721ED98CEDC4DA925F8221"", ""00163E708BF91ED990C7AC222051472D""] | [""00163E5F7A721ED98CFEE3D53CD36FBA"", ""00163E5F7A721EE98F969CEA005BD3E8""] | [""00163E5F7A721ED98CFEE3D53CD28FBA"", ""00163E5F7A721EE98F969CEA005BB3E8""]"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemPurchaseOrderReferenceCollection__ParentObjectID,15337,15337,0,30+,,00163E5F7A721ED98B87CCF57F05B707 | 00163E5F7A721ED98B87CCF57F05D707 | 00163E5F7A721ED98CEDC4DA925D0221 | 00163E5F7A721ED98CFEE3D53CCF0FBA | 00163E5F7A721ED98CFEE3D53CCF2FBA
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemPurchasingContractReferenceCollection__ID,15337,15337,0,30+,JSON_ARRAY,"[""30000001"", ""28""] | [""30000015"", ""71""] | [""30000054"", ""50""] | [""30000148"", ""29""] | [""30000172"", ""32""]"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemPurchasingContractReferenceCollection__ItemID,15337,15337,0,30+,JSON_ARRAY,"2 | 1 | 3 | [""1"", ""2""] | 4"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemPurchasingContractReferenceCollection__ItemTypeCode,15337,15337,0,3,,18 | 84 | 19
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemPurchasingContractReferenceCollection__ItemTypeCodeText,15337,15337,0,3,,Material | Expense | Service
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemPurchasingContractReferenceCollection__ObjectID,15337,15337,0,30+,JSON_ARRAY,"[""00163E5F7A721ED98B87CCF57F091707"", ""00163E5F7A721EE98EFBE66814EDBF7A""] | [""00163E5F7A721ED98B87CCF57F083707"", ""00163E5F7A721EE98EFBE66814ED9F7A""] | [""00163E5F7A721ED98CEDC4DA925F8221"", ""00163E708BF91ED990C7AC222051472D""] | [""00163E5F7A721ED98CFEE3D53CD36FBA"", ""00163E5F7A721EE98F969CEA005BD3E8""] | [""00163E5F7A721ED98CFEE3D53CD28FBA"", ""00163E5F7A721EE98F969CEA005BB3E8""]"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemPurchasingContractReferenceCollection__ParentObjectID,15337,15337,0,30+,,00163E5F7A721ED98B87CCF57F05B707 | 00163E5F7A721ED98B87CCF57F05D707 | 00163E5F7A721ED98CEDC4DA925D0221 | 00163E5F7A721ED98CFEE3D53CCF0FBA | 00163E5F7A721ED98CFEE3D53CCF2FBA
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemPurchasingContractReferenceCollection__TypeCode,15337,15337,0,9,JSON_ARRAY,"[""001"", ""282""] | [""282"", ""001""] | 001 | [""001"", ""283""] | [""283"", ""001""]"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemPurchasingContractReferenceCollection__TypeCodeText,15337,15337,0,9,JSON_ARRAY,"[""Purchase Order"", ""Goods And Service Confirmation""] | [""Goods And Service Confirmation"", ""Purchase Order""] | Purchase Order | [""Purchase Order"", ""Goods Return""] | [""Goods Return"", ""Purchase Order""]"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemRequestorPartyCollection__ObjectID,15337,15337,0,30+,JSON_ARRAY,"[""00163E5F7A721ED98B87CCF57F087707"", ""00163E5F7A721ED98B87CCF57F089707""] | [""00163E5F7A721ED98B87CCF57F061707"", ""00163E5F7A721ED98B87CCF57F063707""] | [""00163E5F7A721ED98CEDC4DA925D4221"", ""00163E5F7A721ED98CEDC4DA925EE221"", ""00163E5F7A721ED98CEDC4DA925F0221""] | [""00163E5F7A721ED98CFEE3D53CD2CFBA"", ""00163E5F7A721ED98CFEE3D53CD2EFBA""] | [""00163E5F7A721ED98CFEE3D53CD1EFBA"", ""00163E5F7A721ED98CFEE3D53CD20FBA""]"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemRequestorPartyCollection__ParentObjectID,15337,15337,0,30+,,00163E5F7A721ED98B87CCF57F05B707 | 00163E5F7A721ED98B87CCF57F05D707 | 00163E5F7A721ED98CEDC4DA925D0221 | 00163E5F7A721ED98CFEE3D53CCF0FBA | 00163E5F7A721ED98CFEE3D53CCF2FBA
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemRequestorPartyCollection__PartyID,15337,15337,0,30+,JSON_ARRAY,"[""71000"", ""G160""] | [""G137"", ""71000"", ""G137""] | [""71000"", ""G196""] | [""G229"", ""71000"", ""G229""] | [""G160"", ""71000"", ""G160""]"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemTextCollection__AuthorName,15337,0,15337,0,,
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemTextCollection__AuthorUUID,15337,0,15337,0,,
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemTextCollection__CreatedBy,15337,5018,10319,6,,Pradosh Prakash Betkikar | Meenali Naik | Viraj Naik | Suresh Kubappa Lamani | Joel Fernandes
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemTextCollection__CreatedOn,15337,5018,10319,30+,,2020-01-22 05:22:05 | 2020-01-22 06:35:23 | 2020-01-22 07:19:55 | 2020-01-22 07:22:45 | 2020-01-22 08:49:59
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemTextCollection__LanguageCode,15337,5017,10320,1,,EN
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemTextCollection__LanguageCodeText,15337,5017,10320,1,,English
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemTextCollection__LastUpdatedBy,15337,5018,10319,6,,Pradosh Prakash Betkikar | Meenali Naik | Viraj Naik | Suresh Kubappa Lamani | Joel Fernandes
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemTextCollection__ObjectID,15337,5018,10319,30+,JSON_ARRAY,00163E876ABA1EDA8F9ADE099C956B0000163E876ABA1EDA8F9ADE099C958B00T00001 | 00163E876ABA1EDA8F9BC94C48242F8C00163E876ABA1EDA8F9BC94C48246F8CT00001 | 00163E876ABA1EDA8F9BC94C48244F8C00163E876ABA1EDA8F9BC94C4824AF8CT00001 | 00163E876ABA1EDA8F9CD50AFBE9749B00163E876ABA1EDA8F9CD50AFBE9B49BT00001 | 00163E876ABA1EDA8F9CD50AFBE9949B00163E876ABA1EDA8F9CD50AFBE9F49BT00001
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemTextCollection__ParentObjectID,15337,5018,10319,30+,,00163E876ABA1EDA8F9ADE099C91CB00 | 00163E876ABA1EDA8F9BC94C481D2F8C | 00163E876ABA1EDA8F9BC94C481D4F8C | 00163E876ABA1EDA8F9CD50AFBE4149B | 00163E876ABA1EDA8F9CD50AFBE4349B
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemTextCollection__Text,15337,4780,10557,30+,"EMBEDDED_NEWLINE,JSON_ARRAY,VERY_LONG_TEXT","Resolution: 300 dpi.
-Printer warranty 1 year 
-& print head 3 months. | Note:Repeat Order. | Pant and Shirt set with Emroidery and logo. | Note:Repeat Order. Length-3.5 meters Width-1.2 meters. | 1. 375VC Solder V-Cut Feeder
-    Specifications:
-    Applicable wire Diameter -0.5mm- 1.6mm
-    One cutter applicable for one size only
-    Low Noise , easy carry
-    Fast activate soldering flux to create ideal
-    soldering condition
-    Foot switch operation
-
-2. Inclusive of Extra cutter set for 0.8 mm"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemTextCollection__TypeCode,15337,5018,10319,7,JSON_ARRAY,"10014 | 10011 | 10015 | [""10011"", ""10014""] | [""10011"", ""10011"", ""10011"", ""10014""]"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemTextCollection__TypeCodeText,15337,5018,10319,7,JSON_ARRAY,"Remark for Supplier | Internal Comment | Remark from Supplier | [""Internal Comment"", ""Remark for Supplier""] | [""Internal Comment"", ""Internal Comment"", ""Internal Comment"", ""Remark for Supplier""]"
-stock_move_history.csv,sap__khgoodsandserviceacknowledgement__ItemTextCollection__UpdatedOn,15337,5018,10319,30+,,2020-01-22 05:22:05 | 2020-01-22 06:35:23 | 2020-01-22 07:19:55 | 2020-01-22 07:22:45 | 2020-01-22 08:49:59
+stock_lot.csv,id,51077,51077,0,30+,,sap_lot_00163E5F_7A72_1EE9_8AF1_E0657D480331 | sap_lot_00163E5F_7A72_1ED9_8AF1_2BEFCA469FBF | sap_lot_00163E5F_7A72_1ED9_8B87_11FE4F3213A5 | sap_lot_00163E5F_7A72_1EE9_8B8B_227150BBC767 | sap_lot_00163E5F_7A72_1EE9_8B8B_2E52C6EEC7B9
+stock_lot.csv,name,51077,51077,0,30+,,2 | 1 | 4 | 10 | 11
+stock_lot.csv,product_id/id,51077,51077,0,30+,,sap_prod_LF90044 | sap_prod_730511 | sap_prod_19239000048 | sap_prod_10130_18475 | sap_prod_LF90286
+stock_move_history.csv,id,260682,260682,0,30+,,sap_move_00163E5F7A721ED98ADFC81C81E6455F | sap_move_00163E5F7A721ED98ADFC81C81E6855F | sap_move_00163E5F7A721ED98ADFC81C81E6C55F | sap_move_00163E5F7A721ED98ADFC81C81E7055F | sap_move_00163E5F7A721ED98ADFC81C81E7455F
+stock_move_history.csv,name,260682,260682,0,7,,Initial Balance Setting | Issue for Customer | Transfer | Consumption | Inventory Difference
+stock_move_history.csv,reference,260682,260682,0,7,,Initial Balance Setting | Issue for Customer | Transfer | Consumption | Inventory Difference
+stock_move_history.csv,product_id/id,260682,260682,0,30+,,sap_prod_10007_8A00W | sap_prod_1000750301 | sap_prod_1000755470 | sap_prod_10030_18475 | sap_prod_10107_8A00W
+stock_move_history.csv,product_uom_qty,260682,260682,0,30+,,31.00000000000000 | 4150.00000000000000 | 3955.00000000000000 | 40.00000000000000 | 24.00000000000000
+stock_move_history.csv,product_uom/id,260682,260682,0,11,,sap_uom_ZNO | sap_uom_LTR | sap_uom_KGM | sap_uom_GRM | sap_uom_MMT
+stock_move_history.csv,date,260682,260682,0,30+,,2019-01-31 | 2019-02-09 | 2019-02-11 | 2019-02-12 | 2019-02-13
+stock_move_history.csv,state,260682,260682,0,2,,done | cancel
+stock_move_history.csv,location_id/id,260682,260682,0,20,,stock.stock_location_suppliers | stock.location_inventory | sap_loc_71000_QAL | sap_loc_71000_RMTS | sap_loc_71000_RMMS
+stock_move_history.csv,location_dest_id/id,260682,260682,0,18,,sap_loc_71000_FGMS | sap_loc_71000_RMMS | sap_loc_71000_RMTS | stock.stock_location_customers | sap_loc_71000_RMQR
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__CustodianPartyUUID,260682,0,260682,0,,
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__ID,260682,260682,0,30+,,10 | 20 | 30 | 40 | 50
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__IdentifiedStockUUID,260682,156714,103968,30+,,00163E5F-7A72-1EE9-8AF1-E0657D480331 | 00163E5F-7A72-1ED9-8AF1-2BEFCA469FBF | 00163E5F-7A72-1ED9-8B87-11FE4F3213A5 | 00163E5F-7A72-1EE9-8B8B-227150BBC767 | 00163E5F-7A72-1EE9-8B8B-2E52C6EEC7B9
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__InventoryChangeReasonCode,260682,260682,0,7,,1 | 14 | 7 | 6 | 5
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__InventoryChangeReasonCodeText,260682,260682,0,7,,Initial Balance Setting | Issue for Customer | Transfer | Consumption | Inventory Difference
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__InventoryMovementDirectionCode,260682,260682,0,2,,2 | 1
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__InventoryMovementDirectionCodeText,260682,260682,0,2,,Inventory receipt | Inventory issue
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__InventoryRelevanceIndicator,260682,260682,0,1,,True
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__InventoryRestrictedUseIndicator,260682,260682,0,2,,False | True
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__LocationUUID,260682,69114,191568,1,,00163E5F-7A72-1EE9-87A8-E185FB7F8E14
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__LogisticsAreaUUID,260682,191568,69114,18,,00163E5F-7A72-1EE9-87DA-1D1BAF9560EF | 00163E5F-7A72-1EE9-87DA-11401044608D | 00163E5F-7A72-1EE9-87DA-19BBD09B60EC | 00163E5F-7A72-1EE9-87DA-1DD1684CC0EF | 00163E5F-7A72-1EE9-87DA-1CB154D720EF
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__MaterialUUID,260682,260682,0,30+,,00163E5F-7A72-1ED9-88F7-44A0C3077B05 | 00163E5F-7A72-1ED9-88D9-58240BCEACC0 | 00163E5F-7A72-1ED9-88D9-58240BCE8CC0 | 00163E5F-7A72-1ED9-88F7-44A0C3075B05 | 00163E5F-7A72-1ED9-88F7-44A0C3067B05
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__ObjectID,260682,260682,0,30+,,00163E5F7A721ED98ADFC81C81E6455F | 00163E5F7A721ED98ADFC81C81E6855F | 00163E5F7A721ED98ADFC81C81E6C55F | 00163E5F7A721ED98ADFC81C81E7055F | 00163E5F7A721ED98ADFC81C81E7455F
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__OwnerPartyUUID,260682,260682,0,1,,00163E5F-7A72-1EE9-87A8-1D692B73CA0C
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__ParentObjectID,260682,260682,0,30+,,00163E5F7A721ED98ADFC81C81E6255F | 00163E5F7A721ED98ADFC84297BAC55F | 00163E5F7A721ED98ADFC8980155455F | 00163E5F7A721ED98ADFC8D6D95B055F | 00163E5F7A721ED98ADFC9169EE3455F
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__PermanentEstablishmentUUID,260682,260682,0,1,,00163E5F-7A72-1EE9-87A8-35E9FA7EEA67
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__StockTypeCode,260682,260682,0,2,,2 | 6
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__StockTypeCodeText,260682,260682,0,2,,Logistics Area | Goods Issue
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__SupplyPlanningAreaUUID,260682,260682,0,1,,00163E5F-7A72-1EE9-87D9-FB8C3A1BE00F
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__TransferGroupID,260682,166693,93989,30+,,20 | 40 | 110 | 130 | 60
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__TypeCode,260682,260682,0,1,,11
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__TypeCodeText,260682,260682,0,1,,Material Inventory Change Item
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__InventoryChangeItemCollection__UUID,260682,260682,0,30+,,00163E5F-7A72-1ED9-8ADF-C81C81E6455F | 00163E5F-7A72-1ED9-8ADF-C81C81E6855F | 00163E5F-7A72-1ED9-8ADF-C81C81E6C55F | 00163E5F-7A72-1ED9-8ADF-C81C81E7055F | 00163E5F-7A72-1ED9-8ADF-C81C81E7455F
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__ItemChangeQuantityCollection__ObjectID,260682,260682,0,30+,,00163E5F7A721ED98ADFC81C81E6655F | 00163E5F7A721ED98ADFC81C81E6A55F | 00163E5F7A721ED98ADFC81C81E6E55F | 00163E5F7A721ED98ADFC81C81E7255F | 00163E5F7A721ED98ADFC81C81E7655F
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__ItemChangeQuantityCollection__ParentObjectID,260682,260682,0,30+,,00163E5F7A721ED98ADFC81C81E6455F | 00163E5F7A721ED98ADFC81C81E6855F | 00163E5F7A721ED98ADFC81C81E6C55F | 00163E5F7A721ED98ADFC81C81E7055F | 00163E5F7A721ED98ADFC81C81E7455F
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__ItemChangeQuantityCollection__Quantity,260682,260682,0,30+,,31.00000000000000 | 4150.00000000000000 | 3955.00000000000000 | 40.00000000000000 | 24.00000000000000
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__ItemChangeQuantityCollection__QuantityUnitCode,260682,260682,0,11,,ZNO | LTR | KGM | GRM | MMT
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__ItemChangeQuantityCollection__QuantityUnitCodeText,260682,260682,0,11,,Number | Liter | Kilogram | Gram | Millimeter
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__ItemTextCollection__AuthorName,260682,0,260682,0,,
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__ItemTextCollection__AuthorUUID,260682,0,260682,0,,
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__ItemTextCollection__CreatedBy,260682,62,260620,5,,Mayur Mapusekar | Maryann Fernandes | Pradosh Prakash Betkikar | Prashant Ram Naik | Joel Fernandes
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__ItemTextCollection__CreatedOn,260682,62,260620,30+,,2021-02-26 05:44:16 | 2021-02-27 07:21:00 | 2020-10-13 08:24:27 | 2021-02-01 04:27:45 | 2021-10-18 07:42:25
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__ItemTextCollection__LanguageCode,260682,0,260682,0,,
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__ItemTextCollection__LanguageCodeText,260682,0,260682,0,,
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__ItemTextCollection__LastUpdatedBy,260682,62,260620,5,,Mayur Mapusekar | Maryann Fernandes | Pradosh Prakash Betkikar | Prashant Ram Naik | Joel Fernandes
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__ItemTextCollection__ObjectID,260682,62,260620,30+,,00163EA941891EEB9DFEB3E8A784F36C00163EA941891EEB9DFEB3E8A785136CT00001 | 00163EA941891EEB9E9988FF930C38B500163EA941891EEB9E9988FF930C58B5T00001 | 00163EA941A41EEB83A5AEC4C874BBBB00163EA941A41EEB83A5AEC4C874DBBBT00001 | 00163EA941C81EEB9988B6E237C6E2CC00163EA941C81EEB9988B6E237C702CCT00001 | 00163EA9426E1EDC8BFCD8953F0C512E00163EA9426E1EDC8BFCD8953F0C712ET00001
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__ItemTextCollection__ParentObjectID,260682,62,260620,30+,,00163EA941891EEB9DFEACFF77959363 | 00163EA941891EEB9E998768707398B5 | 00163EA941A41EEB83A5AA03D7CA9BB5 | 00163EA941C81EEB9988B505EB3EC2CA | 00163EA9426E1EDC8BFCD0C7277750CE
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__ItemTextCollection__TextContent,260682,61,260621,30+,EMBEDDED_NEWLINE,"Required for rework for high current issue observed in RE Amber. | Required for rework of logger 4G to be send for ARAI | as per Haresh sir's mail. | 100 x 21 Boxes - 1900 no's  (Trays issued to Production = 1900 during week 1, 2 & 3) | Reversal - extra PCB's were Issued"
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__ItemTextCollection__TypeCode,260682,62,260620,1,,10011
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__ItemTextCollection__TypeCodeText,260682,62,260620,1,,Internal Comment
+stock_move_history.csv,sap__khgoodsandactivityconfirmation__ItemTextCollection__UpdatedOn,260682,62,260620,30+,,2021-02-26 05:44:16 | 2021-02-27 07:21:00 | 2020-10-13 08:24:27 | 2021-02-01 04:27:45 | 2021-10-18 07:42:25
 stock_picking_delivery.csv,id,28672,28672,0,30+,,sap_delivery_00163E5F7A721ED98B8490AF427507AE | sap_delivery_00163E5F7A721ED98B8684765060F0A3 | sap_delivery_00163E5F7A721ED98B87C9470BFBB702 | sap_delivery_00163E5F7A721ED98BD62D9C5951F934 | sap_delivery_00163E5F7A721ED98BEF44BDEA2BEEB7
 stock_picking_delivery.csv,name,28672,28672,0,30+,,8-1 | 8-2 | 8-3 | 8-4 | 8-5
 stock_picking_delivery.csv,partner_id/id,28672,28672,0,30+,,sap_bp_1121778 | sap_bp_1121709 | sap_bp_1123122 | sap_bp_1123611 | sap_bp_1113761

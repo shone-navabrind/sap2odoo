@@ -153,7 +153,7 @@ MODEL_ROOTS = {
     "stock_warehouse.csv": [("khlocation", "LocationCollection", "sap_wh", ("ObjectID",))],
     "stock_picking_transfer.csv": [("khinbounddelivery", "InboundDeliveryCollection", "sap_inbdel", ("ID",))],
     "stock_picking_transfer_line.csv": [("khinbounddelivery", "ItemCollection", "sap_inbdel_item", ("ObjectID",))],
-    "stock_move_history.csv": [("khgoodsandserviceacknowledgement", "ItemCollection", "sap_move", ("ObjectID",))],
+    "stock_move_history.csv": [("khgoodsandactivityconfirmation", "InventoryChangeItemCollection", "sap_move", ("ObjectID",))],
     "uom_uom.csv": [("vmumaterial", "MaterialBaseMeasureUnitCodeCollection", "sap_uom", ("Code",))],
     "maintenance_equipment.csv": [("khequipmentresource", "EquipmentResourceCollection", "sap_equip", ("ObjectID",))],
 }

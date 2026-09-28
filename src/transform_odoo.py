@@ -1860,49 +1860,173 @@ def build_stock_transfers():
 
 STOCK_MOVE_FIELDNAMES = [
     "id", "name", "reference", "product_id/id", "product_uom_qty", "product_uom/id",
-    "date", "state", "partner_id/id",
+    "date", "state", "location_id/id", "location_dest_id/id",
 ]
+
+# Odoo's own built-in virtual locations (present in every install, not something this project
+# invents) - used as the "outside the warehouse" end of a movement whose other leg isn't a real
+# logistics area on this tenant (a pure receipt with no matching issue leg, or vice versa).
+_VIRTUAL_LOCATION_SUPPLIERS = "stock.stock_location_suppliers"
+_VIRTUAL_LOCATION_CUSTOMERS = "stock.stock_location_customers"
+_VIRTUAL_LOCATION_INVENTORY = "stock.location_inventory"
+
+
+def _logistics_area_lookup():
+    """
+    {stripped-uppercased ObjectID -> (SiteID, ID)} for every khlocation LogisticsArea - lets a
+    khgoodsandactivityconfirmation row's dashed LogisticsAreaUUID be resolved to the exact same
+    external ID build_locations() already gave that same area in stock_location.csv (confirmed
+    by matching ObjectID between the two independently-imported services).
+    """
+    areas = load_raw("LogisticsAreaCollection", service_hint="khlocation")["rows"]
+    return {a["ObjectID"]: (a.get("SiteID"), a.get("ID")) for a in areas if a.get("ObjectID")}
+
+
+def _resolve_area(area_uuid, area_lookup):
+    if not area_uuid:
+        return ""
+    site_area = area_lookup.get(area_uuid.replace("-", "").upper())
+    if not site_area or not site_area[0] or not site_area[1]:
+        return ""
+    return logistics_area_key(*site_area)
 
 
 def build_stock_moves():
     """
     Sheet object #33 (Stock Moves History) -> stock.move.
 
-    Source is khgoodsandserviceacknowledgement - goods and service receipts against purchase
-    orders - NOT khgoodsandactivityconfirmation, which would have been the more direct
-    inventory-movement source but whose InventoryChangeItemCollection and header both return
-    HTTP 500 from SAP on any request, before and after re-importing the service. This is the
-    movement history that is actually reachable on this tenant: 137 receipts, 238 lines with
-    the product, the delivered quantity and the posting date.
+    Replaces the earlier khgoodsandserviceacknowledgement-based version (137 receipts, 238
+    lines - a small subset of one document type) with khgoodsandactivityconfirmation's real
+    inventory-movement ledger: 147,979 confirmations, 366,585 movement lines. The earlier
+    docstring claimed InventoryChangeItemCollection/the header both 500 on this tenant - that
+    was true when first checked but is no longer the case (confirmed: both extract cleanly at
+    full volume now), and the service was already sitting fully extracted in output_raw/,
+    just never wired into a transform.
+
+    Each InventoryChangeItemCollection row is one movement of one material through one
+    logistics area, tagged "Inventory receipt" or "Inventory issue" - NOT a two-sided transfer
+    by itself. Where a confirmation moves the same material with one receipt leg and one issue
+    leg (a real internal transfer, e.g. reason "Transfer"), the two legs are merged into a
+    single stock.move with both a real source and a real destination location, instead of two
+    separate half-transfers - confirmed clean: grouping by (confirmation, material) finds
+    105,903 such pairs, all with identical quantity on both legs, zero mismatches. Every
+    other row (a receipt with no matching issue, e.g. against a PO; an issue with no matching
+    receipt, e.g. "Issue for Customer" or scrapping) keeps its one known real location and uses
+    Odoo's own built-in virtual location for the unknown side - not a guess about where the
+    goods started/ended, since SAP genuinely didn't attach a second logistics area to that row.
     """
-    headers = {h["ObjectID"]: h for h in load_raw(
-        "GoodsAndServiceAcknowledgementCollection",
-        service_hint="khgoodsandserviceacknowledgement")["rows"] if h.get("ObjectID")}
-    items = load_raw("ItemCollection", service_hint="khgoodsandserviceacknowledgement")["rows"]
-    sellers = _group_by_parent(load_raw(
-        "SellerPartyCollection", service_hint="khgoodsandserviceacknowledgement")["rows"])
+    confirmations = {h["ObjectID"]: h for h in load_raw(
+        "GoodsAndActivityConfirmationCollection",
+        service_hint="khgoodsandactivityconfirmation")["rows"] if h.get("ObjectID")}
+    items = load_raw("InventoryChangeItemCollection", service_hint="khgoodsandactivityconfirmation")["rows"]
+    quantities = {q["ParentObjectID"]: q for q in load_raw(
+        "ItemChangeQuantityCollection", service_hint="khgoodsandactivityconfirmation")["rows"]}
+    materials = load_raw("MaterialCollection", service_hint="vmumaterial")["rows"]
+    internal_id_by_uuid = {m["UUID"]: m.get("InternalID") for m in materials if m.get("UUID")}
+    area_lookup = _logistics_area_lookup()
+
+    def product_ref(material_uuid):
+        internal_id = internal_id_by_uuid.get(material_uuid)
+        return external_id("sap_prod", internal_id) if internal_id else ""
+
+    def move_row(object_id, name, date_, state, product_id_ref, qty_row, location_id, location_dest_id):
+        qty = qty_row.get("Quantity") if qty_row else ""
+        unit = qty_row.get("QuantityUnitCode") if qty_row else ""
+        return {
+            "id": external_id("sap_move", object_id),
+            "name": name,
+            "reference": name,
+            "product_id/id": product_id_ref,
+            "product_uom_qty": qty,
+            "product_uom/id": external_id("sap_uom", unit) if unit else "",
+            "date": date_,
+            "state": state,
+            "location_id/id": location_id,
+            "location_dest_id/id": location_dest_id,
+        }
+
+    groups = {}
+    for item in items:
+        key = (item.get("ParentObjectID"), item.get("MaterialUUID"))
+        groups.setdefault(key, []).append(item)
 
     rows = []
-    for item in items:
-        header = headers.get(item.get("ParentObjectID"))
-        product_id = item.get("ProductID")
-        if not header:
+    for (confirmation_id, material_uuid), group in groups.items():
+        confirmation = confirmations.get(confirmation_id)
+        reason = group[0].get("InventoryChangeReasonCodeText", "")
+        date_ = parse_sap_date(confirmation.get("TransactionDateTime")) if confirmation else ""
+        state = "done" if not confirmation or confirmation.get("CancellationStatusCodeText") == "Not Canceled" else "cancel"
+        product_id_ref = product_ref(material_uuid)
+
+        issue_legs = [g for g in group if g.get("InventoryMovementDirectionCodeText") == "Inventory issue"]
+        receipt_legs = [g for g in group if g.get("InventoryMovementDirectionCodeText") == "Inventory receipt"]
+
+        if len(group) == 2 and len(issue_legs) == 1 and len(receipt_legs) == 1:
+            issue, receipt = issue_legs[0], receipt_legs[0]
+            source = _resolve_area(issue.get("LogisticsAreaUUID"), area_lookup) or _VIRTUAL_LOCATION_INVENTORY
+            dest = _resolve_area(receipt.get("LogisticsAreaUUID"), area_lookup) or _VIRTUAL_LOCATION_INVENTORY
+            rows.append(move_row(issue["ObjectID"], reason, date_, state, product_id_ref,
+                                  quantities.get(issue["ObjectID"]), source, dest))
             continue
-        party = resolve_party(sellers, item.get("ParentObjectID"), prefer="supplier")
-        unit = item.get("DeliveredQuantityUnitCode", "")
-        rows.append({
-            "id": external_id("sap_move", item.get("ObjectID")),
-            "name": item.get("Description") or item.get("ID", ""),
-            "reference": header.get("ID", ""),
-            "product_id/id": external_id("sap_prod", product_id) if product_id else "",
-            "product_uom_qty": item.get("DeliveredQuantity", ""),
-            "product_uom/id": external_id("sap_uom", unit) if unit else "",
-            "date": parse_sap_date(header.get("PostingDate")) or "",
-            "state": "done" if header.get("ReleaseStatusCodeText") == "Released" else "draft",
-            "partner_id/id": external_id("sap_bp", party) if party else "",
-        })
+
+        for leg in group:
+            direction = leg.get("InventoryMovementDirectionCodeText")
+            area = _resolve_area(leg.get("LogisticsAreaUUID"), area_lookup)
+            if direction == "Inventory receipt":
+                source = _VIRTUAL_LOCATION_SUPPLIERS
+                dest = area or _VIRTUAL_LOCATION_INVENTORY
+            else:
+                source = area or _VIRTUAL_LOCATION_INVENTORY
+                dest = _VIRTUAL_LOCATION_CUSTOMERS
+            rows.append(move_row(leg["ObjectID"], reason, date_, state, product_id_ref,
+                                  quantities.get(leg["ObjectID"]), source, dest))
+
     write_csv("stock_move_history.csv", rows, STOCK_MOVE_FIELDNAMES)
     return {"stock_move_history.csv": len(rows)}
+
+
+LOT_FIELDNAMES = ["id", "name", "product_id/id"]
+
+
+def build_stock_lots():
+    """
+    Sheet object #30 (Lot/Serial Numbers) -> stock.lot.
+
+    Previously deliberately not written: the only source then known (khproductionorder/
+    ProductionLotCollection) exposes just ObjectID + ID, no product reference at all, so
+    nothing built from it could pass Odoo's mandatory product_id on stock.lot.
+
+    khgoodsandactivityconfirmation's IdentifiedStockCollection (51,980 real batch/specified-
+    stock records) fixes this: InventoryChangeItemCollection links each movement to an
+    IdentifiedStockUUID AND carries that same row's own MaterialUUID, and confirmed clean -
+    every IdentifiedStockUUID across 185,158 linked movement rows maps to exactly one material,
+    never more than one. That gives every batch a real, unambiguous product.
+    """
+    identified_stocks = {s["ObjectID"]: s for s in load_raw(
+        "IdentifiedStockCollection", service_hint="khgoodsandactivityconfirmation")["rows"] if s.get("ObjectID")}
+    items = load_raw("InventoryChangeItemCollection", service_hint="khgoodsandactivityconfirmation")["rows"]
+    materials = load_raw("MaterialCollection", service_hint="vmumaterial")["rows"]
+    internal_id_by_uuid = {m["UUID"]: m.get("InternalID") for m in materials if m.get("UUID")}
+
+    material_by_stock = {}
+    for item in items:
+        stock_uuid = item.get("IdentifiedStockUUID")
+        if stock_uuid and stock_uuid not in material_by_stock:
+            material_by_stock[stock_uuid] = item.get("MaterialUUID")
+
+    rows = []
+    for stock_uuid, material_uuid in material_by_stock.items():
+        stock = identified_stocks.get(stock_uuid.replace("-", "").upper())
+        internal_id = internal_id_by_uuid.get(material_uuid)
+        if not stock or not internal_id:
+            continue
+        rows.append({
+            "id": external_id("sap_lot", stock_uuid),
+            "name": stock.get("ID", ""),
+            "product_id/id": external_id("sap_prod", internal_id),
+        })
+    write_csv("stock_lot.csv", rows, LOT_FIELDNAMES)
+    return {"stock_lot.csv": len(rows)}
 
 
 PRICELIST_ITEM_FIELDNAMES = [
@@ -2349,7 +2473,8 @@ TRANSFORMS = [
     ("account_move credit notes (customer + vendor)", build_credit_notes),
     ("account_analytic_account (profit centres)", build_profit_centres),
     ("stock_picking_transfer (inbound deliveries)", build_stock_transfers),
-    ("stock_move_history (goods receipts)", build_stock_moves),
+    ("stock_move_history (inventory change ledger)", build_stock_moves),
+    ("stock_lot (identified stock / batches)", build_stock_lots),
     ("product_pricelist_item (list prices)", build_pricelist_items),
     ("product_pricelist_with_items (combined deliverable)", build_pricelist_combined),
     ("mrp_production_history (closed orders)", build_production_history),

@@ -387,11 +387,23 @@ object gets wired up, so the report keeps tracing status back to real source fil
 
 ## Known limitations
 
-- **39/67 objects built** (see the README "Status" section for the current, live-computed
-  breakdown) — 13 optional objects are `pending_mapping` waiting on one of the remaining
-  custom service imports, 4 are blocked by SAP authorization (`khproject`, `khlead`,
-  `tmserviceorder`, `tmservicerequest`), and 14 are `not_in_bydesign` (Engineering/PLM,
-  Maintenance, Quality modules don't exist in standard ByDesign).
+- **39/67 objects built** (`python -m src.validate` is the live count) — 12 optional objects are
+  `pending_mapping` waiting on one of the remaining custom service imports, 4 of those are
+  blocked by SAP authorization (`khproject`, `khlead`, `tmserviceorder`, `tmservicerequest`), and
+  13 are `not_in_bydesign` (Engineering/PLM, Quality, and 5 of Maintenance's 6 objects — Equipment
+  itself is now built, see below — don't exist as concepts in standard ByDesign).
+- **Team feedback caught two real gaps, both fixed 2026-09-28**: `stock_move_history.csv` was
+  only reading `khgoodsandserviceacknowledgement` (137 receipts / 238 lines) when a much larger
+  source, `khgoodsandactivityconfirmation`'s inventory-movement ledger (147,979 confirmations,
+  366,585 lines), was already sitting fully extracted in `output_raw/` and simply never wired
+  into a transform — the docstring's claim that this service 500'd was true once but stopped
+  being true and nobody re-checked. Now rebuilt from it: 260,682 rows (paired issue+receipt legs
+  on the same confirmation+material merged into real two-sided moves; everything else uses
+  Odoo's own virtual Suppliers/Customers/Inventory-adjustment location for the unattached side).
+  The same source's `IdentifiedStockCollection` (51,980 real batch records, joinable to a
+  product via `InventoryChangeItemCollection`) closed **#30 Lot/Serial Numbers** too, previously
+  blocked because the only other candidate source had no product reference at all — see
+  `build_stock_moves()`/`build_stock_lots()` in `src/transform_odoo.py`.
 - **Seven `*AttachmentFolderCollection`/`AttachmentCollection` entity sets return 400 Bad Request
   no matter what's queried** (confirmed: single field, no field, and a parent-scoped `$filter` all
   fail identically) — see "Entity sets that exist but can't be queried at all" in

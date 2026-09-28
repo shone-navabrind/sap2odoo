@@ -140,12 +140,15 @@ REGISTRY = [
                raw_sources=("khlocation__LocationCollection.json",)),
     ObjectSpec(29, "Inventory", "Master", "UOM", True, "uom.uom", "uom_uom", "built", "REAL DATA: vmumaterial's MaterialBaseMeasureUnitCodeCollection codelist, already-imported service, no new upload needed - 23 units",
                raw_sources=("vmumaterial__MaterialBaseMeasureUnitCodeCollection.json",)),
-    ObjectSpec(30, "Inventory", "Master", "Lot/Serial Numbers", False, "stock.lot", "stock_lot", "pending_mapping",
-               "BLOCKED, deliberately not written: khproductionorder/ProductionLotCollection has 145 rows but exposes only "
-               "ObjectID and ID - no ParentObjectID and no product reference of any kind - so lots cannot be attached to a "
-               "product, and Odoo's stock.lot requires product_id. A file built from this would be 100% unimportable. "
-               "Fix is an import, not code: khgoodsandactivityconfirmation.xml carries SerialNumber and IdentifiedStock with "
-               "their material links (SAP_IMPORT_PLAN.md, priority 1)."),
+    ObjectSpec(30, "Inventory", "Master", "Lot/Serial Numbers", False, "stock.lot", "stock_lot", "built",
+               "REAL DATA, closed 2026-09-28: khproductionorder/ProductionLotCollection (the originally investigated source) "
+               "really is a dead end - ObjectID + ID only, no product reference. Built instead from "
+               "khgoodsandactivityconfirmation/IdentifiedStockCollection (51,980 real batch records), joined to a product "
+               "via InventoryChangeItemCollection, which links every IdentifiedStockUUID to a MaterialUUID - confirmed "
+               "clean, every one of the 185,158 linked movement rows maps to exactly one material. 51,077 lots written, "
+               "all with a resolved product_id.",
+               raw_sources=("khgoodsandactivityconfirmation__IdentifiedStockCollection.json",
+                            "khgoodsandactivityconfirmation__InventoryChangeItemCollection.json")),
     ObjectSpec(31, "Inventory", "Transaction", "Inventory Adjustments", False, "stock.quant", "stock_quant_adjustment", "built",
                "REAL DATA: 'Inventory Balance' (SCMINBU03) on scm_physicalinventory_analytics.svc, grouped by material x "
                "logistics area x site - exactly Odoo's stock.quant grain. 1805 on-hand balances; location_id resolves to the "
@@ -159,14 +162,19 @@ REGISTRY = [
                raw_sources=("khinbounddelivery__InboundDeliveryCollection.json", "khinbounddelivery__ItemCollection.json",
                             "khinbounddelivery__ItemQuantityCollection.json", "khinbounddelivery__SenderPartyCollection.json")),
     ObjectSpec(33, "Inventory", "Transaction", "Stock Moves History", False, "stock.move", "stock_move_history", "built",
-               "REAL DATA: khgoodsandserviceacknowledgement - 137 goods/service receipts with 238 lines carrying the "
-               "product, delivered quantity and posting date. NOT from khgoodsandactivityconfirmation, which would have "
-               "been the more direct inventory-movement source: that service is imported and most of it works, but its "
-               "InventoryChangeItemCollection and header both return HTTP 500 from SAP on any request, unchanged after a "
-               "re-import - an SAP-side defect, not a query problem.",
-               raw_sources=("khgoodsandserviceacknowledgement__GoodsAndServiceAcknowledgementCollection.json",
-                            "khgoodsandserviceacknowledgement__ItemCollection.json",
-                            "khgoodsandserviceacknowledgement__SellerPartyCollection.json")),
+               "REAL DATA, rebuilt 2026-09-28 from a much larger source after team feedback flagged the previous version "
+               "as incomplete. Was: khgoodsandserviceacknowledgement, 137 receipts / 238 lines. Now: "
+               "khgoodsandactivityconfirmation's real inventory-movement ledger - 147,979 confirmations, 366,585 movement "
+               "lines - already fully extracted in output_raw/ but never wired into a transform (the earlier note that its "
+               "InventoryChangeItemCollection 500'd was true once but no longer is - re-confirmed extracting cleanly at "
+               "full volume). Issue/receipt leg pairs on the same confirmation+material (105,903 of them, zero quantity "
+               "mismatches) are merged into single two-sided stock.move rows with real source/destination logistics "
+               "areas; every other row keeps its one known real location and uses Odoo's own built-in Suppliers/"
+               "Customers/Inventory-adjustment virtual location for the side SAP genuinely didn't attach a second area "
+               "to. 260,682 rows, 0 missing product_id, 0 missing quantity.",
+               raw_sources=("khgoodsandactivityconfirmation__GoodsAndActivityConfirmationCollection.json",
+                            "khgoodsandactivityconfirmation__InventoryChangeItemCollection.json",
+                            "khgoodsandactivityconfirmation__ItemChangeQuantityCollection.json")),
 
     # --- Maintenance ---
     ObjectSpec(34, "Maintenance", "Master", "Equipment", True, "maintenance.equipment", "maintenance_equipment", "built", "MANDATORY - closed 2026-09-28. Earlier notes (kept for context) correctly found no standalone 'Equipment' master data object in any standard or custom service - ByDesign genuinely has no Preventive Maintenance module. What resolves the sheet requirement instead: the real ByDesign standard Business Object EquipmentResource ('Supply Chain Design Master Data' -> 'Resources' in the live UI, the same discovery as khbomvariant) - 18 real records (SMT lines, wave soldering, final inspection, etc.), genuinely typed 'Equipment Resource' on this tenant. Never published as OData until built directly via the OData Editor (self-service, no .xml import): service khequipmentresource, Work Center View SCM_RESOURCES (found by searching the picker for 'Resources' - it only matches a Work Center View's own display name, not its technical ID or parent Work Center name, which is why 'Equipment'/'Design'/'Master Data' searches all returned zero results first). See build_equipment() in src/transform_odoo.py; raw_sources below.",
