@@ -69,20 +69,31 @@ FIELD_MAPS = {
             "Cycle Count": "sap__vmumaterial__LogisticsCollection__CycleCountPlannedDuration",
             "Site": "sap__vmumaterial__LogisticsCollection__SiteName",
             "Serial Number Profile": "sap__vmumaterial__MaterialCollection__SerialNumberProfileCodeText",
-            # Checked live against vmumaterial's own $metadata on 2026-09-28 - genuinely absent,
-            # not unextracted. If these are needed, the custom vmumaterial OData service needs to
-            # be edited (via the OData Editor) to add them, the same way khbomvariant/
-            # khequipmentresource/khbatch were built - they are NOT in output_raw/ at all today.
-            "HSN Code for India": (None, "Not exposed by the vmumaterial custom OData service - "
-                                          "confirmed absent from its live $metadata, 2026-09-28"),
-            "MRP for India": (None, "Not exposed by the vmumaterial custom OData service - "
-                                     "confirmed absent from its live $metadata, 2026-09-28"),
-            "Batch Managed": (None, "Not exposed by the vmumaterial custom OData service - "
-                                     "confirmed absent from its live $metadata, 2026-09-28"),
-            "Storage Location": (None, "Not exposed by the vmumaterial custom OData service - "
-                                        "confirmed absent from its live $metadata, 2026-09-28"),
-            "Manufacturer Name": (None, "Not exposed by the vmumaterial custom OData service - "
-                                         "confirmed absent from its live $metadata, 2026-09-28"),
+            # Storage Location / Manufacturer Name: fixed 2026-09-28 - real fields
+            # (StorageLocation_KUT / ManufacturerName1_KUT) sitting on MaterialCollection's
+            # Common node, never selected when vmumaterial was first built. Added via the
+            # OData Editor - see field_validation/01_products/README.md for the full story.
+            "Storage Location": "sap__vmumaterial__MaterialCollection__StorageLocation_KUT",
+            "Manufacturer Name": "sap__vmumaterial__MaterialCollection__ManufacturerName1_KUT",
+            # Batch Managed: not a separate gap - the only "batch"-named field anywhere in
+            # vmumaterial's metadata is BatchDependentIndicator, which lives on
+            # QuantityConversionCollection (per-UoM, 5 rows total on this tenant), not a
+            # material-wide flag. The screen's checkbox is a client-side derivation from
+            # IdentifiedStockTypeCode == '01' (Batch), already captured as this object's
+            # tracking field - see field_validation/01_products/README.md.
+            "Batch Managed": (None, "Not a real separate field - the screen checkbox derives "
+                                     "from IdentifiedStockTypeCode ('01'=Batch), already "
+                                     "captured as tracking. Confirmed 2026-09-28."),
+            # HSN Code for India / MRP for India: exhaustively checked 2026-09-28, not just
+            # $metadata-absent - the Material BO exposes only 6 child nodes total (checked via
+            # the OData Editor's BO Node Name picker: GlobalTradeItemNumber, Identification,
+            # PlanningQuantity, ProductCategoryAssignment, QuantityCharacteristic,
+            # QuantityConversion) and none of them, nor any Root-level field, carries an
+            # HSN/MRP/India-named property. A real structural gap, not a missed selection.
+            "HSN Code for India": (None, "Not exposed anywhere in vmumaterial - exhaustively "
+                                          "checked every BO node and Root field, 2026-09-28"),
+            "MRP for India": (None, "Not exposed anywhere in vmumaterial - exhaustively "
+                                     "checked every BO node and Root field, 2026-09-28"),
         },
     },
 }
