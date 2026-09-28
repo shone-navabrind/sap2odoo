@@ -69,8 +69,16 @@ def _bool(value):
 
 PARTNER_FIELDNAMES = [
     "id", "name", "street", "city", "zip", "country_id/id", "phone", "email", "website",
-    "vat", "customer_rank", "supplier_rank", "active",
+    "vat", "customer_rank", "supplier_rank", "active", "industry", "payment_terms",
+    "incoterms", "incoterms_location", "purchase_order_currency", "order_block_reason",
+    "delivery_block", "invoice_block", "is_bidder", "is_warehouse_provider",
+    "is_freight_forwarder",
 ]
+
+# BP role codes confirmed live via khsupplier/RoleRoleCodeCollection, 2026-09-28.
+ROLE_CODE_BIDDER = "BBP001"
+ROLE_CODE_WAREHOUSE_PROVIDER = "SCM002"
+ROLE_CODE_FREIGHT_FORWARDER = "CRMS04"
 
 BANK_FIELDNAMES = ["id", "name", "country_id/id"]
 PARTNER_BANK_FIELDNAMES = ["id", "partner_id/id", "bank_id/id", "acc_number"]
@@ -159,9 +167,37 @@ def build_res_partner():
       res_partner_contact.csv - contact persons, via khcustomer's RelationshipCollection
       res_bank.csv            - the real bank directory from khhousebankaccount
       res_partner_bank.csv    - partner bank accounts from BankDetailsCollection
+
+    Extended 2026-09-28 after the user pasted a list of Customer/Vendor screen fields missing
+    from this file. industry/payment_terms/incoterms/incoterms_location/purchase_order_currency/
+    order_block_reason/delivery_block/invoice_block were already sitting in already-extracted
+    CustomerCollection/SupplierCollection fields, just never read by this transform.
+    is_bidder/is_warehouse_provider/is_freight_forwarder are derived from khsupplier's
+    RoleCollection (RoleCode BBP001/SCM002/CRMS04, confirmed live against
+    RoleRoleCodeCollection) - also already extracted, just unused. payment_terms/incoterms/
+    incoterms_location/purchase_order_currency needed one real fix: khsupplier/
+    SupplierCollection is now pulled with $expand=PurchasingData, because
+    PurchasingDataCollection's own rows carry no ParentObjectID back to the supplier (same
+    "child entity you can't join, only expand" situation as khproductionorder/
+    MainProductOutput) - see field_validation/02_customers_vendors/README.md.
+
+    Checked and confirmed NOT available anywhere on this tenant, not just unmapped: Additional
+    Name, Trade Name, Non-Company, Minimum Purchase Order Value, Certified According To/Valid
+    To, ERS Invoice Number Prefix, Calendar Year as Suffix, Restart Doc ID Each Cal Year - all
+    visible on the live Supplier screen but not present as a property anywhere in khsupplier's
+    Business Object tree (checked via the OData Editor's full field list, not just $metadata).
+    Same for Payment Terms/Incoterms/Incoterms Location on the CUSTOMER side specifically - that
+    data lives on a separate CRM Account object this pipeline doesn't read, not on khcustomer.
     """
     customers = load_raw("CustomerCollection", service_hint="khcustomer")["rows"]
     suppliers = load_raw("SupplierCollection", service_hint="khsupplier")["rows"]
+
+    # Role assignments (Bidder/Warehouse Provider/Freight Forwarder), added 2026-09-28 after
+    # the user compared res_partner.csv against the live Customer/Vendor screens and found
+    # these missing. Real fields, already sitting fully extracted - RoleCollection just needed
+    # to be read by this transform. RoleCode set membership per supplier, not a single field.
+    roles_by_supplier = _join_by_parent(
+        load_raw("RoleCollection", service_hint="khsupplier")["rows"])
 
     addresses = _join_by_parent(
         load_raw("PostalAddressCollection", service_hint="khcustomer")["rows"]
@@ -187,6 +223,7 @@ def build_res_partner():
     def partner_row(record, is_customer):
         object_id = record.get("ObjectID", "")
         internal_id = record.get("InternalID")
+        role_codes = {r.get("RoleCode") for r in roles_by_supplier.get(object_id, [])}
         return {
             "id": external_id("sap_bp", internal_id),
             "name": (record.get("BusinessPartnerFormattedName")
@@ -207,6 +244,21 @@ def build_res_partner():
             "supplier_rank": "0" if is_customer else "1",
             # LifeCycleStatusCode 2 = Active; 1 = In Preparation, 3 = Blocked, 4 = Obsolete.
             "active": "True" if record.get("LifeCycleStatusCode") == "2" else "False",
+            "industry": record.get("IndustrialSectorCodeText", ""),
+            # Supplier-side only (khcustomer's CustomerCollection has no equivalent
+            # PurchasingData/SalesData node on this tenant - checked live, 2026-09-28).
+            "payment_terms": record.get("PurchasingData.PaymentTermsCodeText", ""),
+            "incoterms": record.get("PurchasingData.IncotermsCodeText", ""),
+            "incoterms_location": record.get("PurchasingData.IncotermsLocationName", ""),
+            "purchase_order_currency": record.get("PurchasingData.PurchaseOrderCurrencyCodeText", ""),
+            # Customer-side only (khsupplier's SupplierCollection has no equivalent block
+            # reason fields on this tenant - checked live, 2026-09-28).
+            "order_block_reason": record.get("OrderBlockingReasonCodeText", ""),
+            "delivery_block": record.get("FulfilmentBlockingReasonCodeText", ""),
+            "invoice_block": record.get("InvoicingBlockingReasonCodeText", ""),
+            "is_bidder": "True" if ROLE_CODE_BIDDER in role_codes else "False",
+            "is_warehouse_provider": "True" if ROLE_CODE_WAREHOUSE_PROVIDER in role_codes else "False",
+            "is_freight_forwarder": "True" if ROLE_CODE_FREIGHT_FORWARDER in role_codes else "False",
         }
 
     rows_by_id = {}
@@ -226,9 +278,18 @@ def build_res_partner():
         object_ids_by_partner.setdefault(row["id"], []).append(record.get("ObjectID", ""))
         if existing:
             # Same business partner in both roles: keep both ranks, and take any field the
-            # customer-side record left blank.
+            # customer-side record left blank. Booleans OR together instead - the customer-side
+            # branch always sets is_bidder/etc. to "False" (roles are only ever looked up on
+            # the supplier record), so a fill-blank-only merge would silently lose a real
+            # supplier-side "True" behind the customer row's "False" (a real bug caught while
+            # adding these fields, 2026-09-28).
             existing["supplier_rank"] = "1"
+            for field in ("is_bidder", "is_warehouse_provider", "is_freight_forwarder"):
+                if row.get(field) == "True":
+                    existing[field] = "True"
             for field, value in row.items():
+                if field in ("is_bidder", "is_warehouse_provider", "is_freight_forwarder"):
+                    continue
                 if value and not existing.get(field):
                     existing[field] = value
         else:

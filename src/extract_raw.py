@@ -427,7 +427,11 @@ SOURCES = [
 
     # --- khsupplier: 15 entity sets with real data ---
     ("sap/byd/odata/cust/v1/khsupplier", "RoleCollection"),                                   # 758 rows, 5 fields
-    ("sap/byd/odata/cust/v1/khsupplier", "SupplierCollection"),                               # 250 rows, 19 fields
+    # PurchasingData is expanded inline because PurchasingDataCollection can't be joined from its
+    # own endpoint (ObjectID only, no ParentObjectID, and its ObjectIDs don't match the
+    # supplier's) - $expand is the only way to link Payment Terms/Incoterms/PO Currency/ERS back
+    # to a supplier, same pattern as khproductionorder/MainProductOutput.
+    ("sap/byd/odata/cust/v1/khsupplier", "SupplierCollection", {"expand": "PurchasingData"}),  # 250 rows, 19 fields
     ("sap/byd/odata/cust/v1/khsupplier", "CurrentDefaultPostalAddressCollection"),            # 248 rows, 22 fields
     ("sap/byd/odata/cust/v1/khsupplier", "CurrentDefaultAddressInformationCollection"),       # 248 rows, 4 fields
     ("sap/byd/odata/cust/v1/khsupplier", "PurchasingDataCollection"),                         # 237 rows, 11 fields

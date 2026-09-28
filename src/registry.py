@@ -123,13 +123,27 @@ REGISTRY = [
 
     # --- CRM ---
     ObjectSpec(17, "CRM", "Master", "Customers", True, "res.partner", "res_partner", "built",
-               "REAL DATA: khcustomer custom service (plain CRUD) - 44 customers with full address, tax number, bank "
+               "REAL DATA: khcustomer custom service (plain CRUD) - full address, tax number, bank "
                "detail and contact-person data. Replaced the bpm_businesspartnerdata_analytics.svc report, which had to "
                "be fetched in field-chunks and merged on a key SAP does not guarantee unique (44 keys vs 50 rows), so "
                "some fields were an arbitrary sample. Verified before switching: the CRUD source returns a strict "
                "superset - all 271 previous external IDs plus 17 more - so no document reference broke. Contact persons "
-               "(36) now populate res_partner_contact.csv from RelationshipCollection; they were empty before.",
-               raw_sources=("khcustomer__CustomerCollection.json", "khcustomer__PostalAddressCollection.json", "khcustomer__TaxNumberCollection.json", "khcustomer__RelationshipCollection.json")),
+               "now populate res_partner_contact.csv from RelationshipCollection; they were empty before. Extended "
+               "2026-09-28 after the user compared res_partner.csv against the live Customer/Vendor screens: added "
+               "industry, order_block_reason/delivery_block/invoice_block (all already-extracted CustomerCollection "
+               "fields, just never mapped), plus payment_terms/incoterms/incoterms_location/purchase_order_currency "
+               "and is_bidder/is_warehouse_provider/is_freight_forwarder on the supplier side - the latter two needed "
+               "real fixes: khsupplier/SupplierCollection now pulls with $expand=PurchasingData (PurchasingDataCollection "
+               "carries no ParentObjectID, same un-joinable-child situation as khproductionorder/MainProductOutput), "
+               "and the role booleans are derived from khsupplier/RoleCollection (already extracted, RoleCode "
+               "BBP001/SCM002/CRMS04 = Bidder/Warehouse Provider/Freight Forwarder, confirmed against "
+               "RoleRoleCodeCollection). See field_validation/02_customers_vendors/README.md. Confirmed NOT available "
+               "anywhere on this tenant: Additional Name, Trade Name, Non-Company, Minimum Purchase Order Value, "
+               "Certified According To/Valid To, ERS Invoice Number Prefix, Calendar Year as Suffix, Restart Doc ID "
+               "Each Cal Year (checked exhaustively via the OData Editor's full BO field tree, not just $metadata); "
+               "Payment Terms/Incoterms on the Customer side specifically live on a separate CRM Account object this "
+               "pipeline doesn't read.",
+               raw_sources=("khcustomer__CustomerCollection.json", "khcustomer__PostalAddressCollection.json", "khcustomer__TaxNumberCollection.json", "khcustomer__RelationshipCollection.json", "khsupplier__RoleCollection.json")),
     ObjectSpec(18, "CRM", "Master", "Salespersons", True, "res.users", "res_users_salesperson", "built", "REAL DATA: khemployee custom service, 99 employees (output file is res_users.csv - see FILENAME_OVERRIDES)",
                raw_sources=("khemployee__EmployeeCollection.json", "khemployee__WorkplaceAddressCollection.json")),
     ObjectSpec(19, "CRM", "Master", "Activities", False, "mail.activity", "mail_activity", "pending_mapping",
@@ -262,10 +276,12 @@ REGISTRY = [
 
     # --- Purchase ---
     ObjectSpec(46, "Purchase", "Master", "Vendors", True, "res.partner", "res_partner", "built",
-               "REAL DATA: khsupplier custom service (plain CRUD) - 250 suppliers, up from the 229 the analytics report "
-               "returned, with 248 addresses, 82 bank accounts and 43 tax numbers. Same reasoning as #17: the analytics "
-               "route sampled non-key fields (229 keys vs 237 rows); plain CRUD needs no chunking at all.",
-               raw_sources=("khsupplier__SupplierCollection.json", "khsupplier__CurrentDefaultPostalAddressCollection.json", "khsupplier__TaxNumberCollection.json", "khsupplier__BankDetailsCollection.json")),
+               "REAL DATA: khsupplier custom service (plain CRUD) - 2,147 suppliers (grew substantially since the 250 "
+               "first documented here; the tenant's real supplier list, confirmed via live re-extraction 2026-09-28, not "
+               "a pipeline bug), with matching address/bank/tax coverage. Same reasoning as #17: the analytics route "
+               "sampled non-key fields; plain CRUD needs no chunking at all. See #17's note for the 2026-09-28 field "
+               "additions (payment_terms/incoterms/is_bidder/etc.) - same res_partner.csv, same build_res_partner().",
+               raw_sources=("khsupplier__SupplierCollection.json", "khsupplier__CurrentDefaultPostalAddressCollection.json", "khsupplier__TaxNumberCollection.json", "khsupplier__BankDetailsCollection.json", "khsupplier__RoleCollection.json")),
     ObjectSpec(47, "Purchase", "Master", "Vendor Pricelists", False, "product.supplierinfo", "product_supplierinfo", "built",
                "REAL DATA: vmumaterial/SupplierInformationCollection - 34 material-to-supplier links with the supplier's own "
                "part number and lead time. Already extracted but read by no transform until now. No price column exists on "
