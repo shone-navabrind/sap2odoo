@@ -45,13 +45,17 @@ REGISTRY = [
                "six analytics reports that expose CGLACCT/TGLACCT without a blocking variable - see src/probe_gl_accounts.py, "
                "which tested all 60 candidate reports. Covers every G/L account carrying postings; an account configured in "
                "ByDesign but never posted to would not appear. account_type is derived from the account number band, each "
-               "band confirmed against the real account names (see ACCOUNT_TYPE_BANDS in src/transform_odoo.py).",
+               "band confirmed against the real account names (see ACCOUNT_TYPE_BANDS in src/transform_odoo.py). Added "
+               "2026-09-28: a 7th source, RPFINGLAU03_Q0001QueryResults (Journal Entries, #13's source) - 6 real "
+               "accounts used in journal postings weren't covered by the original six reports; adding this source "
+               "closed the gap, confirmed zero orphaned account references from #13 afterward. 219 accounts total.",
                raw_sources=("fin_costandrevenue_analytics.svc__RPFINCACU04_Q0002QueryResults.json",
                             "fin_audit_analytics.svc__RPFINGLAU02_Q0002QueryResults.json",
                             "fin_generalledger_analytics.svc__RPFINFXAU05_Q0001QueryResults.json",
                             "fin_generalledger_analytics.svc__RPFINFCDU02_Q0001QueryResults.json",
                             "fin_audit_analytics.svc__RPFININVU03_Q0001QueryResults.json",
-                            "fin_audit_analytics.svc__RPFINGLAU02_Q0003QueryResults.json")),
+                            "fin_audit_analytics.svc__RPFINGLAU02_Q0003QueryResults.json",
+                            "fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults.json")),
     ObjectSpec(2, "Accounts", "Master", "Taxes", True, "account.tax", "account_tax", "built",
                "REAL DATA: 'Taxes - Product Tax Details' (GLOTAXB01) on fin_taxmanagement_analytics.svc - the only source on "
                "this tenant carrying a tax RATE. Every custom service exposes tax codes on documents but never the percentage "
@@ -92,9 +96,27 @@ REGISTRY = [
                raw_sources=("khpayment__PaymentCollection.json",)),
     ObjectSpec(12, "Accounts", "Transaction", "Bank Statements", False, "account.bank.statement", "account_bank_statement", "built", "REAL DATA: khhousebankstatement custom service, 87 statements",
                raw_sources=("khhousebankstatement__HouseBankStatementCollection.json",)),
-    ObjectSpec(13, "Accounts", "Transaction", "Journal Entries", False, "account.move", "account_move_journal", "pending_mapping", "Data source confirmed: 'Journal Entry Item' (FINACCDIB), 'Journal Entry Voucher' (FINACCENB)"),
-    ObjectSpec(14, "Accounts", "Transaction", "Fixed Assets", False, "account.asset", "account_asset", "pending_mapping", "Data source confirmed: 'Fixed Asset' (FINFXASSB), 'Fixed Assets Master Data' (FINFXAU04)"),
-    ObjectSpec(15, "Accounts", "Transaction", "Asset Depreciation", False, "account.asset.depreciation.line", "account_asset_depreciation_line", "pending_mapping", "Data source confirmed: 'Fixed Assets Values' (FINFXAU01)"),
+    ObjectSpec(13, "Accounts", "Transaction", "Journal Entries", False, "account.move", "account_move_journal", "built",
+               "REAL DATA, closed 2026-09-28: fin_generalledger_analytics.svc/RPFINGLAU03_Q0001QueryResults ('Journal "
+               "Entries'). Was 'data source confirmed' but never actually pulled - the report 400'd on every request "
+               "because of a real bug in get_entity_set_all_fields() (BYD_P_* parameter fields, e.g. BYD_P_TARCUR, "
+               "weren't being excluded from bulk $select the way P_*/PARA_* fields already were - see src/sap_client.py). "
+               "157 real G/L line items, genuinely balanced (net debit-credit ~0 across the whole file, confirmed). "
+               "KCBALANCE_CURRCOMP is signed (positive=debit, negative=credit), so line_ids/debit and line_ids/credit "
+               "are derived directly from its sign, not guessed.",
+               raw_sources=("fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults.json",)),
+    ObjectSpec(14, "Accounts", "Transaction", "Fixed Assets", False, "account.asset", "account_asset", "built",
+               "REAL DATA, closed 2026-09-28: fin_fixedassets_analytics.svc/RPFINFXAU04_Q0001QueryResults ('Fixed "
+               "Assets - Master Data'), same BYD_P_* bug fix as #13. 3,279 real fixed assets (FACTORY LAND, LAPTOP, "
+               "FEEDER F1-12, etc.).",
+               raw_sources=("fin_fixedassets_analytics.svc__RPFINFXAU04_Q0001QueryResults.json",)),
+    ObjectSpec(15, "Accounts", "Transaction", "Asset Depreciation", False, "account.asset.depreciation.line", "account_asset_depreciation_line", "built",
+               "REAL DATA, closed 2026-09-28: fin_fixedassets_analytics.svc/RPFINFXAU01_Q0001QueryResults ('Fixed "
+               "Assets Values'), same fix as #13/#14. 1,565 rows - each asset's CURRENT accumulated depreciation "
+               "position (KCPOSTED_DEPR), not a history of individual depreciation postings - no period dimension was "
+               "selected, so this is one row per asset, not per-period. Called out explicitly rather than implying "
+               "more granularity than the source actually gives.",
+               raw_sources=("fin_fixedassets_analytics.svc__RPFINFXAU01_Q0001QueryResults.json",)),
 
     # --- Common ---
     ObjectSpec(16, "Common", "Master", "Attachments/Documents", False, "ir.attachment", "ir_attachment", "pending_mapping", "SAP attachments are typically binary content on GOS/DMS - needs a per-record download pass, not a flat OData select"),
@@ -207,7 +229,14 @@ REGISTRY = [
     ObjectSpec(41, "Manufacturing", "Master", "Routings", False, "mrp.routing.workcenter", "mrp_routing_workcenter", "pending_mapping", "Data source confirmed: 'Released Execution Production Model Operation' (SCM_REPM_OPER)"),
     ObjectSpec(42, "Manufacturing", "Master", "Work Centers", True, "mrp.workcenter", "mrp_workcenter", "built", "REAL DATA: derived from khproductionorder's OperationCollection (ResourceID/ResourceDescription), deduplicated - no dedicated Work Center master service found, but this data was already on hand (used for #44) - 17 distinct work centers as of 2026-09-25 (was 18 earlier - minor drift in the source data, negligible)",
                raw_sources=("khproductionorder__OperationCollection.json",)),
-    ObjectSpec(43, "Manufacturing", "Master", "Operations", False, "mrp.routing.workcenter", "mrp_routing_workcenter_ops", "pending_mapping"),
+    ObjectSpec(43, "Manufacturing", "Master", "Operations", False, "mrp.routing.workcenter", "mrp_routing_workcenter_ops", "built",
+               "REAL DATA, closed 2026-09-28: khproductionorder/OperationCollection was already raw-extracted (82,859 "
+               "rows, one per operation per production order) but never transformed - #44's own docstring flagged "
+               "this. Deduplicated by (operation ID, resource) among 'Make' rows to the real distinct operation types "
+               "actually run on each work center - 22 combinations (SMT on 10100, AOI on 10200, wave soldering on "
+               "10500, etc.). Cycle time deliberately not included - ProcessingNetDuration is an observed per-order "
+               "duration, not a standard planned time, so there is no single correct value without fabricating one.",
+               raw_sources=("khproductionorder__OperationCollection.json",)),
     ObjectSpec(44, "Manufacturing", "Transaction", "Manufacturing Orders", False, "mrp.production", "mrp_production", "built", "REAL DATA: khproductionorder custom service, 152 orders. Header only - MainProductOutputCollection's 2842 rows don't carry a ParentObjectID and don't reliably join back to a specific order, so product_id/product_qty are left blank; OperationCollection (1158 rows, joins correctly via ParentObjectID) is raw-extracted but not yet transformed into routing lines",
                raw_sources=("khproductionorder__ProductionOrderCollection.json", "khproductionorder__MainProductOutputCollection.json", "khproductionorder__OperationCollection.json")),
     ObjectSpec(45, "Manufacturing", "Transaction", "Production History", False, "mrp.production", "mrp_production_history", "built",
@@ -258,10 +287,11 @@ REGISTRY = [
                raw_sources=("vmumaterial__ProductCategoryCollection.json",)),
     ObjectSpec(59, "Sales", "Master", "Pricelists", True, "product.pricelist", "product_pricelist", "built", "REAL DATA: 226 pricelists, one per real SAP Sales Arrangement resolved from khsalesorder via "
                "_resolve_order_to_arrangement() (Customer + SalesOrg + DistributionChannel business key) - not one "
-               "synthetic catch-all. partner_id/id NOT populated - CustomerUUID here is a hyphenated GUID that doesn't "
-               "match res_partner's numeric-ID-based external IDs, and this tenant hasn't exposed a UUID->numeric-ID "
-               "lookup",
-               raw_sources=("khsalesarrangement__SalesArrangementCollection.json",)),
+               "synthetic catch-all. partner_id/id populated as of 2026-09-28 via khcustomer/CustomerCollection's "
+               "UUID->InternalID lookup (same pattern as vmumaterial for products) - 225/225 real sales arrangements "
+               "resolved (the 226th row is the synthetic unmatched-orders fallback, which has no single customer by "
+               "definition).",
+               raw_sources=("khsalesarrangement__SalesArrangementCollection.json", "khcustomer__CustomerCollection.json")),
     ObjectSpec(60, "Sales", "Transaction", "Discount Rules", False, "product.pricelist.item", "product_pricelist_item_discount", "built",
                "THIS TENANT HAS NO DISCOUNT RULES - checked, not assumed: of the 94 price components SAP categorises as "
                "'Discount', every non-zero one is a Rounding Difference, and Item Discounts / Header Discounts are 0.00 "
@@ -273,7 +303,11 @@ REGISTRY = [
                "wins; the full per-order history is in output_full_csv/.",
                raw_sources=("khsalesorder__ItemPriceComponentCollection.json", "khsalesorder__ItemCollection.json",
                             "khsalesorder__ItemProductCollection.json")),
-    ObjectSpec(61, "Sales", "Master", "Customer Price Lists", False, "product.pricelist", "product_pricelist_customer", "pending_mapping", "Same source as #59 but without a working partner link (see #59's note), so this isn't meaningfully 'by customer' yet - left pending until the UUID->partner mapping is solved"),
+    ObjectSpec(61, "Sales", "Master", "Customer Price Lists", False, "product.pricelist", "product_pricelist", "built",
+               "CLOSED 2026-09-28: same underlying file as #59 (product_pricelist.csv) - the UUID->partner mapping "
+               "that blocked this is now solved (see #59's note), so every real pricelist genuinely carries its "
+               "customer's partner_id/id and no separate file is needed to make this 'by customer'.",
+               raw_sources=("khsalesarrangement__SalesArrangementCollection.json", "khcustomer__CustomerCollection.json")),
     ObjectSpec(62, "Sales", "Transaction", "Quotations", False, "sale.order", "sale_order_quotation", "pending_mapping", "UPDATED 2026-09-26: the authorization block described here is resolved - live curl now returns HTTP 200 with "
                "$inlinecount __count=0 (not RBAM_ERROR). khcustomerquote is imported, live, and authorized; the tenant "
                "genuinely just has zero customer quotes right now. Still pending_mapping because there's no data to "

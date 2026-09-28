@@ -287,10 +287,31 @@ fin_audit_analytics.svc__RPFININVU03_Q0001QueryResults.csv,CGLACCT,4,4,0,4,,7000
 fin_audit_analytics.svc__RPFININVU03_Q0001QueryResults.csv,TGLACCT,4,4,0,4,,GR/IR clearing-Unbills Payable | GR/IR clearing-Purchase in Transit | GR/IR services not yet invoiced | GR/IR services not yet delivered
 fin_costandrevenue_analytics.svc__RPFINCACU04_Q0002QueryResults.csv,CGLACCT,147,147,0,30+,,161020 | 254906 | 300054 | 300055 | 301010
 fin_costandrevenue_analytics.svc__RPFINCACU04_Q0002QueryResults.csv,TGLACCT,147,147,0,30+,,Tax Collected at Source | TCS Receivable from Supplier | Domestic Sales - | Domestic Sales - New Business | Export Sales - New Business
+fin_fixedassets_analytics.svc__RPFINFXAU01_Q0001QueryResults.csv,CFXA_UUID,1565,1565,0,30+,,1-0 | 10-0 | 100-0 | 1000-0 | 1001-0
+fin_fixedassets_analytics.svc__RPFINFXAU01_Q0001QueryResults.csv,KCACCUMULATED_DEPR,1565,1565,0,30+,,-1535820.000000 | -67724.000000 | -51084.000000 | -126987.000000 | -46581.000000
+fin_fixedassets_analytics.svc__RPFINFXAU01_Q0001QueryResults.csv,KCACQUISITION_COSTS,1565,1565,0,30+,,0.000000 | -0.160000 | 40000.000000 | -0.440000 | 5670.000000
+fin_fixedassets_analytics.svc__RPFINFXAU01_Q0001QueryResults.csv,KCNETBOOKVALUE_END_OF,1565,1565,0,30+,,0.000000 | 870.000000 | 13832.000000 | 316729.000000 | 249937.000000
+fin_fixedassets_analytics.svc__RPFINFXAU01_Q0001QueryResults.csv,KCPOSTED_DEPR,1565,1565,0,30+,,0.000000 | -1101.000000 | -2903.000000 | -21606.000000 | -99506.000000
+fin_fixedassets_analytics.svc__RPFINFXAU04_Q0001QueryResults.csv,odoo_external_id,3279,3279,0,30+,,sap_asset_1_0 | sap_asset_10_0 | sap_asset_100_0 | sap_asset_1000_0 | sap_asset_1001_0
+fin_fixedassets_analytics.svc__RPFINFXAU04_Q0001QueryResults.csv,CASSETCLASS,3279,3279,0,25,,Z210 | 2040 | Z240 | 2060 | 2070
+fin_fixedassets_analytics.svc__RPFINFXAU04_Q0001QueryResults.csv,CFXA_UUID,3279,3279,0,30+,,1-0 | 10-0 | 100-0 | 1000-0 | 1001-0
+fin_fixedassets_analytics.svc__RPFINFXAU04_Q0001QueryResults.csv,CLC_STAT,3279,3279,0,2,,3 | 4
+fin_fixedassets_analytics.svc__RPFINFXAU04_Q0001QueryResults.csv,TASSETCLASS,3279,3279,0,25,,Land - Leasehold | Building Factory | Plant & Machinery (Prod Equipment) | Computers | Furniture and Fixtures
+fin_fixedassets_analytics.svc__RPFINFXAU04_Q0001QueryResults.csv,TFXA_UUID,3279,3279,0,30+,,FACTORY LAND - L15 | CONSTRUCTION OF VEHICLE PARKING AR | FEEDER F1-12 - 12MM | LAPTOP | DESKTOP
+fin_fixedassets_analytics.svc__RPFINFXAU04_Q0001QueryResults.csv,TLC_STAT,3279,3279,0,2,,Capitalized | Retired
 fin_generalledger_analytics.svc__RPFINFCDU02_Q0001QueryResults.csv,CGLACCT,53,53,0,30+,,150000 | 151000 | 151001 | 151006 | 203110
 fin_generalledger_analytics.svc__RPFINFCDU02_Q0001QueryResults.csv,TGLACCT,53,53,0,30+,,Accounts Payable-Domestic | Accounts Payable-International | Accounts Payable-Employees | DANLAW INC ECB | Plant & Machinery (Other Equipment)
 fin_generalledger_analytics.svc__RPFINFXAU05_Q0001QueryResults.csv,CGLACCT,40,40,0,30+,,201010 | 202010 | 202210 | 203000 | 203010
 fin_generalledger_analytics.svc__RPFINFXAU05_Q0001QueryResults.csv,TGLACCT,40,40,0,30+,,Land - Leasehold | Buildings - Factory | Buildings - Others | Plant & Machinery - Imported | Plant & Machinery (Prod Equipment)
+fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults.csv,CACC_DOC_UUID,157,157,0,30+,,110000000649 | 110000000651 | 110000000652 | 110000000653 | 200000003846
+fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults.csv,CCOMPANY_UUID,157,157,0,1,,70000
+fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults.csv,CDEBITCREDIT,157,157,0,2,,1 | 2
+fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults.csv,CDOC_DATE,157,157,0,10,,2026-07-16 00:00:00 | 2026-09-28 00:00:00 | 2026-09-07 00:00:00 | 2026-09-10 00:00:00 | 2026-09-03 00:00:00
+fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults.csv,CFISCYEAR,157,157,0,1,,2027
+fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults.csv,CGLACCT,157,157,0,20,,151000 | 252500 | 700023 | 150000 | 254756
+fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults.csv,KCBALANCE_CURRCOMP,157,157,0,30+,,5672328 | -5668812 | 77982 | -81498 | 137640.67
+fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults.csv,RCBALANCE_CURRCOMP,157,157,0,1,,INR
+fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults.csv,TGLACCT,157,157,0,20,,Accounts Payable-International | Advances to Suppliers | Gain/Loss from Realized Exchange Rate Differences | Accounts Payable-Domestic | CGST-Input Credit-Goa
 fin_receivablesar_analytics.svc__RPFINDUEU04_Q0007QueryResults.csv,CCOMP_UUID,846,846,0,1,,70000
 fin_receivablesar_analytics.svc__RPFINDUEU04_Q0007QueryResults.csv,CIM_BP_UUID,846,846,0,22,,1000020 | 1113761 | 1116013 | 1121595 | 1121709
 fin_receivablesar_analytics.svc__RPFINDUEU04_Q0007QueryResults.csv,CIM_B_BTD_DATE,846,846,0,30+,,2026-01-02 00:00:00 | 2024-03-23 00:00:00 | 2025-05-23 00:00:00 | 2024-07-03 00:00:00 | 2025-06-05 00:00:00

@@ -194,10 +194,10 @@ FIELD_MAP = {
         "ProductCategoryInternalID": ("id (external ID key)", "product.category", ""),
         "Description": ("name", "product.category", ""),
     },
-    59: {  # Pricelists (Discount Rules #60 / Customer Price Lists #61 share this source, not separately mapped)
+    59: {  # Pricelists (Discount Rules #60 / Customer Price Lists #61 share this source)
         "ObjectID": ("id (external ID key)", "product.pricelist", ""),
         "CurrencyCode": ("currency_id/id", "product.pricelist", ""),
-        "CustomerUUID": ("(not mapped)", "product.pricelist", "Hyphenated GUID doesn't match res_partner's numeric-ID external IDs - known limitation, see CLAUDE.md"),
+        "CustomerUUID": ("partner_id/id", "product.pricelist", "Resolved via khcustomer/CustomerCollection's UUID->InternalID lookup, closed 2026-09-28 - also closes #61"),
     },
     63: {  # Sales Orders
         "ObjectID": ("id (external ID key)", "sale.order / sale.order.line", ""),
@@ -361,6 +361,43 @@ FIELD_MAP = {
         "ResourceTimeZoneCode": ("(no core Odoo field)", "maintenance.equipment", ""),
         "WorkingDayCalendarCode": ("(no core Odoo field)", "maintenance.equipment", ""),
         "languageCode": ("(filter only)", "maintenance.equipment", "Always EN on this tenant"),
+    },
+    13: {  # Journal Entries - fin_generalledger_analytics.svc/RPFINGLAU03, closed 2026-09-28
+        "CACC_DOC_UUID": ("id (external ID key) / ref", "account.move", ""),
+        "CGLACCT": ("line_ids/account_id/id", "account.move", ""),
+        "TGLACCT": ("(no core Odoo field - also used to widen #1 Chart of Accounts)", "account.move", ""),
+        "CDOC_DATE": ("date", "account.move", ""),
+        "CFISCYEAR": ("(no core Odoo field)", "account.move", ""),
+        "CDEBITCREDIT": ("(sign only, not mapped)", "account.move", "Used to decide whether KCBALANCE_CURRCOMP becomes a debit or a credit line"),
+        "CCOMPANY_UUID": ("(no core Odoo field)", "account.move", ""),
+        "KCBALANCE_CURRCOMP": ("line_ids/debit or line_ids/credit", "account.move", "Signed - positive splits to debit, negative (as abs) to credit"),
+        "RCBALANCE_CURRCOMP": ("(no core Odoo field)", "account.move", "Always INR on this tenant"),
+    },
+    14: {  # Fixed Assets - fin_fixedassets_analytics.svc/RPFINFXAU04, closed 2026-09-28
+        "CFXA_UUID": ("id (external ID key)", "account.asset", ""),
+        "TFXA_UUID": ("name", "account.asset", ""),
+        "CASSETCLASS": ("(no core Odoo field)", "account.asset", ""),
+        "TASSETCLASS": ("(no core Odoo field)", "account.asset", ""),
+        "CLC_STAT": ("(no core Odoo field)", "account.asset", ""),
+        "TLC_STAT": ("(no core Odoo field)", "account.asset", "e.g. \"Capitalized\""),
+    },
+    15: {  # Asset Depreciation - fin_fixedassets_analytics.svc/RPFINFXAU01, closed 2026-09-28
+        "CFXA_UUID": ("id (external ID key) / asset_id/id", "account.asset.depreciation.line", ""),
+        "KCACQUISITION_COSTS": ("(not used, not mapped)", "account.asset.depreciation.line", "Extracted but this object only writes the current depreciation position, not the full value history"),
+        "KCACCUMULATED_DEPR": ("(not used, not mapped)", "account.asset.depreciation.line", ""),
+        "KCPOSTED_DEPR": ("amount", "account.asset.depreciation.line", "Current accumulated depreciation position, not a per-period posting - see build_fixed_assets() docstring"),
+        "KCNETBOOKVALUE_END_OF": ("(not used, not mapped)", "account.asset.depreciation.line", ""),
+    },
+    43: {  # Operations - khproductionorder/OperationCollection, closed 2026-09-28
+        "ID": ("name / (part of id)", "mrp.routing.workcenter", "Deduplicated with ResourceID to the 22 distinct real operation types - see build_routing_operations() docstring"),
+        "ResourceID": ("workcenter_id/id / (part of id)", "mrp.routing.workcenter", ""),
+        "TypeCodeText": ("(filter only)", "mrp.routing.workcenter", "Only \"Make\" rows kept"),
+        "ProcessingNetDuration": ("(not used, not mapped)", "mrp.routing.workcenter", "Per-order observed duration, not a standard planned time - deliberately not used as a template cycle time"),
+        "CategoryCode": ("(filter only)", "mrp.routing.workcenter", ""),
+        "ResourceDescription": ("(not used, not mapped)", "mrp.routing.workcenter", "Same text as maintenance_equipment.csv's own name field"),
+    },
+    61: {  # Customer Price Lists - same file as #59, closed 2026-09-28 (see build_pricelists() docstring)
+        "CustomerUUID": ("partner_id/id", "product.pricelist", "Resolved via khcustomer/CustomerCollection's UUID->InternalID lookup"),
     },
     66: {  # Credit Notes (customer side) - THREE unioned sources, see build_credit_notes() docstring
         "TypeCodeText": ("(filter only)", "account.move", "khcustomerinvoicerequest: contains \"Credit Memo\"; khcustomerreturn: n/a"),

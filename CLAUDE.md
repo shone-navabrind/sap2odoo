@@ -387,11 +387,38 @@ object gets wired up, so the report keeps tracing status back to real source fil
 
 ## Known limitations
 
-- **39/67 objects built** (`python -m src.validate` is the live count) — 12 optional objects are
-  `pending_mapping` waiting on one of the remaining custom service imports, 4 of those are
-  blocked by SAP authorization (`khproject`, `khlead`, `tmserviceorder`, `tmservicerequest`), and
-  13 are `not_in_bydesign` (Engineering/PLM, Quality, and 5 of Maintenance's 6 objects — Equipment
-  itself is now built, see below — don't exist as concepts in standard ByDesign).
+- **44/67 objects built** (`python -m src.validate` is the live count) — 7 optional objects are
+  genuinely `pending_mapping` (confirmed no OData source exists anywhere on this tenant: #3 Fiscal
+  Positions, #48 Purchase Requisitions, #0 Currency Exchange Rates, #16 Attachments, #41 Routings
+  header - see below; #19 Activities is auth-blocked; #20/21/22 Opportunities and #62 Quotations
+  are code-correct but the tenant genuinely has 0 rows right now), and 13 are `not_in_bydesign`
+  (Engineering/PLM, Quality, and 5 of Maintenance's 6 objects don't exist as concepts in standard
+  ByDesign).
+- **A systematic re-check of every `pending_mapping` object against the live catalog closed 5
+  more, 2026-09-28**, after a real bug was found in `get_entity_set_all_fields()`
+  (`src/sap_client.py`): `BYD_P_*` fields (e.g. `BYD_P_TARCUR`, a currency-conversion parameter
+  present on 21 of the tenant's 48 analytics services) weren't being excluded from bulk `$select`
+  the way `P_*`/`PARA_*` fields already were, so any report carrying one 400'd on every request -
+  fixed, and three reports that had been sitting as "data source confirmed" but never actually
+  pulled came through clean: **#13 Journal Entries** (157 real G/L lines, genuinely balanced),
+  **#14 Fixed Assets** (3,279 real assets) and **#15 Asset Depreciation** (1,565 current
+  depreciation positions), all from `fin_generalledger_analytics.svc`/`fin_fixedassets_analytics
+  .svc`. Closing #13 also surfaced 6 real G/L accounts missing from #1 Chart of Accounts (used in
+  postings but not covered by the original six analytics sources) - added as a 7th source, now
+  219 accounts, zero orphaned account references from Journal Entries. Separately: **#43
+  Operations** was closed by finally transforming `khproductionorder/OperationCollection`
+  (82,859 raw rows, already extracted, flagged as a gap in #44's own docstring since it was
+  written) - deduplicated to the 22 real distinct operation-per-workcenter combinations. And
+  **#59 Pricelists' `partner_id/id`** (previously blank - the tenant's `CustomerUUID` didn't
+  match `res_partner`'s external IDs) now resolves for 225/226 pricelists via `khcustomer`'s own
+  UUID→InternalID lookup (the same pattern already used for products) - which also closes **#61
+  Customer Price Lists**, since it's the same file, now genuinely per-customer.
+  **#41 Routings** (the routing header, distinct from #43's operations) remains open - its data
+  source, "Released Execution Production Model Operation" (`SCM_REPM_OPER`), is a real report
+  definition (confirmed in the Design Data Sources catalog) but was never published as a live
+  OData service on this tenant, same situation BOMs and Equipment were in before those were
+  closed via the OData Editor - closing it needs that same self-service live-service-creation
+  work, not more searching.
 - **Team feedback caught two real gaps, both fixed 2026-09-28**: `stock_move_history.csv` was
   only reading `khgoodsandserviceacknowledgement` (137 receipts / 238 lines) when a much larger
   source, `khgoodsandactivityconfirmation`'s inventory-movement ledger (147,979 confirmations,

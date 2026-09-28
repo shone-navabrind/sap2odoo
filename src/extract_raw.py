@@ -885,6 +885,26 @@ SOURCES = [
     # not its technical ID or parent Work Center name, which is why "Equipment"/"Design"/"Master
     # Data" all returned zero matches before this one was found).
     ("sap/byd/odata/cust/v1/khequipmentresource", "EquipmentResourceCollection"),                        # 18 equipment resources
+
+    # --- Journal Entries (#13), Fixed Assets (#14), Asset Depreciation (#15). All three were
+    # "pending_mapping, data source confirmed" and never actually pulled - closed 2026-09-28
+    # once a real bug in get_entity_set_all_fields() (see src/sap_client.py) was found and
+    # fixed: BYD_P_* fields (e.g. BYD_P_TARCUR, a currency-conversion parameter present on 21
+    # of the tenant's analytics services) were not being excluded from bulk $select the way
+    # P_*/PARA_* fields already were, so any report carrying one 400'd on every request. Fields
+    # picked explicitly (not "every field") because these reports declare 100+ dimensions and
+    # >11 at once trips TOO_MANY_DRILL_DOWN_OBJECTS; the ones below are exactly what their
+    # transforms need, confirmed present with real values via direct curl first.
+    ("sap/byd/odata/fin_generalledger_analytics.svc", "RPFINGLAU03_Q0001QueryResults", {"select": [
+        "CACC_DOC_UUID", "CGLACCT", "TGLACCT", "CDOC_DATE", "CFISCYEAR", "CDEBITCREDIT", "CCOMPANY_UUID",
+        "KCBALANCE_CURRCOMP", "RCBALANCE_CURRCOMP",
+    ]}),                                                                                                 # 137 journal entry lines
+    ("sap/byd/odata/fin_fixedassets_analytics.svc", "RPFINFXAU04_Q0001QueryResults", {"select": [
+        "CFXA_UUID", "TFXA_UUID", "CASSETCLASS", "TASSETCLASS", "CLC_STAT", "TLC_STAT",
+    ]}),                                                                                                 # fixed asset master data
+    ("sap/byd/odata/fin_fixedassets_analytics.svc", "RPFINFXAU01_Q0001QueryResults", {"select": [
+        "CFXA_UUID", "KCACQUISITION_COSTS", "KCACCUMULATED_DEPR", "KCPOSTED_DEPR", "KCNETBOOKVALUE_END_OF",
+    ]}),                                                                                                 # per-asset depreciation values
 ]
 
 

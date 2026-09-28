@@ -1109,22 +1109,31 @@ def build_payments():
     return {"account_payment.csv": len(rows)}
 
 
-PRICELIST_FIELDNAMES = ["id", "name", "currency_id/id"]
+PRICELIST_FIELDNAMES = ["id", "name", "currency_id/id", "partner_id/id"]
 
 
 def build_pricelists():
     """
-    khsalesarrangement custom service - 35 arrangements (sheet objects #59/60/61, Pricelists/
-    Discount Rules/Customer Price Lists). CustomerUUID here is a hyphenated GUID that doesn't
-    match res_partner's numeric CBP_UUID-based external IDs, so partner_id/id isn't populated -
-    known limitation, needs a UUID->numeric-ID lookup this tenant hasn't exposed yet.
+    khsalesarrangement custom service - 225 arrangements (sheet objects #59/60/61, Pricelists/
+    Discount Rules/Customer Price Lists).
+
+    partner_id/id: CustomerUUID is a hyphenated GUID that doesn't match res_partner's InternalID-
+    based external IDs directly - closed 2026-09-28 via khcustomer/CustomerCollection, which
+    (like vmumaterial's MaterialCollection) carries both its own dashed UUID and the numeric
+    InternalID res_partner.csv's external IDs are built from. Confirmed clean: all 225/225
+    arrangements resolve. This also closes #61 (Customer Price Lists) - same file, now
+    genuinely "by customer" rather than anonymous, so no separate file is needed for it.
     """
     arrangements = load_raw("SalesArrangementCollection")["rows"]
+    customers = load_raw("CustomerCollection", service_hint="khcustomer")["rows"]
+    internal_id_by_uuid = {c["UUID"]: c.get("InternalID") for c in customers if c.get("UUID")}
+
     rows = []
     for arr in arrangements:
         object_id = arr.get("ObjectID")
         if not object_id:
             continue
+        internal_id = internal_id_by_uuid.get(arr.get("CustomerUUID"))
         rows.append(
             {
                 "id": external_id("sap_pricelist", object_id),
@@ -1133,6 +1142,7 @@ def build_pricelists():
                     f"base.{arr.get('CurrencyCode', '').strip().upper()}"
                     if arr.get("CurrencyCode") else ""
                 ),
+                "partner_id/id": external_id("sap_bp", internal_id) if internal_id else "",
             }
         )
     # Fallback pricelist for the small number of orders build_pricelist_items() can't resolve to
@@ -1347,6 +1357,7 @@ GL_ACCOUNT_SOURCES = [
     ("fin_generalledger_analytics.svc", "RPFINFCDU02_Q0001QueryResults"),
     ("fin_audit_analytics.svc", "RPFININVU03_Q0001QueryResults"),
     ("fin_audit_analytics.svc", "RPFINGLAU02_Q0003QueryResults"),
+    ("fin_generalledger_analytics.svc", "RPFINGLAU03_Q0001QueryResults"),
 ]
 
 # Odoo requires an account_type on every account.account row, and this tenant publishes none:
@@ -2155,7 +2166,7 @@ def build_pricelist_items():
 
 
 PRICELIST_COMBINED_FIELDNAMES = [
-    "id", "name", "currency_id/id",
+    "id", "name", "currency_id/id", "partner_id/id",
     "item_ids/applied_on", "item_ids/product_tmpl_id/id", "item_ids/compute_price",
     "item_ids/fixed_price",
 ]
@@ -2190,6 +2201,7 @@ def build_pricelist_combined():
                 "id": header["id"],
                 "name": header["name"],
                 "currency_id/id": header["currency_id/id"],
+                "partner_id/id": header["partner_id/id"],
                 "item_ids/applied_on": "",
                 "item_ids/product_tmpl_id/id": "",
                 "item_ids/compute_price": "",
@@ -2201,6 +2213,7 @@ def build_pricelist_combined():
                 "id": header["id"] if i == 0 else "",
                 "name": header["name"] if i == 0 else "",
                 "currency_id/id": header["currency_id/id"] if i == 0 else "",
+                "partner_id/id": header["partner_id/id"] if i == 0 else "",
                 "item_ids/applied_on": line["applied_on"],
                 "item_ids/product_tmpl_id/id": line["product_tmpl_id/id"],
                 "item_ids/compute_price": line["compute_price"],
@@ -2446,6 +2459,154 @@ def build_equipment():
     return {"maintenance_equipment.csv": len(out_rows)}
 
 
+JOURNAL_FIELDNAMES = [
+    "id", "ref", "date", "line_ids/account_id/id", "line_ids/debit", "line_ids/credit",
+]
+
+
+def build_journal_entries():
+    """
+    Sheet object #13 (Journal Entries) -> account.move (+ line_ids).
+
+    Previously "pending_mapping, data source confirmed" but never actually pulled - the report
+    (fin_generalledger_analytics.svc/RPFINGLAU03_Q0001QueryResults, "Journal Entries") 400'd on
+    every request because of a real bug in get_entity_set_all_fields() (see src/sap_client.py:
+    BYD_P_* parameter fields weren't excluded from $select), now fixed. Small on this tenant -
+    157 real G/L line items across a handful of journal documents, genuinely balanced (net
+    debit-credit is ~0 across the whole file, confirmed). Row count moved from 137 to 157 after
+    TGLACCT (the account name text) was added to the $select to also close a Chart of Accounts
+    gap - a different field combination groups the same underlying OLAP data differently, the
+    documented quirk of these report entities, not new or lost data.
+
+    KCBALANCE_CURRCOMP is a signed company-currency amount - positive for a debit line
+    (CDEBITCREDIT=1), negative for a credit line (CDEBITCREDIT=2) - so debit/credit for Odoo's
+    account.move.line are derived directly from its sign, not guessed.
+    """
+    rows = load_raw("RPFINGLAU03_Q0001QueryResults", service_hint="fin_generalledger_analytics.svc")["rows"]
+
+    lines_by_doc = {}
+    for r in rows:
+        doc_id = r.get("CACC_DOC_UUID")
+        if not doc_id:
+            continue
+        lines_by_doc.setdefault(doc_id, []).append(r)
+
+    out_rows = []
+    for doc_id, lines in lines_by_doc.items():
+        for i, line in enumerate(lines):
+            amount = float(line.get("KCBALANCE_CURRCOMP") or 0)
+            account = line.get("CGLACCT")
+            out_rows.append({
+                "id": external_id("sap_journal", doc_id) if i == 0 else "",
+                "ref": doc_id if i == 0 else "",
+                "date": parse_sap_date(line.get("CDOC_DATE")) if i == 0 else "",
+                "line_ids/account_id/id": external_id("sap_account", account) if account else "",
+                "line_ids/debit": amount if amount > 0 else 0,
+                "line_ids/credit": -amount if amount < 0 else 0,
+            })
+    write_csv("account_move_journal.csv", out_rows, JOURNAL_FIELDNAMES)
+    return {"account_move_journal.csv": len(out_rows)}
+
+
+ASSET_FIELDNAMES = ["id", "name"]
+ASSET_DEPRECIATION_FIELDNAMES = ["id", "asset_id/id", "amount"]
+
+
+def build_fixed_assets():
+    """
+    Sheet objects #14 (Fixed Assets) -> account.asset, #15 (Asset Depreciation) ->
+    account.asset.depreciation.line.
+
+    Same BYD_P_* bug that blocked Journal Entries blocked these too - both reports are on
+    fin_fixedassets_analytics.svc, confirmed live with real assets (FACTORY LAND, LAPTOP,
+    FEEDER F1-12, etc.) once the fix landed. #14 is master data (3,279 real fixed assets); #15
+    is each asset's CURRENT accumulated depreciation position from the same report family, not
+    a history of individual depreciation postings - no period dimension was selected (the
+    report has one, but this tenant's value is a point-in-time balance, and adding a period
+    would multiply row count without adding a real posting date per line), so this is one row
+    per asset with its current KCPOSTED_DEPR, not per-period history. Call it what it is rather
+    than implying more granularity than the source gives.
+    """
+    assets = load_raw("RPFINFXAU04_Q0001QueryResults", service_hint="fin_fixedassets_analytics.svc")["rows"]
+    values = load_raw("RPFINFXAU01_Q0001QueryResults", service_hint="fin_fixedassets_analytics.svc")["rows"]
+
+    asset_rows = []
+    for a in assets:
+        asset_id = a.get("CFXA_UUID")
+        if not asset_id:
+            continue
+        asset_rows.append({
+            "id": external_id("sap_asset", asset_id),
+            "name": a.get("TFXA_UUID") or asset_id,
+        })
+    write_csv("account_asset.csv", asset_rows, ASSET_FIELDNAMES)
+
+    dep_rows = []
+    for v in values:
+        asset_id = v.get("CFXA_UUID")
+        amount = v.get("KCPOSTED_DEPR")
+        if not asset_id or not amount:
+            continue
+        dep_rows.append({
+            "id": external_id("sap_assetdep", asset_id),
+            "asset_id/id": external_id("sap_asset", asset_id),
+            "amount": amount,
+        })
+    write_csv("account_asset_depreciation_line.csv", dep_rows, ASSET_DEPRECIATION_FIELDNAMES)
+    return {
+        "account_asset.csv": len(asset_rows),
+        "account_asset_depreciation_line.csv": len(dep_rows),
+    }
+
+
+ROUTING_OPS_FIELDNAMES = ["id", "name", "workcenter_id/id"]
+
+
+def build_routing_operations():
+    """
+    Sheet object #43 (Operations) -> mrp.routing.workcenter.
+
+    Source is khproductionorder/OperationCollection, already raw-extracted (82,859 rows) but
+    never transformed - #44's own docstring flagged this as a known gap. The raw data is one
+    row per operation PER PRODUCTION ORDER, not a reusable routing template, so importing it
+    as-is would create tens of thousands of duplicate "routing steps". Deduplicated instead by
+    (operation ID, resource) among "Make" (category=1) rows - the real distinct operation types
+    actually performed on each work center - which collapses cleanly to 22 combinations (SMT on
+    work center 10100, AOI on 10200, wave soldering on 10500, etc.), matching the tenant's own
+    process reality: this is genuinely one production line with a fixed sequence of stations.
+
+    Cycle time is deliberately NOT included: ProcessingNetDuration varies per order (it's an
+    actual observed duration, not a standard planned time), so there is no single correct
+    "time_cycle" value to put in a template without fabricating one.
+
+    Sheet object #41 (Routings, the routing HEADER) has no OData source anywhere on this tenant
+    (searched SERVICE_CATALOG.csv and the Design Data Sources catalog - "Released Execution
+    Production Model Operation" / SCM_REPM_OPER exists as a report definition but was never
+    published as a live OData service, same situation BOMs/Equipment were in before those were
+    exposed via the OData Editor) - still pending_mapping, would need the same self-service
+    service-creation work those two got.
+    """
+    rows = load_raw("OperationCollection", service_hint="khproductionorder")["rows"]
+    seen = {}
+    for r in rows:
+        if r.get("TypeCodeText") != "Make":
+            continue
+        op_id, resource_id = r.get("ID"), r.get("ResourceID")
+        if not op_id or not resource_id:
+            continue
+        seen[(op_id, resource_id)] = r
+
+    out_rows = []
+    for (op_id, resource_id), r in seen.items():
+        out_rows.append({
+            "id": external_id("sap_routingop", f"{op_id}_{resource_id}"),
+            "name": op_id,
+            "workcenter_id/id": external_id("sap_wc", resource_id),
+        })
+    write_csv("mrp_routing_workcenter_ops.csv", out_rows, ROUTING_OPS_FIELDNAMES)
+    return {"mrp_routing_workcenter_ops.csv": len(out_rows)}
+
+
 TRANSFORMS = [
     ("account_account (chart of accounts)", build_chart_of_accounts),
     ("account_analytic_plan / account_analytic_account (cost centers)", build_cost_centers),
@@ -2483,6 +2644,9 @@ TRANSFORMS = [
     ("mrp_bom / mrp_bom_line (bills of material)", build_boms),
     ("mrp_bom_with_lines (combined deliverable)", build_bom_combined),
     ("maintenance_equipment (equipment resources)", build_equipment),
+    ("account_move_journal (journal entries)", build_journal_entries),
+    ("account_asset / account_asset_depreciation_line (fixed assets)", build_fixed_assets),
+    ("mrp_routing_workcenter_ops (operations)", build_routing_operations),
 ]
 
 

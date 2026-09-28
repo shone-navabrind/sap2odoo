@@ -1,19 +1,19 @@
 entity_file,column,rows,non_blank,blank,distinct_values,flags,sample_values
-account_account.csv,id,213,213,0,30+,,sap_account_150000 | sap_account_151000 | sap_account_151001 | sap_account_151006 | sap_account_152000
-account_account.csv,code,213,213,0,30+,,150000 | 151000 | 151001 | 151006 | 152000
-account_account.csv,name,213,213,0,30+,,Accounts Payable-Domestic | Accounts Payable-International | Accounts Payable-Employees | DANLAW INC ECB | Advances From Customers
-account_account.csv,account_type,213,213,0,9,,liability_payable | asset_current | liability_current | asset_fixed | asset_receivable
-account_account.csv,reconcile,213,213,0,2,,True | False
-account_account.csv,sap__fin_costandrevenue_analytics.svc__RPFINCACU04_Q0002QueryResults__CGLACCT,213,147,66,30+,,161020 | 254906 | 300054 | 300055 | 301010
-account_account.csv,sap__fin_costandrevenue_analytics.svc__RPFINCACU04_Q0002QueryResults__TGLACCT,213,147,66,30+,,Tax Collected at Source | TCS Receivable from Supplier | Domestic Sales - | Domestic Sales - New Business | Export Sales - New Business
-account_account.csv,sap__fin_audit_analytics.svc__RPFINGLAU02_Q0002QueryResults__CGLACCT,213,13,200,13,,150000 | 151000 | 152000 | 163455 | 163456
-account_account.csv,sap__fin_audit_analytics.svc__RPFINGLAU02_Q0002QueryResults__TGLACCT,213,13,200,13,,Accounts Payable-Domestic | Accounts Payable-International | Advances From Customers | IGST-Payable-Goa-RCM | CGST-Payable-Goa-RCM
-account_account.csv,sap__fin_generalledger_analytics.svc__RPFINFXAU05_Q0001QueryResults__CGLACCT,213,40,173,30+,,201010 | 202010 | 202210 | 203000 | 203010
-account_account.csv,sap__fin_generalledger_analytics.svc__RPFINFXAU05_Q0001QueryResults__TGLACCT,213,40,173,30+,,Land - Leasehold | Buildings - Factory | Buildings - Others | Plant & Machinery - Imported | Plant & Machinery (Prod Equipment)
-account_account.csv,sap__fin_generalledger_analytics.svc__RPFINFCDU02_Q0001QueryResults__CGLACCT,213,53,160,30+,,150000 | 151000 | 151001 | 151006 | 203110
-account_account.csv,sap__fin_generalledger_analytics.svc__RPFINFCDU02_Q0001QueryResults__TGLACCT,213,53,160,30+,,Accounts Payable-Domestic | Accounts Payable-International | Accounts Payable-Employees | DANLAW INC ECB | Plant & Machinery (Other Equipment)
-account_account.csv,sap__fin_audit_analytics.svc__RPFININVU03_Q0001QueryResults__CGLACCT,213,4,209,4,,700044 | 700045 | 700046 | 700047
-account_account.csv,sap__fin_audit_analytics.svc__RPFININVU03_Q0001QueryResults__TGLACCT,213,4,209,4,,GR/IR clearing-Unbills Payable | GR/IR clearing-Purchase in Transit | GR/IR services not yet invoiced | GR/IR services not yet delivered
+account_account.csv,id,219,219,0,30+,,sap_account_150000 | sap_account_151000 | sap_account_151001 | sap_account_151006 | sap_account_152000
+account_account.csv,code,219,219,0,30+,,150000 | 151000 | 151001 | 151006 | 152000
+account_account.csv,name,219,219,0,30+,,Accounts Payable-Domestic | Accounts Payable-International | Accounts Payable-Employees | DANLAW INC ECB | Advances From Customers
+account_account.csv,account_type,219,219,0,9,,liability_payable | asset_current | liability_current | asset_fixed | asset_receivable
+account_account.csv,reconcile,219,219,0,2,,True | False
+account_account.csv,sap__fin_costandrevenue_analytics.svc__RPFINCACU04_Q0002QueryResults__CGLACCT,219,147,72,30+,,161020 | 254906 | 300054 | 300055 | 301010
+account_account.csv,sap__fin_costandrevenue_analytics.svc__RPFINCACU04_Q0002QueryResults__TGLACCT,219,147,72,30+,,Tax Collected at Source | TCS Receivable from Supplier | Domestic Sales - | Domestic Sales - New Business | Export Sales - New Business
+account_account.csv,sap__fin_audit_analytics.svc__RPFINGLAU02_Q0002QueryResults__CGLACCT,219,13,206,13,,150000 | 151000 | 152000 | 163455 | 163456
+account_account.csv,sap__fin_audit_analytics.svc__RPFINGLAU02_Q0002QueryResults__TGLACCT,219,13,206,13,,Accounts Payable-Domestic | Accounts Payable-International | Advances From Customers | IGST-Payable-Goa-RCM | CGST-Payable-Goa-RCM
+account_account.csv,sap__fin_generalledger_analytics.svc__RPFINFXAU05_Q0001QueryResults__CGLACCT,219,40,179,30+,,201010 | 202010 | 202210 | 203000 | 203010
+account_account.csv,sap__fin_generalledger_analytics.svc__RPFINFXAU05_Q0001QueryResults__TGLACCT,219,40,179,30+,,Land - Leasehold | Buildings - Factory | Buildings - Others | Plant & Machinery - Imported | Plant & Machinery (Prod Equipment)
+account_account.csv,sap__fin_generalledger_analytics.svc__RPFINFCDU02_Q0001QueryResults__CGLACCT,219,53,166,30+,,150000 | 151000 | 151001 | 151006 | 203110
+account_account.csv,sap__fin_generalledger_analytics.svc__RPFINFCDU02_Q0001QueryResults__TGLACCT,219,53,166,30+,,Accounts Payable-Domestic | Accounts Payable-International | Accounts Payable-Employees | DANLAW INC ECB | Plant & Machinery (Other Equipment)
+account_account.csv,sap__fin_audit_analytics.svc__RPFININVU03_Q0001QueryResults__CGLACCT,219,4,215,4,,700044 | 700045 | 700046 | 700047
+account_account.csv,sap__fin_audit_analytics.svc__RPFININVU03_Q0001QueryResults__TGLACCT,219,4,215,4,,GR/IR clearing-Unbills Payable | GR/IR clearing-Purchase in Transit | GR/IR services not yet invoiced | GR/IR services not yet delivered
 account_analytic_account.csv,id,2,2,0,2,,sap_pc_71000 | sap_pc_71100
 account_analytic_account.csv,name,2,2,0,2,,Danlaw Technologies India Limited | EMS-Electronic Manufacturing Service
 account_analytic_account.csv,code,2,2,0,2,,71000 | 71100
@@ -52,6 +52,22 @@ account_analytic_account_cc.csv,sap__costcentre__CostCentreCollection__ObjectID,
 account_analytic_account_cc.csv,sap__costcentre__CostCentreCollection__UUID,13,13,0,13,,00163E5F-7A72-1EE9-87A8-35E9FA7EEA67 | 00163E5F-7A72-1EE9-87A8-4B491229EAD0 | 00163E5F-7A72-1EE9-87A8-5637CD726B34 | 00163E5F-7A72-1EE9-87A8-5DF1F0EB2B45 | 00163E5F-7A72-1EE9-87A8-6949A837ABAC
 account_analytic_plan.csv,id,1,1,0,1,,sap_analytic_plan_cost_centers
 account_analytic_plan.csv,name,1,1,0,1,,SAP Cost Centers
+account_asset.csv,id,3279,3279,0,30+,,sap_asset_1_0 | sap_asset_10_0 | sap_asset_100_0 | sap_asset_1000_0 | sap_asset_1001_0
+account_asset.csv,name,3279,3279,0,30+,,FACTORY LAND - L15 | CONSTRUCTION OF VEHICLE PARKING AR | FEEDER F1-12 - 12MM | LAPTOP | DESKTOP
+account_asset.csv,sap__fin_fixedassets_analytics.svc__RPFINFXAU04_Q0001QueryResults__CASSETCLASS,3279,3279,0,25,,Z210 | 2040 | Z240 | 2060 | 2070
+account_asset.csv,sap__fin_fixedassets_analytics.svc__RPFINFXAU04_Q0001QueryResults__CFXA_UUID,3279,3279,0,30+,,1-0 | 10-0 | 100-0 | 1000-0 | 1001-0
+account_asset.csv,sap__fin_fixedassets_analytics.svc__RPFINFXAU04_Q0001QueryResults__CLC_STAT,3279,3279,0,2,,3 | 4
+account_asset.csv,sap__fin_fixedassets_analytics.svc__RPFINFXAU04_Q0001QueryResults__TASSETCLASS,3279,3279,0,25,,Land - Leasehold | Building Factory | Plant & Machinery (Prod Equipment) | Computers | Furniture and Fixtures
+account_asset.csv,sap__fin_fixedassets_analytics.svc__RPFINFXAU04_Q0001QueryResults__TFXA_UUID,3279,3279,0,30+,,FACTORY LAND - L15 | CONSTRUCTION OF VEHICLE PARKING AR | FEEDER F1-12 - 12MM | LAPTOP | DESKTOP
+account_asset.csv,sap__fin_fixedassets_analytics.svc__RPFINFXAU04_Q0001QueryResults__TLC_STAT,3279,3279,0,2,,Capitalized | Retired
+account_asset_depreciation_line.csv,id,1565,1565,0,30+,,sap_assetdep_1_0 | sap_assetdep_10_0 | sap_assetdep_100_0 | sap_assetdep_1000_0 | sap_assetdep_1001_0
+account_asset_depreciation_line.csv,asset_id/id,1565,1565,0,30+,,sap_asset_1_0 | sap_asset_10_0 | sap_asset_100_0 | sap_asset_1000_0 | sap_asset_1001_0
+account_asset_depreciation_line.csv,amount,1565,1565,0,30+,,0.000000 | -1101.000000 | -2903.000000 | -21606.000000 | -99506.000000
+account_asset_depreciation_line.csv,sap__fin_fixedassets_analytics.svc__RPFINFXAU01_Q0001QueryResults__CFXA_UUID,1565,1565,0,30+,,1-0 | 10-0 | 100-0 | 1000-0 | 1001-0
+account_asset_depreciation_line.csv,sap__fin_fixedassets_analytics.svc__RPFINFXAU01_Q0001QueryResults__KCACCUMULATED_DEPR,1565,1565,0,30+,,-1535820.000000 | -67724.000000 | -51084.000000 | -126987.000000 | -46581.000000
+account_asset_depreciation_line.csv,sap__fin_fixedassets_analytics.svc__RPFINFXAU01_Q0001QueryResults__KCACQUISITION_COSTS,1565,1565,0,30+,,0.000000 | -0.160000 | 40000.000000 | -0.440000 | 5670.000000
+account_asset_depreciation_line.csv,sap__fin_fixedassets_analytics.svc__RPFINFXAU01_Q0001QueryResults__KCNETBOOKVALUE_END_OF,1565,1565,0,30+,,0.000000 | 870.000000 | 13832.000000 | 316729.000000 | 249937.000000
+account_asset_depreciation_line.csv,sap__fin_fixedassets_analytics.svc__RPFINFXAU01_Q0001QueryResults__KCPOSTED_DEPR,1565,1565,0,30+,,0.000000 | -1101.000000 | -2903.000000 | -21606.000000 | -99506.000000
 account_bank_statement.csv,id,404,404,0,30+,,sap_bstmt_00163E5F7A721ED98ADF8681D9C1641A | sap_bstmt_00163E5F7A721ED98ADF86C64DEF641A | sap_bstmt_00163E5F7A721EE98CEC3697111C3AEF | sap_bstmt_00163E876A901ED9B6BA57B9C6AE76B5 | sap_bstmt_00163E876A901ED9B6F0370602169FF9
 account_bank_statement.csv,name,404,404,0,30+,,0 | 1 | 30 | 31 | 32
 account_bank_statement.csv,date,404,404,0,30+,,2019-01-31 | 2019-09-17 | 2019-09-19 | 2019-09-28 | 2019-09-30
@@ -315,6 +331,21 @@ account_move_customer_invoice_line.csv,sap__khcustomerinvoice__ItemBusinessTrans
 account_move_customer_invoice_line.csv,sap__khcustomerinvoice__ItemBusinessTransactionDocumentReferenceCollection__RelationshipRoleCodeText,35514,35514,0,1,,Predecessor
 account_move_customer_invoice_line.csv,sap__khcustomerinvoice__ItemBusinessTransactionDocumentReferenceCollection__TypeCode,35514,35514,0,7,JSON_ARRAY,"[""114"", ""73"", ""001""] | 29 | [""32"", ""114"", ""28""] | [""114"", ""73""] | [""32"", ""28"", ""114""]"
 account_move_customer_invoice_line.csv,sap__khcustomerinvoice__ItemBusinessTransactionDocumentReferenceCollection__TypeCodeText,35514,35514,0,7,JSON_ARRAY,"[""Sales Order"", ""Outbound Delivery"", ""Purchase Order""] | Customer Invoice Request | [""Customer Return"", ""Sales Order"", ""Customer Invoice""] | [""Sales Order"", ""Outbound Delivery""] | [""Customer Return"", ""Customer Invoice"", ""Sales Order""]"
+account_move_journal.csv,id,157,73,84,30+,,sap_journal_110000000649 | sap_journal_110000000651 | sap_journal_110000000652 | sap_journal_110000000653 | sap_journal_200000003846
+account_move_journal.csv,ref,157,73,84,30+,,110000000649 | 110000000651 | 110000000652 | 110000000653 | 200000003846
+account_move_journal.csv,date,157,73,84,10,,2026-07-16 | 2026-09-28 | 2026-09-07 | 2026-09-10 | 2026-09-03
+account_move_journal.csv,line_ids/account_id/id,157,157,0,20,,sap_account_151000 | sap_account_252500 | sap_account_700023 | sap_account_150000 | sap_account_254756
+account_move_journal.csv,line_ids/debit,157,157,0,30+,,5672328.0 | 0 | 77982.0 | 137640.67 | 366.77
+account_move_journal.csv,line_ids/credit,157,157,0,30+,,0 | 5668812.0 | 81498.0 | 136300.18 | 1707.26
+account_move_journal.csv,sap__fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults__CACC_DOC_UUID,157,73,84,30+,,110000000649 | 110000000651 | 110000000652 | 110000000653 | 200000003846
+account_move_journal.csv,sap__fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults__CCOMPANY_UUID,157,73,84,1,,70000
+account_move_journal.csv,sap__fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults__CDEBITCREDIT,157,73,84,2,,2 | 1
+account_move_journal.csv,sap__fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults__CDOC_DATE,157,73,84,10,,2026-07-16 00:00:00 | 2026-09-28 00:00:00 | 2026-09-07 00:00:00 | 2026-09-10 00:00:00 | 2026-09-03 00:00:00
+account_move_journal.csv,sap__fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults__CFISCYEAR,157,73,84,1,,2027
+account_move_journal.csv,sap__fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults__CGLACCT,157,73,84,9,,700023 | 403000 | 700045 | 245005 | 241927
+account_move_journal.csv,sap__fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults__KCBALANCE_CURRCOMP,157,73,84,30+,,-81498 | -1707.26 | -3870.16 | -5143.67 | 3279.66
+account_move_journal.csv,sap__fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults__RCBALANCE_CURRCOMP,157,73,84,1,,INR
+account_move_journal.csv,sap__fin_generalledger_analytics.svc__RPFINGLAU03_Q0001QueryResults__TGLACCT,157,73,84,9,,Gain/Loss from Realized Exchange Rate Differences | Tools – Consumption NRE | GR/IR clearing-Purchase in Transit | State Bank of India-Bank Receipt | Goods WIP
 account_move_open_customer.csv,id,846,846,0,30+,,sap_openinv_94 | sap_openinv_1347 | sap_openinv_2478 | sap_openinv_2897 | sap_openinv_3031
 account_move_open_customer.csv,name,846,846,0,30+,,94 | 1347 | 2478 | 2897 | 3031
 account_move_open_customer.csv,partner_id/id,846,846,0,22,,sap_bp_1000020 | sap_bp_1113761 | sap_bp_1116013 | sap_bp_1121595 | sap_bp_1121709
@@ -975,6 +1006,9 @@ mrp_production_history.csv,sap__khproductionorder__OperationCollection__Resource
 mrp_production_history.csv,sap__khproductionorder__OperationCollection__TypeCode,9412,9412,0,30+,JSON_ARRAY,"[""10"", ""1"", ""1"", ""1"", ""1"", ""1"", ""1"", ""1"", ""1"", ""8""] | [""10"", ""1"", ""1"", ""1"", ""1"", ""1"", ""1"", ""1"", ""8""] | [""10"", ""1"", ""1"", ""1"", ""8""] | [""10"", ""1"", ""1"", ""1"", ""1"", ""1"", ""8""] | [""10"", ""1"", ""1"", ""1"", ""1"", ""1"", ""1"", ""1"", ""1"", ""1"", ""8""]"
 mrp_production_history.csv,sap__khproductionorder__OperationCollection__TypeCodeText,9412,9412,0,30+,JSON_ARRAY,"[""Supply"", ""Make"", ""Make"", ""Make"", ""Make"", ""Make"", ""Make"", ""Make"", ""Make"", ""Check""] | [""Supply"", ""Make"", ""Make"", ""Make"", ""Make"", ""Make"", ""Make"", ""Make"", ""Check""] | [""Supply"", ""Make"", ""Make"", ""Make"", ""Check""] | [""Supply"", ""Make"", ""Make"", ""Make"", ""Make"", ""Make"", ""Check""] | [""Supply"", ""Make"", ""Make"", ""Make"", ""Make"", ""Make"", ""Make"", ""Make"", ""Make"", ""Make"", ""Check""]"
 mrp_production_history.csv,sap__khproductionorder__OperationCollection__UUID,9412,9412,0,30+,JSON_ARRAY,"[""00163E5F-7A72-1ED9-8AF0-6F5041695BE0"", ""00163E5F-7A72-1ED9-8AF0-6F504169DBE0"", ""00163E5F-7A72-1ED9-8AF0-6F50416B7BE0"", ""00163E5F-7A72-1ED9-8AF0-6F50416C3BE0"", ""00163E5F-7A72-1ED9-8AF0-6F50416CFBE0"", ""00163E5F-7A72-1ED9-8AF0-6F50416DBBE0"", ""00163E5F-7A72-1ED9-8AF0-6F50416E7BE0"", ""00163E5F-7A72-1ED9-8AF0-6F50416F3BE0"", ""00163E5F-7A72-1ED9-8AF0-6F50416FFBE0"", ""00163E5F-7A72-1ED9-8AF0-6F504170BBE0""] | [""00163E5F-7A72-1ED9-8AF0-F6A3FB079EA9"", ""00163E5F-7A72-1ED9-8AF0-F6A3FB081EA9"", ""00163E5F-7A72-1ED9-8AF0-F6A3FB0F5EA9"", ""00163E5F-7A72-1ED9-8AF0-F6A3FB101EA9"", ""00163E5F-7A72-1ED9-8AF0-F6A3FB10DEA9"", ""00163E5F-7A72-1ED9-8AF0-F6A3FB119EA9"", ""00163E5F-7A72-1ED9-8AF0-F6A3FB125EA9"", ""00163E5F-7A72-1ED9-8AF0-F6A3FB131EA9"", ""00163E5F-7A72-1ED9-8AF0-F6A3FB13DEA9""] | [""00163E5F-7A72-1ED9-8B84-9DEBBC5B481C"", ""00163E5F-7A72-1ED9-8B84-9DEBBC5BC81C"", ""00163E5F-7A72-1ED9-8B84-9DEBBC5DA81C"", ""00163E5F-7A72-1ED9-8B84-9DEBBC5E681C"", ""00163E5F-7A72-1ED9-8B84-9DEBBC5F281C"", ""00163E5F-7A72-1ED9-8B84-9DEBBC5FE81C"", ""00163E5F-7A72-1ED9-8B84-9DEBBC60A81C"", ""00163E5F-7A72-1ED9-8B84-9DEBBC61681C"", ""00163E5F-7A72-1ED9-8B84-9DEBBC62281C"", ""00163E5F-7A72-1ED9-8B84-9DEBBC62E81C""] | [""00163E5F-7A72-1ED9-8B84-D87EB262C8F4"", ""00163E5F-7A72-1ED9-8B84-D87EB26348F4"", ""00163E5F-7A72-1ED9-8B84-D87EB26A68F4"", ""00163E5F-7A72-1ED9-8B84-D87EB26B28F4"", ""00163E5F-7A72-1ED9-8B84-D87EB26BE8F4"", ""00163E5F-7A72-1ED9-8B84-D87EB26CA8F4"", ""00163E5F-7A72-1ED9-8B84-D87EB26D68F4"", ""00163E5F-7A72-1ED9-8B84-D87EB26E28F4"", ""00163E5F-7A72-1ED9-8B84-D87EB26EE8F4""] | [""00163E5F-7A72-1ED9-8B84-E445071F0948"", ""00163E5F-7A72-1ED9-8B84-E445071F8948"", ""00163E5F-7A72-1ED9-8B84-E4450726C948"", ""00163E5F-7A72-1ED9-8B84-E44507278948"", ""00163E5F-7A72-1ED9-8B84-E44507284948"", ""00163E5F-7A72-1ED9-8B84-E44507290948"", ""00163E5F-7A72-1ED9-8B84-E4450729C948"", ""00163E5F-7A72-1ED9-8B84-E445072A8948"", ""00163E5F-7A72-1ED9-8B84-E445072B4948""]"
+mrp_routing_workcenter_ops.csv,id,22,22,0,22,,sap_routingop_SMT_10100 | sap_routingop_AOI_10200 | sap_routingop_THSOLD_10600 | sap_routingop_ICT_11700 | sap_routingop_TESTING_11100
+mrp_routing_workcenter_ops.csv,name,22,22,0,16,,SMT | AOI | THSOLD | ICT | TESTING
+mrp_routing_workcenter_ops.csv,workcenter_id/id,22,22,0,16,,sap_wc_10100 | sap_wc_10200 | sap_wc_10600 | sap_wc_11700 | sap_wc_11100
 mrp_workcenter.csv,id,17,17,0,17,,sap_wc_10100 | sap_wc_10200 | sap_wc_10600 | sap_wc_11700 | sap_wc_11100
 mrp_workcenter.csv,name,17,17,0,17,,"SMT LINES WITH PRINTER, SPI, PLACEMENT & | AUTOMATED INSPECTION USING INLINE OR OFF | MANUAL SOLDERING | MANUAL CONFORMAL COATING | FUNCTIONAL TESTING & PROGRAMMING"
 mrp_workcenter.csv,code,17,17,0,17,,10100 | 10200 | 10600 | 11700 | 11100
@@ -1011,6 +1045,7 @@ product_category.csv,sap__khserviceproduct__ProductCategoryCollection__ProductCa
 product_pricelist.csv,id,226,226,0,30+,,sap_pricelist_00163E5F7A721ED9888BBD7687F2F460 | sap_pricelist_00163E5F7A721ED9888BBD7687F31460 | sap_pricelist_00163E5F7A721ED9888BBD7687F33460 | sap_pricelist_00163E5F7A721ED9888BBD7687F35460 | sap_pricelist_00163E5F7A721ED9888BBD7687F37460
 product_pricelist.csv,name,226,226,0,30+,,SAP Sales Arrangement 00163E5F7A72 | SAP Sales Arrangement 00163E876ABA | SAP Sales Arrangement 00163E876AD0 | SAP Sales Arrangement 00163E876AF1 | SAP Sales Arrangement 00163EA0C8E4
 product_pricelist.csv,currency_id/id,226,225,1,5,,base.INR | base.USD | base.GBP | base.EUR | base.JPY
+product_pricelist.csv,partner_id/id,226,225,1,30+,,sap_bp_1122824 | sap_bp_1122338 | sap_bp_1122233 | sap_bp_1121778 | sap_bp_1121709
 product_pricelist.csv,sap__khsalesarrangement__SalesArrangementCollection__CompleteDeliveryRequestedIndicator,226,225,1,2,,False | True
 product_pricelist.csv,sap__khsalesarrangement__SalesArrangementCollection__CreationDateTime,226,225,1,30+,,2019-01-25 04:58:58 | 2019-01-25 04:59:18 | 2019-01-25 04:59:17 | 2019-02-05 19:28:28 | 2019-02-06 06:21:50
 product_pricelist.csv,sap__khsalesarrangement__SalesArrangementCollection__CurrencyCode,226,224,2,5,,INR | USD | GBP | EUR | JPY
@@ -1043,6 +1078,7 @@ product_pricelist_item_discount.csv,fixed_price,1109,1109,0,30+,,305.00 | 290.45
 product_pricelist_with_items.csv,id,1274,226,1048,30+,,sap_pricelist_00163E5F7A721ED9888BBD7687F2F460 | sap_pricelist_00163E5F7A721ED9888BBD7687F31460 | sap_pricelist_00163E5F7A721ED9888BBD7687F33460 | sap_pricelist_00163E5F7A721ED9888BBD7687F35460 | sap_pricelist_00163E5F7A721ED9888BBD7687F37460
 product_pricelist_with_items.csv,name,1274,226,1048,30+,,SAP Sales Arrangement 00163E5F7A72 | SAP Sales Arrangement 00163E876ABA | SAP Sales Arrangement 00163E876AD0 | SAP Sales Arrangement 00163E876AF1 | SAP Sales Arrangement 00163EA0C8E4
 product_pricelist_with_items.csv,currency_id/id,1274,225,1049,5,,base.INR | base.USD | base.GBP | base.EUR | base.JPY
+product_pricelist_with_items.csv,partner_id/id,1274,225,1049,30+,,sap_bp_1122824 | sap_bp_1122338 | sap_bp_1122233 | sap_bp_1121778 | sap_bp_1121709
 product_pricelist_with_items.csv,item_ids/applied_on,1274,1109,165,1,,1_product
 product_pricelist_with_items.csv,item_ids/product_tmpl_id/id,1274,1109,165,30+,,sap_prod_10007_8A00W | sap_prod_10030_18475 | sap_prod_10107_8A00W | sap_prod_10130_18475 | sap_prod_IJ23MOTH601
 product_pricelist_with_items.csv,item_ids/compute_price,1274,1109,165,1,,fixed

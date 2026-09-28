@@ -35,7 +35,7 @@ _ENTITY_SET_RE = re.compile(r'<EntitySet Name="([^"]+)"[^>]*EntityType="[^"]*\.(
 # content) returns "400 Bad Request" the moment it's in $select, even though every other field
 # on the same entity works fine. Binary/stream content needs its own dedicated $value request
 # per row, not a bulk list query - out of scope here, so these fields are excluded from $select
-# the same way P_*/PARA_* query-parameter fields already are, rather than failing the whole
+# the same way P_*/PARA_*/BYD_P_* query-parameter fields already are, rather than failing the whole
 # entity set over one field that could never have worked this way.
 _UNSELECTABLE_TYPES = {"Edm.Binary", "Edm.Stream"}
 
@@ -271,7 +271,8 @@ class SAPODataClient:
         excluded = ({"TotaledProperties", "ID"} if is_olap_entity else set()) | unselectable
         fields = [
             f for f in all_fields
-            if not f.startswith("P_") and not f.startswith("PARA_") and f not in excluded
+            if not f.startswith("P_") and not f.startswith("PARA_") and not f.startswith("BYD_P_")
+            and f not in excluded
         ]
 
         if not fields:

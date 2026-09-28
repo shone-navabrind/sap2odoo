@@ -93,6 +93,7 @@ ODOO_KEY = {
     ("khprofitcentre", "ProfitCentreCollection"): ("sap_pc", "ID"),
     ("costcentre", "CostCentreCollection"): ("sap_cost_center", "UUID"),
     ("khequipmentresource", "EquipmentResourceCollection"): ("sap_equip", "ObjectID"),
+    ("fin_fixedassets_analytics.svc", "RPFINFXAU04_Q0001QueryResults"): ("sap_asset", "CFXA_UUID"),
 }
 
 # Odoo CSV filename -> root SAP records that create its rows.  This is deliberately separate
@@ -156,6 +157,9 @@ MODEL_ROOTS = {
     "stock_move_history.csv": [("khgoodsandactivityconfirmation", "InventoryChangeItemCollection", "sap_move", ("ObjectID",))],
     "uom_uom.csv": [("vmumaterial", "MaterialBaseMeasureUnitCodeCollection", "sap_uom", ("Code",))],
     "maintenance_equipment.csv": [("khequipmentresource", "EquipmentResourceCollection", "sap_equip", ("ObjectID",))],
+    "account_move_journal.csv": [("fin_generalledger_analytics.svc", "RPFINGLAU03_Q0001QueryResults", "sap_journal", ("CACC_DOC_UUID",))],
+    "account_asset.csv": [("fin_fixedassets_analytics.svc", "RPFINFXAU04_Q0001QueryResults", "sap_asset", ("CFXA_UUID",))],
+    "account_asset_depreciation_line.csv": [("fin_fixedassets_analytics.svc", "RPFINFXAU01_Q0001QueryResults", "sap_assetdep", ("CFXA_UUID",))],
 }
 
 
