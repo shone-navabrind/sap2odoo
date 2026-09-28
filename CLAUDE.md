@@ -427,10 +427,17 @@ object gets wired up, so the report keeps tracing status back to real source fil
   being true and nobody re-checked. Now rebuilt from it: 260,682 rows (paired issue+receipt legs
   on the same confirmation+material merged into real two-sided moves; everything else uses
   Odoo's own virtual Suppliers/Customers/Inventory-adjustment location for the unattached side).
-  The same source's `IdentifiedStockCollection` (51,980 real batch records, joinable to a
-  product via `InventoryChangeItemCollection`) closed **#30 Lot/Serial Numbers** too, previously
-  blocked because the only other candidate source had no product reference at all — see
-  `build_stock_moves()`/`build_stock_lots()` in `src/transform_odoo.py`.
+  That source's embedded `IdentifiedStockCollection` node initially closed **#30 Lot/Serial
+  Numbers** too, previously blocked because the only other candidate source had no product
+  reference at all. Then, after the user separately asked where production/expiration dates
+  were, `stock_lot.csv` was rebuilt again (2026-09-28): the embedded node only exposes 4 fields
+  (no dates at all - confirmed via live `$metadata`), because `IdentifiedStock` is actually its
+  own full standalone Business Object with `ExpirationDateTime` and `ProductionDateTime`, never
+  exposed as OData until built directly via the OData Editor (service `khbatch`, Work Center
+  View `MMA_PHYSICALINVENTORY` - the third object closed this way, after `khbomvariant` and
+  `khequipmentresource`). 52,101 real batch records, 51,864 (99.5%) with a real production date,
+  1,743 (3.3%) with a real expiration date - most materials on this tenant simply aren't
+  expiry-tracked. See `build_stock_moves()`/`build_stock_lots()` in `src/transform_odoo.py`.
 - **Seven `*AttachmentFolderCollection`/`AttachmentCollection` entity sets return 400 Bad Request
   no matter what's queried** (confirmed: single field, no field, and a parent-scoped `$filter` all
   fail identically) — see "Entity sets that exist but can't be queried at all" in

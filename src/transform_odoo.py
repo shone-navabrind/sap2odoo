@@ -1996,7 +1996,7 @@ def build_stock_moves():
     return {"stock_move_history.csv": len(rows)}
 
 
-LOT_FIELDNAMES = ["id", "name", "product_id/id", "note"]
+LOT_FIELDNAMES = ["id", "name", "product_id/id", "production_date", "expiration_date"]
 
 
 def build_stock_lots():
@@ -2007,55 +2007,36 @@ def build_stock_lots():
     ProductionLotCollection) exposes just ObjectID + ID, no product reference at all, so
     nothing built from it could pass Odoo's mandatory product_id on stock.lot.
 
-    khgoodsandactivityconfirmation's IdentifiedStockCollection (51,980 real batch/specified-
-    stock records) fixes this: InventoryChangeItemCollection links each movement to an
-    IdentifiedStockUUID AND carries that same row's own MaterialUUID, and confirmed clean -
-    every IdentifiedStockUUID across 185,158 linked movement rows maps to exactly one material,
-    never more than one. That gives every batch a real, unambiguous product.
+    Closed 2026-09-25 via khgoodsandactivityconfirmation's embedded IdentifiedStock node
+    (joined through InventoryChangeItemCollection for a product), then rebuilt 2026-09-28 after
+    the user asked where production/expiration dates were: that embedded node only exposes 4
+    fields (no dates at all - confirmed via live $metadata), because it's a thin projection of
+    IdentifiedStock's real, standalone Business Object, which DOES carry ExpirationDateTime and
+    ProductionDateTime - never exposed as OData until built directly via the OData Editor
+    (service khbatch, Work Center View MMA_PHYSICALINVENTORY - same path as khbomvariant/
+    khequipmentresource). Confirmed live: 52,101 real batch records, 51,864 (99.5%) with a real
+    production date, 1,743 (3.3%) with a real expiration date - most materials on this tenant
+    simply aren't expiry-tracked, so a blank expiration_date is real data, not a gap.
 
-    No created-date/created-by field exists anywhere for this entity - confirmed via live
-    $metadata, IdentifiedStock declares exactly 4 properties (ObjectID, ID,
-    IdentifiedStockTypeCode, IdentifiedStockTypeCodeText), nothing else. `note` instead carries
-    a derived "first seen" date: the earliest CreationDateTime among the confirmation documents
-    that reference this batch - not the same thing as when the batch record itself was created
-    (SAP doesn't track that), so it is written into `note` rather than a real date field, to
-    avoid implying a guarantee the source data doesn't back up.
+    MaterialUUID lives directly on this entity now, so the InventoryChangeItemCollection join
+    that build_stock_moves() still needs (no MaterialUUID there) is no longer needed here.
     """
-    identified_stocks = {s["ObjectID"]: s for s in load_raw(
-        "IdentifiedStockCollection", service_hint="khgoodsandactivityconfirmation")["rows"] if s.get("ObjectID")}
-    items = load_raw("InventoryChangeItemCollection", service_hint="khgoodsandactivityconfirmation")["rows"]
-    confirmations = {c["ObjectID"]: c for c in load_raw(
-        "GoodsAndActivityConfirmationCollection", service_hint="khgoodsandactivityconfirmation")["rows"] if c.get("ObjectID")}
+    stocks = load_raw("IdentifiedStockCollection", service_hint="khbatch")["rows"]
     materials = load_raw("MaterialCollection", service_hint="vmumaterial")["rows"]
     internal_id_by_uuid = {m["UUID"]: m.get("InternalID") for m in materials if m.get("UUID")}
 
-    material_by_stock = {}
-    earliest_date_by_stock = {}
-    for item in items:
-        stock_uuid = item.get("IdentifiedStockUUID")
-        if not stock_uuid:
-            continue
-        if stock_uuid not in material_by_stock:
-            material_by_stock[stock_uuid] = item.get("MaterialUUID")
-        confirmation = confirmations.get(item.get("ParentObjectID"))
-        raw_date = confirmation.get("CreationDateTime") if confirmation else None
-        if raw_date:
-            parsed = parse_sap_date(raw_date)
-            if parsed and (stock_uuid not in earliest_date_by_stock or parsed < earliest_date_by_stock[stock_uuid]):
-                earliest_date_by_stock[stock_uuid] = parsed
-
     rows = []
-    for stock_uuid, material_uuid in material_by_stock.items():
-        stock = identified_stocks.get(stock_uuid.replace("-", "").upper())
-        internal_id = internal_id_by_uuid.get(material_uuid)
-        if not stock or not internal_id:
+    for stock in stocks:
+        object_id = stock.get("ObjectID")
+        internal_id = internal_id_by_uuid.get(stock.get("MaterialUUID"))
+        if not object_id or not internal_id:
             continue
-        first_seen = earliest_date_by_stock.get(stock_uuid)
         rows.append({
-            "id": external_id("sap_lot", stock_uuid),
-            "note": f"First seen in a stock movement on {first_seen}" if first_seen else "",
+            "id": external_id("sap_lot", object_id),
             "name": stock.get("ID", ""),
             "product_id/id": external_id("sap_prod", internal_id),
+            "production_date": parse_sap_date(stock.get("ProductionDateTime")) or "",
+            "expiration_date": parse_sap_date(stock.get("ExpirationDateTime")) or "",
         })
     write_csv("stock_lot.csv", rows, LOT_FIELDNAMES)
     return {"stock_lot.csv": len(rows)}

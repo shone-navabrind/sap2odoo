@@ -905,6 +905,14 @@ SOURCES = [
     ("sap/byd/odata/fin_fixedassets_analytics.svc", "RPFINFXAU01_Q0001QueryResults", {"select": [
         "CFXA_UUID", "KCACQUISITION_COSTS", "KCACCUMULATED_DEPR", "KCPOSTED_DEPR", "KCNETBOOKVALUE_END_OF",
     ]}),                                                                                                 # per-asset depreciation values
+
+    # --- khbatch: real production/expiration dates for stock_lot.csv (#30), closed 2026-09-28
+    # after the user asked where these fields were. The thin IdentifiedStock node embedded in
+    # khgoodsandactivityconfirmation only exposes 4 fields (no dates at all); IdentifiedStock is
+    # actually its own full standalone Business Object with ExpirationDateTime and
+    # ProductionDateTime, never exposed as OData until built directly via the OData Editor - same
+    # path as khbomvariant/khequipmentresource. Work Center View MMA_PHYSICALINVENTORY.
+    ("sap/byd/odata/cust/v1/khbatch", "IdentifiedStockCollection"),                                      # 52,101 real batch records
 ]
 
 

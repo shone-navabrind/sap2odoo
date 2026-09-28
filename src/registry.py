@@ -163,18 +163,18 @@ REGISTRY = [
     ObjectSpec(29, "Inventory", "Master", "UOM", True, "uom.uom", "uom_uom", "built", "REAL DATA: vmumaterial's MaterialBaseMeasureUnitCodeCollection codelist, already-imported service, no new upload needed - 23 units",
                raw_sources=("vmumaterial__MaterialBaseMeasureUnitCodeCollection.json",)),
     ObjectSpec(30, "Inventory", "Master", "Lot/Serial Numbers", False, "stock.lot", "stock_lot", "built",
-               "REAL DATA, closed 2026-09-28: khproductionorder/ProductionLotCollection (the originally investigated source) "
-               "really is a dead end - ObjectID + ID only, no product reference. Built instead from "
-               "khgoodsandactivityconfirmation/IdentifiedStockCollection (51,980 real batch records), joined to a product "
-               "via InventoryChangeItemCollection, which links every IdentifiedStockUUID to a MaterialUUID - confirmed "
-               "clean, every one of the 185,158 linked movement rows maps to exactly one material. 51,077 lots written, "
-               "all with a resolved product_id. No created-date/created-by field exists anywhere for this entity "
-               "(confirmed via live $metadata - IdentifiedStock declares exactly 4 properties, nothing else); `note` "
-               "instead carries a derived 'first seen' date (earliest confirmation CreationDateTime referencing that "
-               "batch), explicitly labeled as derived rather than a real SAP creation date.",
-               raw_sources=("khgoodsandactivityconfirmation__IdentifiedStockCollection.json",
-                            "khgoodsandactivityconfirmation__InventoryChangeItemCollection.json",
-                            "khgoodsandactivityconfirmation__GoodsAndActivityConfirmationCollection.json")),
+               "REAL DATA. khproductionorder/ProductionLotCollection (the originally investigated source) really is a "
+               "dead end - ObjectID + ID only, no product reference. Closed 2026-09-25 via khgoodsandactivityconfirmation's "
+               "embedded IdentifiedStock node (only 4 fields - no dates at all, confirmed via live $metadata), joined to "
+               "a product via InventoryChangeItemCollection. Rebuilt 2026-09-28 after the user asked where production/"
+               "expiration dates were: IdentifiedStock is actually its own full standalone Business Object with "
+               "ExpirationDateTime and ProductionDateTime, never exposed as OData until built directly via the OData "
+               "Editor (service khbatch, Work Center View MMA_PHYSICALINVENTORY - same self-service path as "
+               "khbomvariant/khequipmentresource). 52,101 real batch records, 51,864 (99.5%) with a real production "
+               "date, 1,743 (3.3%) with a real expiration date - most materials on this tenant aren't expiry-tracked, "
+               "so a blank expiration_date is real data, not a gap. MaterialUUID lives directly on this entity, so no "
+               "join through InventoryChangeItemCollection is needed any more for this object.",
+               raw_sources=("khbatch__IdentifiedStockCollection.json",)),
     ObjectSpec(31, "Inventory", "Transaction", "Inventory Adjustments", False, "stock.quant", "stock_quant_adjustment", "built",
                "REAL DATA: 'Inventory Balance' (SCMINBU03) on scm_physicalinventory_analytics.svc, grouped by material x "
                "logistics area x site - exactly Odoo's stock.quant grain. 1805 on-hand balances; location_id resolves to the "

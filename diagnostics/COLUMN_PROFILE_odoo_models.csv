@@ -2386,10 +2386,17 @@ stock_location.csv,sap__khlocation__LocationCollection__TimeZoneCodeText,19,1,18
 stock_location.csv,sap__khlocation__LocationCollection__UUID,19,1,18,1,,00163E5F-7A72-1EE9-87A8-E185FB7F8E14
 stock_location.csv,sap__khlocation__LocationCollection__WorkingDayCalendarCode,19,1,18,1,,Z98Z
 stock_location.csv,sap__khlocation__LocationCollection__WorkingDayCalendarCodeText,19,1,18,1,,India with 6 working days
-stock_lot.csv,id,51077,51077,0,30+,,sap_lot_00163E5F_7A72_1EE9_8AF1_E0657D480331 | sap_lot_00163E5F_7A72_1ED9_8AF1_2BEFCA469FBF | sap_lot_00163E5F_7A72_1ED9_8B87_11FE4F3213A5 | sap_lot_00163E5F_7A72_1EE9_8B8B_227150BBC767 | sap_lot_00163E5F_7A72_1EE9_8B8B_2E52C6EEC7B9
-stock_lot.csv,name,51077,51077,0,30+,,2 | 1 | 4 | 10 | 11
-stock_lot.csv,product_id/id,51077,51077,0,30+,,sap_prod_LF90044 | sap_prod_730511 | sap_prod_19239000048 | sap_prod_10130_18475 | sap_prod_LF90286
-stock_lot.csv,note,51077,51077,0,30+,,First seen in a stock movement on 2019-02-08 | First seen in a stock movement on 2019-02-09 | First seen in a stock movement on 2019-02-11 | First seen in a stock movement on 2019-02-12 | First seen in a stock movement on 2019-02-13
+stock_lot.csv,id,52101,52101,0,30+,,sap_lot_00163E5F7A721ED98AF12BEFCA469FBF | sap_lot_00163E5F7A721ED98B8711FE4F3213A5 | sap_lot_00163E5F7A721ED98BBC8C60DA0BDD89 | sap_lot_00163E5F7A721ED98BD330A4A9FF4BC6 | sap_lot_00163E5F7A721ED98BD52FC07B58D4C4
+stock_lot.csv,name,52101,52101,0,30+,,1 | 4 | 12 | 17 | 18
+stock_lot.csv,product_id/id,52101,52101,0,30+,,sap_prod_730511 | sap_prod_19239000048 | sap_prod_10130_18475 | sap_prod_LF90286 | sap_prod_10030_18475
+stock_lot.csv,production_date,52101,51864,237,30+,,2019-02-08 | 2019-02-09 | 2019-02-11 | 2019-02-12 | 2019-02-13
+stock_lot.csv,expiration_date,52101,1743,50358,30+,,2022-07-31 | 2020-09-08 | 2021-07-31 | 2021-02-28 | 2021-01-31
+stock_lot.csv,sap__khbatch__IdentifiedStockCollection__ExpirationDateTime,52101,1743,50358,30+,,2022-07-31 07:00:00 | 2020-09-08 07:00:00 | 2021-07-31 18:30:00 | 2021-02-28 18:30:00 | 2021-01-31 18:30:00
+stock_lot.csv,sap__khbatch__IdentifiedStockCollection__ID,52101,52101,0,30+,,1 | 4 | 12 | 17 | 18
+stock_lot.csv,sap__khbatch__IdentifiedStockCollection__IdentifiedStockTypeCode,52101,52101,0,2,,03 | 04
+stock_lot.csv,sap__khbatch__IdentifiedStockCollection__MaterialUUID,52101,52101,0,30+,,00163E5F-7A72-1EE9-88DD-F8335D718105 | 00163E5F-7A72-1EE9-88DD-F8335D71E105 | 00163E5F-7A72-1ED9-88F7-44A0C3079B05 | 00163E5F-7A72-1EE9-88E3-A0A9951E7A8F | 00163E5F-7A72-1ED9-88F7-44A0C3075B05
+stock_lot.csv,sap__khbatch__IdentifiedStockCollection__ObjectID,52101,52101,0,30+,,00163E5F7A721ED98AF12BEFCA469FBF | 00163E5F7A721ED98B8711FE4F3213A5 | 00163E5F7A721ED98BBC8C60DA0BDD89 | 00163E5F7A721ED98BD330A4A9FF4BC6 | 00163E5F7A721ED98BD52FC07B58D4C4
+stock_lot.csv,sap__khbatch__IdentifiedStockCollection__ProductionDateTime,52101,51864,237,30+,,2019-02-08 10:07:00 | 2019-02-09 07:01:00 | 2019-02-11 10:04:00 | 2019-02-12 07:40:00 | 2019-02-12 09:35:00
 stock_move_history.csv,id,260682,260682,0,30+,,sap_move_00163E5F7A721ED98ADFC81C81E6455F | sap_move_00163E5F7A721ED98ADFC81C81E6855F | sap_move_00163E5F7A721ED98ADFC81C81E6C55F | sap_move_00163E5F7A721ED98ADFC81C81E7055F | sap_move_00163E5F7A721ED98ADFC81C81E7455F
 stock_move_history.csv,name,260682,260682,0,7,,Initial Balance Setting | Issue for Customer | Transfer | Consumption | Inventory Difference
 stock_move_history.csv,reference,260682,260682,0,7,,Initial Balance Setting | Issue for Customer | Transfer | Consumption | Inventory Difference
