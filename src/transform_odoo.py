@@ -689,6 +689,29 @@ def _service_product_rows():
 # most-frequent remaining PartyID reliably picks the actual customer/supplier.
 _NON_PARTY_IDS = {"70000", "71000"}
 
+_KNOWN_PRODUCT_IDS_CACHE = None
+
+
+def _known_product_ids():
+    """
+    default_code values already written to product_template.csv (read once per run). Used to
+    blank out a product_id/id reference on old transaction lines whose ProductID is a real SAP
+    value but names a material that's since been deleted/obsoleted from the live product
+    master - a genuine historical gap, not something to fabricate a link for. Caught on
+    account_move_customer_invoice_line.csv (194/35,514 lines, 0.5%), 2026-09-29.
+    """
+    global _KNOWN_PRODUCT_IDS_CACHE
+    if _KNOWN_PRODUCT_IDS_CACHE is None:
+        ids = set()
+        try:
+            with open(os.path.join(ODOO_DIR, "product_template.csv"), newline="", encoding="utf-8") as f:
+                for row in csv.DictReader(f):
+                    ids.add(row.get("default_code", ""))
+        except FileNotFoundError:
+            pass
+        _KNOWN_PRODUCT_IDS_CACHE = ids
+    return _KNOWN_PRODUCT_IDS_CACHE
+
 
 def _is_employee_id(party_id):
     return len(party_id) == 10 and party_id.startswith("8")
@@ -742,7 +765,12 @@ def resolve_party(party_rows_by_parent, parent_object_id, prefer=None):
     known_candidates = [c for c in candidates if c in known]
     if known_candidates:
         return Counter(known_candidates).most_common(1)[0][0]
-    return Counter(candidates).most_common(1)[0][0]
+    # No candidate on this document is a known partner (res_partner.csv) at all - real but rare
+    # (3/55,261 vendor bills, caught by a team cross-validation pass, 2026-09-29): SAP's own
+    # PartyID here is a generic/group code (e.g. "G113") that never became a full Business
+    # Partner record. Returning it anyway used to produce a broken partner_id/id reference Odoo
+    # would reject on import; returning None instead leaves the field genuinely blank.
+    return None
 
 
 _PARTNER_RANKS_CACHE = None
@@ -909,11 +937,12 @@ def build_customer_invoices():
         if parent not in known_ids:
             continue
         product_id = item.get("ProductID")
+        product_known = product_id and product_id in _known_product_ids()
         line_rows.append(
             {
                 "id": external_id("sap_cinv_item", item.get("ObjectID")),
                 "move_id/id": external_id("sap_cinv", parent),
-                "product_id/id": external_id("sap_prod", product_id) if product_id else "",
+                "product_id/id": external_id("sap_prod", product_id) if product_known else "",
                 "name": item.get("Description") or product_id or item.get("ID", ""),
                 "quantity": item.get("Quantity", "") or "1",
                 "price_unit": item.get("NetAmount", "") or "0",
@@ -973,11 +1002,12 @@ def build_supplier_invoices():
         if parent not in known_ids:
             continue
         product_id = item.get("ProductID")
+        product_known = product_id and product_id in _known_product_ids()
         line_rows.append(
             {
                 "id": external_id("sap_vinv_item", item.get("ObjectID")),
                 "move_id/id": external_id("sap_vinv", parent),
-                "product_id/id": external_id("sap_prod", product_id) if product_id else "",
+                "product_id/id": external_id("sap_prod", product_id) if product_known else "",
                 "name": item.get("Description") or product_id or item.get("ID", ""),
                 "quantity": item.get("Quantity", "") or "1",
                 "price_unit": item.get("NetUnitPriceAmount", "") or "0",

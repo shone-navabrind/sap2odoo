@@ -296,7 +296,12 @@ REGISTRY = [
                raw_sources=("khpurchaseorder__PurchaseOrderCollection.json", "khpurchaseorder__SupplierCollection.json")),
     ObjectSpec(50, "Purchase", "Transaction", "Purchase Orders", True, "purchase.order", "purchase_order", "built", "REAL DATA: cust/v1/khpurchaseorder custom OData service (user-imported Cloud Applications Studio BO, from byd-api-samples-main) - 655 POs, 1861 line items confirmed. product_id/id on lines resolves now that Products (#57) is also wired up (1586/1595)",
                raw_sources=("khpurchaseorder__PurchaseOrderCollection.json", "khpurchaseorder__ItemCollection.json", "khpurchaseorder__SupplierCollection.json")),
-    ObjectSpec(51, "Purchase", "Transaction", "Vendor Bills", False, "account.move", "account_move_vendor_bill", "built", "REAL DATA: khsupplierinvoice custom service, 458 invoices, 1581 lines. Partner resolved via SellerPartyCollection (442/458 resolved)",
+    ObjectSpec(51, "Purchase", "Transaction", "Vendor Bills", False, "account.move", "account_move_vendor_bill", "built", "REAL DATA: khsupplierinvoice custom service - 55,449 invoices, 212,420 lines. Partner resolved via "
+               "SellerPartyCollection. Fixed 2026-09-29, caught by a team cross-validation pass before Odoo import: "
+               "resolve_party()'s final fallback used to return a document's most-common PartyID even when it wasn't "
+               "a known partner at all (3/55,449 rows - SAP-internal group codes like 'G113' that never became a real "
+               "Business Partner) - now returns None in that case instead of a broken external-id reference. 0 broken "
+               "partner_id/id references confirmed after the fix.",
                raw_sources=("khsupplierinvoice__SupplierInvoiceCollection.json", "khsupplierinvoice__ItemCollection.json", "khsupplierinvoice__SellerPartyCollection.json")),
     ObjectSpec(52, "Purchase", "Transaction", "Vendor Credit Notes", False, "account.move", "account_move_vendor_credit", "built",
                "REAL DATA: ByDesign has no separate credit-memo entity - credit memos sit in the ordinary invoice table "
@@ -354,7 +359,14 @@ REGISTRY = [
                raw_sources=("khsalesorder__SalesOrderCollection.json", "khsalesorder__ItemCollection.json", "khsalesorder__BuyerPartyCollection.json", "khsalesorder__ItemProductCollection.json", "khsalesorder__ItemScheduleLineCollection.json")),
     ObjectSpec(64, "Sales", "Transaction", "Deliveries", False, "stock.picking", "stock_picking_delivery", "built", "REAL DATA: khoutbounddelivery custom service, 130 deliveries, 157 lines. Partner resolved via BuyerPartyCollection (121/130 resolved)",
                raw_sources=("khoutbounddelivery__OutboundDeliveryCollection.json", "khoutbounddelivery__ItemCollection.json", "khoutbounddelivery__BuyerPartyCollection.json")),
-    ObjectSpec(65, "Sales", "Transaction", "Customer Invoices", False, "account.move", "account_move_customer_invoice", "built", "REAL DATA: khcustomerinvoice custom service, 524 invoices, 623 lines. Partner resolved via BuyerPartyCollection (513/524 resolved)",
+    ObjectSpec(65, "Sales", "Transaction", "Customer Invoices", False, "account.move", "account_move_customer_invoice", "built", "REAL DATA: khcustomerinvoice custom service - 30,081 invoices, 35,514 lines. Partner resolved via "
+               "BuyerPartyCollection. Fixed 2026-09-29, caught by a team cross-validation pass before Odoo import: "
+               "product_id/id on the line file used to be emitted for any real SAP ProductID even when that material "
+               "no longer exists in product_template.csv (194/35,514 lines, 0.5% - old invoices referencing since-"
+               "obsoleted materials, a real historical gap given this tenant's data goes back to 2011) - a broken "
+               "external-id reference Odoo would reject. Now checked against _known_product_ids() and left blank in "
+               "that case (description still carried in the name column); 0 broken references confirmed after the "
+               "fix. Same guard applied to account_move_vendor_bill_line.csv (currently 0 affected, same risk class).",
                raw_sources=("khcustomerinvoice__CustomerInvoiceCollection.json", "khcustomerinvoice__ItemCollection.json", "khcustomerinvoice__BuyerPartyCollection.json")),
     ObjectSpec(66, "Sales", "Transaction", "Credit Notes", False, "account.move", "account_move_credit_note", "built",
                "REAL DATA, two unioned sources: (1) khcustomerinvoicerequest/CustomerInvoiceRequestCollection, the 21 "
