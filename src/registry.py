@@ -90,7 +90,7 @@ REGISTRY = [
                raw_sources=("fin_receivablesar_analytics.svc__RPFINDUEU04_Q0007QueryResults.json",)),
     ObjectSpec(9, "Accounts", "Transaction", "Open Vendor Bills", True, "account.move", "account_move_open_vendor", "built", "REAL DATA: same khsupplierinvoice source as #51, filtered on LifeCycleStatusCode (confirmed real/populated: excludes Paid=12, Canceled=9, Voided=7) - 265/458 open",
                raw_sources=("khsupplierinvoice__SupplierInvoiceCollection.json", "khsupplierinvoice__ItemCollection.json", "khsupplierinvoice__SellerPartyCollection.json")),
-    ObjectSpec(10, "Accounts", "Transaction", "Customer Payments", False, "account.payment", "account_payment_customer", "built", "REAL DATA: khpayment custom service, 544 payments total - customer vs vendor split via partner_type column (looked up against res_partner's customer_rank/supplier_rank), combined with #11 in one account_payment.csv",
+    ObjectSpec(10, "Accounts", "Transaction", "Customer Payments", False, "account.payment", "account_payment_customer", "built", "REAL DATA: khpayment custom service, 59,493 payments total - customer vs vendor split via partner_type column (looked up against res_partner's customer_rank/supplier_rank), combined with #11 in one account_payment.csv. Fixed 2026-09-28, caught by a team cross-validation pass: partner_id/id used to be emitted for every row with a real BusinessPartnerID even when that ID wasn't in res_partner.csv (563/59,493 rows, 0.9% - a real Business Partner per khbusinesspartner, but neither a customer nor supplier) - a broken external-id reference Odoo would reject. Now left blank in both that case and the 5,133/59,493 (8.6%) rows with no BusinessPartnerID at all on SAP's side; 0 broken references confirmed.",
                raw_sources=("khpayment__PaymentCollection.json",)),
     ObjectSpec(11, "Accounts", "Transaction", "Vendor Payments", False, "account.payment", "account_payment_vendor", "built", "REAL DATA: same khpayment source and account_payment.csv as #10, split by partner_type column",
                raw_sources=("khpayment__PaymentCollection.json",)),
@@ -343,8 +343,15 @@ REGISTRY = [
                "$inlinecount __count=0 (not RBAM_ERROR). khcustomerquote is imported, live, and authorized; the tenant "
                "genuinely just has zero customer quotes right now. Still pending_mapping because there's no data to "
                "confirm a transform against, not because of access - re-check if the tenant gets real quote data later."),
-    ObjectSpec(63, "Sales", "Transaction", "Sales Orders", True, "sale.order", "sale_order", "built", "REAL DATA: khsalesorder custom service, 196 orders, 263 lines. Partner resolved via BuyerPartyCollection (195/196 resolved)",
-               raw_sources=("khsalesorder__SalesOrderCollection.json", "khsalesorder__ItemCollection.json", "khsalesorder__BuyerPartyCollection.json", "khsalesorder__ItemProductCollection.json")),
+    ObjectSpec(63, "Sales", "Transaction", "Sales Orders", True, "sale.order", "sale_order", "built", "REAL DATA: khsalesorder custom service - 4,308 orders, 9,921 lines. Partner resolved via "
+               "BuyerPartyCollection. Fixed 2026-09-28, caught by a team cross-validation pass before Odoo import: "
+               "state used to be hardcoded 'sale' for every order even though 47.8% (2,060/4,308) are Canceled/"
+               "Partially Canceled per CancellationStatusCode - now maps to Odoo's 'cancel' state. Line quantity/UoM "
+               "used to be entirely missing (every line would have imported at qty 0) - now summed from "
+               "ItemScheduleLineCollection (23,731 rows, already extracted but never read), preferring 'Confirmed' "
+               "schedule lines over 'Requested'; 1,725/9,921 lines (17.4%) still have no quantity because the item "
+               "genuinely has no schedule line on this tenant - real absence, not a bug.",
+               raw_sources=("khsalesorder__SalesOrderCollection.json", "khsalesorder__ItemCollection.json", "khsalesorder__BuyerPartyCollection.json", "khsalesorder__ItemProductCollection.json", "khsalesorder__ItemScheduleLineCollection.json")),
     ObjectSpec(64, "Sales", "Transaction", "Deliveries", False, "stock.picking", "stock_picking_delivery", "built", "REAL DATA: khoutbounddelivery custom service, 130 deliveries, 157 lines. Partner resolved via BuyerPartyCollection (121/130 resolved)",
                raw_sources=("khoutbounddelivery__OutboundDeliveryCollection.json", "khoutbounddelivery__ItemCollection.json", "khoutbounddelivery__BuyerPartyCollection.json")),
     ObjectSpec(65, "Sales", "Transaction", "Customer Invoices", False, "account.move", "account_move_customer_invoice", "built", "REAL DATA: khcustomerinvoice custom service, 524 invoices, 623 lines. Partner resolved via BuyerPartyCollection (513/524 resolved)",

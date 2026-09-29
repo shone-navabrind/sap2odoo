@@ -764,23 +764,62 @@ def _group_by_parent(rows):
 
 
 SO_HEADER_FIELDNAMES = ["id", "name", "partner_id/id", "date_order", "state", "currency_id/id", "amount_total"]
-SO_LINE_FIELDNAMES = ["id", "order_id/id", "product_id/id", "name", "price_subtotal"]
+SO_LINE_FIELDNAMES = ["id", "order_id/id", "product_id/id", "name", "price_subtotal",
+                      "product_uom_qty", "product_uom/id"]
+
+# CancellationStatusCode, decoded via khsalesorder's own field (checked live, 2026-09-28):
+# 1=Not Canceled, 4=Canceled, 5=Partially Canceled.
+_SO_CANCELED_CODES = {"4", "5"}
 
 
 def build_sales_orders():
     """
-    khsalesorder custom service - 196 sales orders (mandatory sheet object #63).
+    khsalesorder custom service - mandatory sheet object #63.
     SalesOrderCollection (header) + ItemCollection (lines, ParentObjectID -> header ObjectID) +
     ItemProductCollection (ProductID, ParentObjectID -> Item.ObjectID - CONFIRMED by testing) +
     BuyerPartyCollection (see resolve_party() above for why this isn't a direct field lookup).
+
+    Two real gaps fixed 2026-09-28, caught by a team cross-validation pass before Odoo import:
+
+    1. state was hardcoded "sale" for every order, but CancellationStatusCode shows 47.8%
+       (2,060/4,308) of orders are actually Canceled (4) or Partially Canceled (5) - neither
+       reached the CSV, so canceled orders would have imported as active. Now maps to Odoo's
+       'cancel' state for both; a real distinction between full and partial cancellation isn't
+       representable in stock stock.order's state field without a custom field, so both use the
+       same core state rather than fabricating one.
+    2. sale_order_line.csv had no quantity or UoM at all - every line would import at qty 0.
+       Real quantity/UoM lives in ItemScheduleLineCollection (23,731 rows, ParentObjectID ->
+       Item.ObjectID), which was extracted but never read by this transform. An item can carry
+       several schedule lines (partial delivery dates splitting one ordered quantity across
+       several confirmed dates - confirmed live: 9,875/9,920 items have more than one). Quantity
+       is summed within a TypeCode ('Confirmed' preferred over 'Requested' - Confirmed is what
+       SAP actually committed to deliver; only 9,920/9,921 items have any schedule line at all,
+       the rest keep quantity 0 as a real, not fabricated, absence).
     """
     headers = load_raw("SalesOrderCollection")["rows"]
     items = load_raw("ItemCollection", service_hint="khsalesorder")["rows"]
     item_products = load_raw("ItemProductCollection")["rows"]
     parties = load_raw("BuyerPartyCollection", service_hint="khsalesorder")["rows"]
+    schedule_lines = load_raw("ItemScheduleLineCollection", service_hint="khsalesorder")["rows"]
 
     party_by_order = _group_by_parent(parties)
     product_by_item = {p["ParentObjectID"]: p.get("ProductID") for p in item_products if p.get("ParentObjectID")}
+
+    schedule_by_item = {}
+    for s in schedule_lines:
+        parent = s.get("ParentObjectID")
+        if parent:
+            schedule_by_item.setdefault(parent, []).append(s)
+
+    def item_quantity_and_uom(item_object_id):
+        lines = schedule_by_item.get(item_object_id, [])
+        for preferred_type in ("Confirmed", "Requested"):
+            matching = [s for s in lines if s.get("TypeCodeText") == preferred_type]
+            if matching:
+                total_qty = sum(float(s.get("Quantity") or 0) for s in matching)
+                unit_code = matching[0].get("unitCode", "")
+                return str(total_qty), unit_code
+        return "0", ""
 
     header_rows = []
     known_ids = set()
@@ -796,7 +835,7 @@ def build_sales_orders():
                 "name": h.get("ID", object_id),
                 "partner_id/id": external_id("sap_bp", partner) if partner else "",
                 "date_order": parse_sap_date(h.get("PostingDateTime")),
-                "state": "sale",
+                "state": "cancel" if h.get("CancellationStatusCode") in _SO_CANCELED_CODES else "sale",
                 "currency_id/id": (
                     f"base.{h.get('NetAmountCurrencyCode', '').strip().upper()}"
                     if h.get("NetAmountCurrencyCode") else ""
@@ -812,6 +851,7 @@ def build_sales_orders():
             continue
         object_id = item.get("ObjectID")
         product_id = product_by_item.get(object_id)
+        qty, unit_code = item_quantity_and_uom(object_id)
         line_rows.append(
             {
                 "id": external_id("sap_so_item", object_id),
@@ -819,6 +859,8 @@ def build_sales_orders():
                 "product_id/id": external_id("sap_prod", product_id) if product_id else "",
                 "name": item.get("Description") or product_id or item.get("ID", ""),
                 "price_subtotal": item.get("NetAmount", "") or "0",
+                "product_uom_qty": qty,
+                "product_uom/id": external_id("sap_uom", unit_code) if unit_code else "",
             }
         )
 
@@ -1129,10 +1171,21 @@ PAYMENT_FIELDNAMES = ["id", "partner_id/id", "amount", "payment_type", "partner_
 
 def build_payments():
     """
-    khpayment custom service - 544 payments (sheet objects #10/11, Customer/Vendor Payments).
+    khpayment custom service (sheet objects #10/11, Customer/Vendor Payments).
     Splits by looking up BusinessPartnerID against the customer_rank/supplier_rank already
     established in res_partner.csv (built earlier in the pipeline) rather than guessing from
     this entity's own fields, which don't distinguish payment direction cleanly.
+
+    Fixed 2026-09-28, caught by a team cross-validation pass before Odoo import: this used to
+    emit `partner_id/id` for EVERY payment with a real BusinessPartnerID, even when that ID
+    wasn't in res_partner.csv - a broken external-id reference Odoo would reject on import.
+    563/59,493 payments (0.9%) carry a BusinessPartnerID that's a real Business Partner (found
+    in khbusinesspartner/BusinessPartnerCollection) but neither a customer nor a supplier, so it
+    was never built into res_partner.csv - not this transform's data to fabricate a fix for.
+    5,133/59,493 (8.6%) have no BusinessPartnerID at all on SAP's side - a real absence, not a
+    join failure. Both cases now leave partner_id/id blank instead of pointing at a record that
+    doesn't exist, and partner_type/payment_type fall back to "customer"/"inbound" (SAP's own
+    default direction) since there's no rank to check.
     """
     payments = load_raw("PaymentCollection")["rows"]
 
@@ -1150,12 +1203,12 @@ def build_payments():
         if not object_id:
             continue
         bp_id = pmt.get("BusinessPartnerID", "")
-        rank_row = partner_rank.get(bp_id, {})
-        is_supplier = rank_row.get("supplier_rank") == "1"
+        rank_row = partner_rank.get(bp_id)
+        is_supplier = bool(rank_row) and rank_row.get("supplier_rank") == "1"
         rows.append(
             {
                 "id": external_id("sap_pay", object_id),
-                "partner_id/id": external_id("sap_bp", bp_id) if bp_id else "",
+                "partner_id/id": external_id("sap_bp", bp_id) if rank_row else "",
                 "amount": pmt.get("TransactionCurrencyAmount", "") or "0",
                 "payment_type": "outbound" if is_supplier else "inbound",
                 "partner_type": "supplier" if is_supplier else "customer",
