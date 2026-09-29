@@ -391,6 +391,11 @@ def build_res_partner():
 PO_HEADER_FIELDNAMES = ["id", "name", "partner_id/id", "date_order", "state", "currency_id/id", "amount_total"]
 PO_LINE_FIELDNAMES = ["id", "order_id/id", "product_id/id", "name", "product_qty", "price_unit"]
 
+# LifeCycleStatusCodeText values that mean "not yet a real order" - these orders are written to
+# purchase_order_rfq.csv (build_rfqs(), below) instead of purchase_order.csv, so the same real
+# SAP order never appears in both files under different external-ID prefixes.
+_RFQ_STAGE_STATES = {"In Preparation", "In Approval"}
+
 
 def build_purchase_orders():
     """
@@ -403,6 +408,13 @@ def build_purchase_orders():
     ItemCollection          - 1861 line rows, ParentObjectID -> header ObjectID
     SupplierCollection      - links header ObjectID -> supplier business partner "PartyID"
                                (matches CBP_UUID in res_partner.csv's external IDs)
+
+    Orders still in "In Preparation"/"In Approval" (LifeCycleStatusCodeText) are excluded here -
+    build_rfqs() below already writes those same real orders to purchase_order_rfq.csv as
+    draft/sent purchase.order records. Both files used to draw from every order with no
+    exclusion, so the ~139 RFQ-stage orders existed twice under different external-ID prefixes
+    (sap_po_* here, sap_rfq_* there) - importing both would have created duplicate purchase.order
+    records in Odoo for the same real SAP order. Fixed 2026-09-30.
     """
     headers = load_raw("PurchaseOrderCollection")["rows"]
     items = load_raw("ItemCollection", service_hint="khpurchaseorder")["rows"]
@@ -419,6 +431,8 @@ def build_purchase_orders():
     for header in headers:
         object_id = header.get("ObjectID")
         if not object_id:
+            continue
+        if header.get("LifeCycleStatusCodeText") in _RFQ_STAGE_STATES:
             continue
         known_po_ids.add(object_id)
         partner_bp = resolve_party(party_by_po, object_id, prefer="supplier")
@@ -2453,7 +2467,8 @@ def build_rfqs():
     ByDesign has no separate RFQ object; an RFQ is a purchase order that has not been ordered
     yet. LifeCycleStatusCodeText gives the split on real data: In Preparation 89 and In Approval
     86 are the pre-order states, against Sent 125 / Follow-Up Document Created 266 / Finished 77
-    which are live orders and already covered by #50.
+    which are live orders and already covered by #50. build_purchase_orders() excludes these same
+    _RFQ_STAGE_STATES orders from purchase_order.csv so neither file duplicates the other.
     """
     orders = load_raw("PurchaseOrderCollection", service_hint="khpurchaseorder")["rows"]
     suppliers = _group_by_parent(
@@ -2701,7 +2716,10 @@ def build_journal_entries():
     return {"account_move_journal.csv": len(out_rows)}
 
 
-ASSET_FIELDNAMES = ["id", "name"]
+ASSET_FIELDNAMES = [
+    "id", "name", "asset_class", "status", "acquisition_cost", "accumulated_depreciation",
+    "net_book_value",
+]
 ASSET_DEPRECIATION_FIELDNAMES = ["id", "asset_id/id", "amount"]
 
 
@@ -2719,18 +2737,31 @@ def build_fixed_assets():
     would multiply row count without adding a real posting date per line), so this is one row
     per asset with its current KCPOSTED_DEPR, not per-period history. Call it what it is rather
     than implying more granularity than the source gives.
+
+    account_asset.csv used to only write id/name even though RPFINFXAU04 carries real asset
+    class/status (CASSETCLASS/TASSETCLASS, CLC_STAT/TLC_STAT) and RPFINFXAU01 carries real
+    cost/depreciation/net-book-value figures (KCACQUISITION_COSTS/KCACCUMULATED_DEPR/
+    KCNETBOOKVALUE_END_OF) for every asset - plain decimals, no currency-suffix formatting to
+    parse (unlike the F*/K* fields on other analytics reports). Wired in 2026-09-30.
     """
     assets = load_raw("RPFINFXAU04_Q0001QueryResults", service_hint="fin_fixedassets_analytics.svc")["rows"]
     values = load_raw("RPFINFXAU01_Q0001QueryResults", service_hint="fin_fixedassets_analytics.svc")["rows"]
+    values_by_asset = {v.get("CFXA_UUID"): v for v in values if v.get("CFXA_UUID")}
 
     asset_rows = []
     for a in assets:
         asset_id = a.get("CFXA_UUID")
         if not asset_id:
             continue
+        v = values_by_asset.get(asset_id, {})
         asset_rows.append({
             "id": external_id("sap_asset", asset_id),
             "name": a.get("TFXA_UUID") or asset_id,
+            "asset_class": a.get("TASSETCLASS") or a.get("CASSETCLASS") or "",
+            "status": a.get("TLC_STAT") or a.get("CLC_STAT") or "",
+            "acquisition_cost": v.get("KCACQUISITION_COSTS", ""),
+            "accumulated_depreciation": v.get("KCACCUMULATED_DEPR", ""),
+            "net_book_value": v.get("KCNETBOOKVALUE_END_OF", ""),
         })
     write_csv("account_asset.csv", asset_rows, ASSET_FIELDNAMES)
 

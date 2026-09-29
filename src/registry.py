@@ -108,8 +108,14 @@ REGISTRY = [
     ObjectSpec(14, "Accounts", "Transaction", "Fixed Assets", False, "account.asset", "account_asset", "built",
                "REAL DATA, closed 2026-09-28: fin_fixedassets_analytics.svc/RPFINFXAU04_Q0001QueryResults ('Fixed "
                "Assets - Master Data'), same BYD_P_* bug fix as #13. 3,279 real fixed assets (FACTORY LAND, LAPTOP, "
-               "FEEDER F1-12, etc.).",
-               raw_sources=("fin_fixedassets_analytics.svc__RPFINFXAU04_Q0001QueryResults.json",)),
+               "FEEDER F1-12, etc.). Fields extended 2026-09-30 (caught in a pre-import team validation pass): the "
+               "file used to write only id/name even though asset_class/status (CASSETCLASS/TASSETCLASS, "
+               "CLC_STAT/TLC_STAT, from this same RPFINFXAU04 report) and acquisition_cost/accumulated_depreciation/"
+               "net_book_value (from RPFINFXAU01, see #15) were already sitting unused in output_raw/. 1,714/3,279 "
+               "assets (52%) have no cost/depreciation figures - a genuine data gap, matches RPFINFXAU01's own row "
+               "count of 1,565 exactly, not a join bug.",
+               raw_sources=("fin_fixedassets_analytics.svc__RPFINFXAU04_Q0001QueryResults.json",
+                             "fin_fixedassets_analytics.svc__RPFINFXAU01_Q0001QueryResults.json")),
     ObjectSpec(15, "Accounts", "Transaction", "Asset Depreciation", False, "account.asset.depreciation.line", "account_asset_depreciation_line", "built",
                "REAL DATA, closed 2026-09-28: fin_fixedassets_analytics.svc/RPFINFXAU01_Q0001QueryResults ('Fixed "
                "Assets Values'), same fix as #13/#14. 1,565 rows - each asset's CURRENT accumulated depreciation "
@@ -291,10 +297,16 @@ REGISTRY = [
     ObjectSpec(48, "Purchase", "Transaction", "Purchase Requisitions", False, "purchase.requisition", "purchase_requisition", "pending_mapping", "No matching data source found"),
     ObjectSpec(49, "Purchase", "Transaction", "RFQs", False, "purchase.order", "purchase_order_rfq", "built",
                "REAL DATA: ByDesign has no separate RFQ object - an RFQ is a purchase order not yet ordered. "
-               "LifeCycleStatusCodeText splits the 655 orders cleanly: In Preparation 89 + In Approval 86 = 175 pre-order "
-               "documents (this file), against Sent/Follow-Up/Finished which are live orders already covered by #50.",
+               "LifeCycleStatusCodeText splits the orders cleanly: In Preparation + In Approval are the pre-order "
+               "documents (this file, 139 rows on the current tenant), against Sent/Follow-Up/Finished which are live "
+               "orders already covered by #50. Fixed 2026-09-30 (caught in a pre-import team validation pass): these "
+               "same 139 orders used to also appear in purchase_order.csv (#50) under a different external-ID prefix "
+               "(sap_po_* vs this file's sap_rfq_*) with no exclusion between the two builds - importing both would "
+               "have created duplicate purchase.order records in Odoo. build_purchase_orders() now excludes any order "
+               "whose LifeCycleStatusCodeText is In Preparation/In Approval, via the shared _RFQ_STAGE_STATES set - "
+               "confirmed 0 id overlap between the two files after the fix.",
                raw_sources=("khpurchaseorder__PurchaseOrderCollection.json", "khpurchaseorder__SupplierCollection.json")),
-    ObjectSpec(50, "Purchase", "Transaction", "Purchase Orders", True, "purchase.order", "purchase_order", "built", "REAL DATA: cust/v1/khpurchaseorder custom OData service (user-imported Cloud Applications Studio BO, from byd-api-samples-main) - 655 POs, 1861 line items confirmed. product_id/id on lines resolves now that Products (#57) is also wired up (1586/1595)",
+    ObjectSpec(50, "Purchase", "Transaction", "Purchase Orders", True, "purchase.order", "purchase_order", "built", "REAL DATA: cust/v1/khpurchaseorder custom OData service (user-imported Cloud Applications Studio BO, from byd-api-samples-main) - 15,658 POs (live tenant total minus the 139 pre-order documents now excluded to #49, see #49's note), line items confirmed. product_id/id on lines resolves once Products (#57) is wired up.",
                raw_sources=("khpurchaseorder__PurchaseOrderCollection.json", "khpurchaseorder__ItemCollection.json", "khpurchaseorder__SupplierCollection.json")),
     ObjectSpec(51, "Purchase", "Transaction", "Vendor Bills", False, "account.move", "account_move_vendor_bill", "built", "REAL DATA: khsupplierinvoice custom service - 55,449 invoices, 212,420 lines. Partner resolved via "
                "SellerPartyCollection. Fixed 2026-09-29, caught by a team cross-validation pass before Odoo import: "
