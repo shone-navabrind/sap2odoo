@@ -305,8 +305,12 @@ REGISTRY = [
                "(sap_po_* vs this file's sap_rfq_*) with no exclusion between the two builds - importing both would "
                "have created duplicate purchase.order records in Odoo. build_purchase_orders() now excludes any order "
                "whose LifeCycleStatusCodeText is In Preparation/In Approval, via the shared _RFQ_STAGE_STATES set - "
-               "confirmed 0 id overlap between the two files after the fix.",
-               raw_sources=("khpurchaseorder__PurchaseOrderCollection.json", "khpurchaseorder__SupplierCollection.json")),
+               "confirmed 0 id overlap between the two files after the fix. "
+               "Fixed 2026-10-01 (team question: are RFQ line items extracted too? - they weren't): this build "
+               "function only ever wrote purchase_order_rfq.csv (headers) - the same khpurchaseorder/ItemCollection "
+               "these 136 orders use was already fully extracted (340 real line items), just never written to a "
+               "line file at all. purchase_order_rfq_line.csv now exists, 340 rows, 0 blank/broken order_id/id.",
+               raw_sources=("khpurchaseorder__PurchaseOrderCollection.json", "khpurchaseorder__SupplierCollection.json", "khpurchaseorder__ItemCollection.json")),
     ObjectSpec(50, "Purchase", "Transaction", "Purchase Orders", True, "purchase.order", "purchase_order", "built", "REAL DATA: cust/v1/khpurchaseorder custom OData service (user-imported Cloud Applications Studio BO, from byd-api-samples-main) - 15,704 POs, 45,847 lines after the 2026-10-01 live re-pull (live tenant total minus the 136 pre-order documents excluded to #49, see #49's note; was 15,658/45,624). product_id/id on lines resolves once Products (#57) is wired up. "
                "2026-10-01 (team pre-import check, Tax + missing-product requested on PO lines): purchase_order_line.csv "
                "now carries price_tax from ItemCollection's real TaxAmount (confirmed via live $metadata: no TaxCode/"

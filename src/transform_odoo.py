@@ -2641,30 +2641,61 @@ def build_rfqs():
     86 are the pre-order states, against Sent 125 / Follow-Up Document Created 266 / Finished 77
     which are live orders and already covered by #50. build_purchase_orders() excludes these same
     _RFQ_STAGE_STATES orders from purchase_order.csv so neither file duplicates the other.
+
+    purchase_order_rfq_line.csv added 2026-10-01 (real gap found: the same khpurchaseorder/
+    ItemCollection these 136 RFQ-stage orders use was already fully extracted - 340 real line
+    items - but this build function only ever wrote header rows, never a line file at all).
     """
     orders = load_raw("PurchaseOrderCollection", service_hint="khpurchaseorder")["rows"]
+    items = load_raw("ItemCollection", service_hint="khpurchaseorder")["rows"]
     suppliers = _group_by_parent(
         load_raw("SupplierCollection", service_hint="khpurchaseorder")["rows"])
     draft_states = {"In Preparation": "draft", "In Approval": "sent"}
 
     rows = []
+    rfq_id_by_object_id = {}
     for order in orders:
         state = draft_states.get(order.get("LifeCycleStatusCodeText"))
         if not state:
             continue
         party = resolve_party(suppliers, order.get("ObjectID"), prefer="supplier")
         currency = order.get("CurrencyCode") or ""
+        rfq_id = order.get("ID") or order.get("ObjectID")
+        rfq_id_by_object_id[order.get("ObjectID")] = rfq_id
         rows.append({
-            "id": external_id("sap_rfq", order.get("ID") or order.get("ObjectID")),
-            "name": order.get("ID") or order.get("ObjectID", ""),
+            "id": external_id("sap_rfq", rfq_id),
+            "name": rfq_id,
             "partner_id/id": external_id("sap_bp", party) if party else "",
             "date_order": parse_sap_date(order.get("CreationDateTime")) or "",
             "state": state,
             "currency_id/id": f"base.{currency}" if currency else "",
             "amount_total": order.get("TotalGrossAmount", ""),
         })
+
+    line_rows = []
+    for item in items:
+        po_object_id = item.get("ParentObjectID")
+        rfq_id = rfq_id_by_object_id.get(po_object_id)
+        if not rfq_id:
+            continue
+        product_id = item.get("ProductID")
+        product_known = product_id and product_id in _known_product_ids()
+        line_rows.append({
+            "id": external_id("sap_rfq_item", item.get("ObjectID")),
+            "order_id/id": external_id("sap_rfq", rfq_id),
+            "product_id/id": external_id("sap_prod", product_id) if product_known else "",
+            "name": _clean_text(item.get("Description")) or product_id or item.get("ID", ""),
+            "product_qty": item.get("Quantity", "") or "0",
+            "price_unit": item.get("NetUnitPriceAmount", "") or "0",
+            "price_tax": item.get("TaxAmount", "") or "0",
+        })
+
     write_csv("purchase_order_rfq.csv", rows, PO_HEADER_FIELDNAMES)
-    return {"purchase_order_rfq.csv": len(rows)}
+    write_csv("purchase_order_rfq_line.csv", line_rows, PO_LINE_FIELDNAMES)
+    return {
+        "purchase_order_rfq.csv": len(rows),
+        "purchase_order_rfq_line.csv": len(line_rows),
+    }
 
 
 BOM_FIELDNAMES = ["id", "product_tmpl_id/id", "product_qty", "code", "type"]
