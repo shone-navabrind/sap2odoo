@@ -404,7 +404,8 @@ def build_res_partner():
     }
 
 
-PO_HEADER_FIELDNAMES = ["id", "name", "partner_id/id", "date_order", "state", "currency_id/id", "amount_total"]
+PO_HEADER_FIELDNAMES = ["id", "name", "partner_id/id", "date_order", "state", "currency_id/id",
+                        "amount_total", "incoterms", "incoterms_location", "buyer_responsible_name"]
 PO_LINE_FIELDNAMES = ["id", "order_id/id", "product_id/id", "name", "product_qty", "price_unit", "price_tax"]
 
 # LifeCycleStatusCodeText values that mean "not yet a real order" - these orders are written to
@@ -444,16 +445,32 @@ def build_purchase_orders():
        allows without a Material Master link, not something any field in the source can resolve
        further). 0 of the remaining ProductID-bearing lines pointed at an unknown/deleted product
        on this tenant at last check, but the guard is now applied here too for consistency.
+
+    Two more real fields added 2026-10-01 (team pre-import check, found via the live SAP UI -
+    both were already accessible via the API, just never read by this transform):
+    1. incoterms/incoterms_location - PurchaseOrderCollection's own IncotermsCodeText/
+       IncotermsLocationName fields (confirmed in output_raw/ all along).
+    2. buyer_responsible_name - EmployeeResponsibleCollection (already extracted, ParentObjectID
+       -> header ObjectID), resolved to a real name via _employee_name_by_code(). Like
+       SupplierCollection, this bundles several unrelated party roles per PO with no role code
+       (own-company "70000", the supplier's own BP id, AND the real employee code) - confirmed
+       on PO 30016303: candidates were ["70000", "G020", "70000", "8000755", "G232"], and only
+       "G020"/"G232" are real EmployeeIDs in khemployee. Picks the first candidate that's a known
+       EmployeeID rather than the first row, matching the live UI's "Buyer Responsible: G020 -
+       Maryann Fernandes" for that PO exactly.
     """
     headers = load_raw("PurchaseOrderCollection")["rows"]
     items = load_raw("ItemCollection", service_hint="khpurchaseorder")["rows"]
     suppliers = load_raw("SupplierCollection", service_hint="khpurchaseorder")["rows"]
+    employees_responsible = load_raw("EmployeeResponsibleCollection", service_hint="khpurchaseorder")["rows"]
 
     # SupplierCollection bundles several party roles per PO (3529 rows for 655 POs), so taking
     # the first row picked the wrong party or an empty one 33% of the time. Type-aware
     # resolution (prefer a PartyID that is a known SUPPLIER in res_partner.csv) measured 87%
     # valid vs 67% for first-row.
     party_by_po = _group_by_parent(suppliers)
+    employee_by_po = _group_by_parent(employees_responsible)
+    employee_names = _employee_name_by_code()
 
     header_rows = []
     known_po_ids = set()
@@ -465,6 +482,10 @@ def build_purchase_orders():
             continue
         known_po_ids.add(object_id)
         partner_bp = resolve_party(party_by_po, object_id, prefer="supplier")
+        buyer_code = next(
+            (e.get("PartyID") for e in employee_by_po.get(object_id, [])
+             if e.get("PartyID") in employee_names), None
+        )
         header_rows.append(
             {
                 "id": external_id("sap_po", object_id),
@@ -479,6 +500,9 @@ def build_purchase_orders():
                     if header.get("CurrencyCode") else ""
                 ),
                 "amount_total": header.get("TotalNetAmount", "") or "0",
+                "incoterms": header.get("IncotermsCodeText", ""),
+                "incoterms_location": header.get("IncotermsLocationName", ""),
+                "buyer_responsible_name": employee_names.get(buyer_code, "") if buyer_code else "",
             }
         )
 
@@ -758,6 +782,26 @@ def _known_product_ids():
 
 def _is_employee_id(party_id):
     return len(party_id) == 10 and party_id.startswith("8")
+
+
+_EMPLOYEE_NAME_BY_CODE_CACHE = None
+
+
+def _employee_name_by_code():
+    """
+    EmployeeID -> FormattedName, from khemployee/EmployeeCollection. Confirmed live 2026-10-01
+    (team pre-import check, via the live SAP UI): khpurchaseorder/EmployeeResponsibleCollection's
+    PartyID uses this same short EmployeeID code (e.g. "G020"), not khemployee's own ObjectID/
+    InternalID - a clean, confirmed join, not a guess (G020 resolves to "Maryann Fernandes",
+    matching the "Buyer Responsible" field shown on the live Purchase Order screen exactly).
+    """
+    global _EMPLOYEE_NAME_BY_CODE_CACHE
+    if _EMPLOYEE_NAME_BY_CODE_CACHE is None:
+        _EMPLOYEE_NAME_BY_CODE_CACHE = {
+            e["EmployeeID"]: e.get("FormattedName")
+            for e in load_raw("EmployeeCollection")["rows"] if e.get("EmployeeID")
+        }
+    return _EMPLOYEE_NAME_BY_CODE_CACHE
 
 
 def _load_partner_ranks():

@@ -319,8 +319,23 @@ REGISTRY = [
                "genuine non-catalog PO lines SAP allows without a Material Master link, confirmed not resolvable, "
                "not a pipeline gap. Also: line item descriptions containing a literal \" were replaced with the "
                "Unicode double-prime (U+2033) - see #63's note on the same fix, applied here too (0 lines with a "
-               "straight quote remaining, confirmed).",
-               raw_sources=("khpurchaseorder__PurchaseOrderCollection.json", "khpurchaseorder__ItemCollection.json", "khpurchaseorder__SupplierCollection.json")),
+               "straight quote remaining, confirmed). Also same date (live SAP UI audit against the custom OData "
+               "service, team request for 'more missing fields'): incoterms/incoterms_location and "
+               "buyer_responsible_name added - both were already accessible via the API (IncotermsCodeText/"
+               "IncotermsLocationName sitting unused on PurchaseOrderCollection; EmployeeResponsibleCollection "
+               "already extracted), just never read by this transform. buyer_responsible_name resolves via "
+               "_employee_name_by_code() (EmployeeResponsibleCollection's PartyID is an EmployeeID code like "
+               "'G020', joined against khemployee) - confirmed exact match against the live UI's 'Buyer "
+               "Responsible' field for a real PO. incoterms/incoterms_location: 15,689/15,704 (99.9%). "
+               "buyer_responsible_name: 15,704/15,704 (100%, after filtering EmployeeResponsibleCollection's "
+               "candidates to real EmployeeIDs - it bundles the PO's own company code and the supplier's BP id "
+               "in the same collection with no role code, same shape as SupplierCollection). Payment Terms was "
+               "also requested and found VISIBLE with real data on the live UI ('30 days from the date of invoice "
+               "subject to acceptance') but confirmed ABSENT from khpurchaseorder's OData metadata entirely - "
+               "unlike Incoterms/Buyer Responsible, this one is not accessible via the API at all and needs a live "
+               "OData Editor change to the custom service to expose it (not yet done - pending user confirmation, "
+               "see SAP_IMPORT_PLAN.md or the team's 2026-10-01 field audit notes).",
+               raw_sources=("khpurchaseorder__PurchaseOrderCollection.json", "khpurchaseorder__ItemCollection.json", "khpurchaseorder__SupplierCollection.json", "khpurchaseorder__EmployeeResponsibleCollection.json")),
     ObjectSpec(51, "Purchase", "Transaction", "Vendor Bills", False, "account.move", "account_move_vendor_bill", "built", "REAL DATA: khsupplierinvoice custom service - 55,449 invoices, 212,420 lines. Partner resolved via "
                "SellerPartyCollection. Fixed 2026-09-29, caught by a team cross-validation pass before Odoo import: "
                "resolve_party()'s final fallback used to return a document's most-common PartyID even when it wasn't "
