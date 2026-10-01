@@ -98,20 +98,25 @@ def _flatten_expanded(row):
     """
     Flatten an $expand response so the raw dump stays a flat table.
 
-    An expanded navigation property arrives as a nested object (or {"results": [...]} for a
-    to-many nav). Its fields become "NavProp.Field" keys. Unexpanded navs arrive as
-    {"__deferred": ...} and carry no data, so they're dropped.
+    An expanded navigation property arrives as a nested object, as {"results": [...]} for a
+    to-many nav, or (confirmed live, khsalesorder/SalesUnitPartyName, 2026-10-01) as a bare
+    Python list with no "results" wrapper at all - this tenant's JSON responses aren't
+    consistent about which shape a to-many nav uses. Its fields become "NavProp.Field" keys.
+    Unexpanded navs arrive as {"__deferred": ...} and carry no data, so they're dropped.
     """
     flat = {}
     for key, value in row.items():
-        if not isinstance(value, dict):
+        if isinstance(value, list):
+            nested = value[0] if value else {}
+        elif isinstance(value, dict):
+            if "__deferred" in value:
+                continue
+            nested = value
+            if "results" in nested and isinstance(nested["results"], list):
+                nested = nested["results"][0] if nested["results"] else {}
+        else:
             flat[key] = value
             continue
-        if "__deferred" in value:
-            continue
-        nested = value
-        if "results" in nested and isinstance(nested["results"], list):
-            nested = nested["results"][0] if nested["results"] else {}
         for sub_key, sub_value in nested.items():
             if sub_key == "__metadata" or isinstance(sub_value, dict):
                 continue

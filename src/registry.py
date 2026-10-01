@@ -298,15 +298,28 @@ REGISTRY = [
     ObjectSpec(49, "Purchase", "Transaction", "RFQs", False, "purchase.order", "purchase_order_rfq", "built",
                "REAL DATA: ByDesign has no separate RFQ object - an RFQ is a purchase order not yet ordered. "
                "LifeCycleStatusCodeText splits the orders cleanly: In Preparation + In Approval are the pre-order "
-               "documents (this file, 139 rows on the current tenant), against Sent/Follow-Up/Finished which are live "
-               "orders already covered by #50. Fixed 2026-09-30 (caught in a pre-import team validation pass): these "
+               "documents (this file, 136 rows after the 2026-10-01 live re-pull, was 139), against Sent/Follow-Up/"
+               "Finished which are live orders already covered by #50. Fixed 2026-09-30 (caught in a pre-import team "
+               "validation pass): these "
                "same 139 orders used to also appear in purchase_order.csv (#50) under a different external-ID prefix "
                "(sap_po_* vs this file's sap_rfq_*) with no exclusion between the two builds - importing both would "
                "have created duplicate purchase.order records in Odoo. build_purchase_orders() now excludes any order "
                "whose LifeCycleStatusCodeText is In Preparation/In Approval, via the shared _RFQ_STAGE_STATES set - "
                "confirmed 0 id overlap between the two files after the fix.",
                raw_sources=("khpurchaseorder__PurchaseOrderCollection.json", "khpurchaseorder__SupplierCollection.json")),
-    ObjectSpec(50, "Purchase", "Transaction", "Purchase Orders", True, "purchase.order", "purchase_order", "built", "REAL DATA: cust/v1/khpurchaseorder custom OData service (user-imported Cloud Applications Studio BO, from byd-api-samples-main) - 15,658 POs (live tenant total minus the 139 pre-order documents now excluded to #49, see #49's note), line items confirmed. product_id/id on lines resolves once Products (#57) is wired up.",
+    ObjectSpec(50, "Purchase", "Transaction", "Purchase Orders", True, "purchase.order", "purchase_order", "built", "REAL DATA: cust/v1/khpurchaseorder custom OData service (user-imported Cloud Applications Studio BO, from byd-api-samples-main) - 15,704 POs, 45,847 lines after the 2026-10-01 live re-pull (live tenant total minus the 136 pre-order documents excluded to #49, see #49's note; was 15,658/45,624). product_id/id on lines resolves once Products (#57) is wired up. "
+               "2026-10-01 (team pre-import check, Tax + missing-product requested on PO lines): purchase_order_line.csv "
+               "now carries price_tax from ItemCollection's real TaxAmount (confirmed via live $metadata: no TaxCode/"
+               "rate field exists on this entity, only the computed amount, so this is informational, not a "
+               "taxes_id/id relation) - 0 blank across all 45,847 lines. product_id/id now goes through the same "
+               "_known_product_ids() guard already used on invoice/bill lines, for consistency (0 lines affected - "
+               "every ProductID present already resolves). 18,421/45,847 raw lines have NO ProductID at all - "
+               "checked directly against output_raw/: ItemTypeCode mostly 'Material' with real free-text "
+               "descriptions (e.g. 'F2 LASER CUT STENCILS') and no ProductSellerID/ProductStandardID either - "
+               "genuine non-catalog PO lines SAP allows without a Material Master link, confirmed not resolvable, "
+               "not a pipeline gap. Also: line item descriptions containing a literal \" were replaced with the "
+               "Unicode double-prime (U+2033) - see #63's note on the same fix, applied here too (0 lines with a "
+               "straight quote remaining, confirmed).",
                raw_sources=("khpurchaseorder__PurchaseOrderCollection.json", "khpurchaseorder__ItemCollection.json", "khpurchaseorder__SupplierCollection.json")),
     ObjectSpec(51, "Purchase", "Transaction", "Vendor Bills", False, "account.move", "account_move_vendor_bill", "built", "REAL DATA: khsupplierinvoice custom service - 55,449 invoices, 212,420 lines. Partner resolved via "
                "SellerPartyCollection. Fixed 2026-09-29, caught by a team cross-validation pass before Odoo import: "
@@ -360,15 +373,29 @@ REGISTRY = [
                "$inlinecount __count=0 (not RBAM_ERROR). khcustomerquote is imported, live, and authorized; the tenant "
                "genuinely just has zero customer quotes right now. Still pending_mapping because there's no data to "
                "confirm a transform against, not because of access - re-check if the tenant gets real quote data later."),
-    ObjectSpec(63, "Sales", "Transaction", "Sales Orders", True, "sale.order", "sale_order", "built", "REAL DATA: khsalesorder custom service - 4,308 orders, 9,921 lines. Partner resolved via "
-               "BuyerPartyCollection. Fixed 2026-09-28, caught by a team cross-validation pass before Odoo import: "
-               "state used to be hardcoded 'sale' for every order even though 47.8% (2,060/4,308) are Canceled/"
-               "Partially Canceled per CancellationStatusCode - now maps to Odoo's 'cancel' state. Line quantity/UoM "
-               "used to be entirely missing (every line would have imported at qty 0) - now summed from "
-               "ItemScheduleLineCollection (23,731 rows, already extracted but never read), preferring 'Confirmed' "
-               "schedule lines over 'Requested'; 1,725/9,921 lines (17.4%) still have no quantity because the item "
-               "genuinely has no schedule line on this tenant - real absence, not a bug.",
-               raw_sources=("khsalesorder__SalesOrderCollection.json", "khsalesorder__ItemCollection.json", "khsalesorder__BuyerPartyCollection.json", "khsalesorder__ItemProductCollection.json", "khsalesorder__ItemScheduleLineCollection.json")),
+    ObjectSpec(63, "Sales", "Transaction", "Sales Orders", True, "sale.order", "sale_order", "built", "REAL DATA: khsalesorder custom service - 4,326 orders, 9,947 lines (re-pulled live 2026-10-01, "
+               "grew from 4,308/9,921). Partner resolved via BuyerPartyCollection. Fixed 2026-09-28, caught by a "
+               "team cross-validation pass before Odoo import: state used to be hardcoded 'sale' for every order "
+               "even though ~48% are Canceled/Partially Canceled per CancellationStatusCode - now maps to Odoo's "
+               "'cancel' state. Line quantity/UoM used to be entirely missing (every line would have imported at "
+               "qty 0) - now summed from ItemScheduleLineCollection, preferring 'Confirmed' schedule lines over "
+               "'Requested'; a real minority of lines still have no quantity because the item genuinely has no "
+               "schedule line on this tenant - real absence, not a bug. "
+               "2026-10-01 (team pre-import check, Payment Terms/Sales Team/Salesperson requested): Payment Terms "
+               "confirmed absent - no PaymentTerms-equivalent property anywhere on khsalesorder's own $metadata. "
+               "Sales Team/Salesperson closed the same day once SAP access was restored (password had rotated, "
+               "causing tenant-wide 401s earlier) - added salesperson_name column, sourced from "
+               "SalesUnitPartyCollection re-extracted with $expand=SalesUnitPartyName (a real bug in "
+               "_flatten_expanded()/src/sap_client.py was found and fixed while wiring this up - it didn't handle "
+               "an expanded nav property arriving as a bare list, which is the shape this one came back in). "
+               "Resolution excludes whichever SalesUnitParty candidate matches the order's own resolved customer, "
+               "then takes the first remaining candidate's name - resolves for 4,325/4,326 orders (99.98%). Also "
+               "same date: line item descriptions containing a literal \" (inch-mark product dimensions, e.g. "
+               "2.76\"L X 1.97\"W) were replaced with the Unicode double-prime (U+2033) - the CSV itself was always "
+               "valid RFC 4180, but the escaped-quote-then-more-text pattern is a known rough edge for Excel's "
+               "quick-open CSV parser (reported as the product description 'shifting to the next cell'). Same fix "
+               "applied to purchase_order_line.csv.",
+               raw_sources=("khsalesorder__SalesOrderCollection.json", "khsalesorder__ItemCollection.json", "khsalesorder__BuyerPartyCollection.json", "khsalesorder__ItemProductCollection.json", "khsalesorder__ItemScheduleLineCollection.json", "khsalesorder__SalesUnitPartyCollection.json")),
     ObjectSpec(64, "Sales", "Transaction", "Deliveries", False, "stock.picking", "stock_picking_delivery", "built", "REAL DATA: khoutbounddelivery custom service, 130 deliveries, 157 lines. Partner resolved via BuyerPartyCollection (121/130 resolved)",
                raw_sources=("khoutbounddelivery__OutboundDeliveryCollection.json", "khoutbounddelivery__ItemCollection.json", "khoutbounddelivery__BuyerPartyCollection.json")),
     ObjectSpec(65, "Sales", "Transaction", "Customer Invoices", False, "account.move", "account_move_customer_invoice", "built", "REAL DATA: khcustomerinvoice custom service - 30,081 invoices, 35,514 lines. Partner resolved via "

@@ -234,7 +234,15 @@ SOURCES = [
     ("sap/byd/odata/cust/v1/khsalesorder", "ItemVendorPartyCollection"),                        # 2333 rows, 4 fields
     ("sap/byd/odata/cust/v1/khsalesorder", "ItemProductRecipientPartyCollection"),              # 2333 rows, 3 fields
     ("sap/byd/odata/cust/v1/khsalesorder", "ProductRecipientPartyCollection"),                  # 1557 rows, 6 fields
-    ("sap/byd/odata/cust/v1/khsalesorder", "SalesUnitPartyCollection"),                         # 1557 rows, 4 fields
+    # SalesUnitPartyName is expanded inline because SalesUnitPartyNameCollection can't be joined
+    # from its own file - it has no ParentObjectID/foreign key back to SalesUnitParty at all
+    # (confirmed: 0/34,457 ObjectIDs overlap between the two collections pulled separately).
+    # Same gotcha already solved for khsupplier/PurchasingData and khproductionorder/
+    # MainProductOutput. Fixed 2026-10-01 for Sales Team/Salesperson - also caught a real bug in
+    # _flatten_expanded() (src/sap_client.py) while wiring this up: it only handled an expanded
+    # nav arriving as a dict or {"results": [...]}, not a bare list, which is the shape this
+    # particular property came back in - fixed there too.
+    ("sap/byd/odata/cust/v1/khsalesorder", "SalesUnitPartyCollection", {"expand": "SalesUnitPartyName"}),  # 1557 rows, 4 fields
     ("sap/byd/odata/cust/v1/khsalesorder", "ProductRecipientPartyDetailsCollection"),           # 1477 rows, 17 fields
     ("sap/byd/odata/cust/v1/khsalesorder", "ProductRecipientPartyFormattedAddressCollection"),  # 1420 rows, 3 fields
     ("sap/byd/odata/cust/v1/khsalesorder", "ItemVendorFormattedAddressCollection"),             # 1420 rows, 2 fields

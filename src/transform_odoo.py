@@ -58,6 +58,22 @@ def write_csv(filename, rows, fieldnames):
     return path
 
 
+def _clean_text(value):
+    """
+    Replace a literal straight double-quote inside a free-text field (e.g. a product
+    description like 2.76"L X 1.97"W) with the Unicode double-prime (U+2033). The CSV itself
+    was always valid RFC 4180 (Python's csv module correctly doubles embedded quotes), but a
+    quoted field ending in an escaped quote immediately followed by more text is a known rough
+    edge for some CSV viewers (notably Excel's quick-open path), which can visually show the
+    rest of the field spilling into the next cell. Swapping the character removes the ambiguity
+    entirely without changing the meaning (a straight quote after a number is the inch mark, and
+    U+2033 is the correct typographic symbol for it anyway). 2026-10-01.
+    """
+    if not value:
+        return value
+    return value.replace('"', "″")
+
+
 def _country_ref(code):
     code = (code or "").strip().lower()
     return f"base.{code}" if code else ""
@@ -389,7 +405,7 @@ def build_res_partner():
 
 
 PO_HEADER_FIELDNAMES = ["id", "name", "partner_id/id", "date_order", "state", "currency_id/id", "amount_total"]
-PO_LINE_FIELDNAMES = ["id", "order_id/id", "product_id/id", "name", "product_qty", "price_unit"]
+PO_LINE_FIELDNAMES = ["id", "order_id/id", "product_id/id", "name", "product_qty", "price_unit", "price_tax"]
 
 # LifeCycleStatusCodeText values that mean "not yet a real order" - these orders are written to
 # purchase_order_rfq.csv (build_rfqs(), below) instead of purchase_order.csv, so the same real
@@ -415,6 +431,19 @@ def build_purchase_orders():
     exclusion, so the ~139 RFQ-stage orders existed twice under different external-ID prefixes
     (sap_po_* here, sap_rfq_* there) - importing both would have created duplicate purchase.order
     records in Odoo for the same real SAP order. Fixed 2026-09-30.
+
+    Two more real gaps fixed 2026-10-01 (team pre-import check):
+    1. price_tax now carries ItemCollection's real TaxAmount - present on every line (confirmed
+       via live $metadata, no TaxCode/tax-rate field exists on this entity, only the computed
+       monetary amount, so this is informational, not a taxes_id/id relation to account_tax.csv).
+    2. product_id/id now goes through the same _known_product_ids() guard already used on
+       customer-invoice/vendor-bill lines, instead of trusting any non-blank ProductID. Checked
+       the remaining ~40% blank product_id/id directly against output_raw/ first: 18,367/45,981
+       raw PO items have NO ProductID in SAP at all (ItemTypeCode mostly "Material", real
+       descriptions like "F2 LASER CUT STENCILS" - genuine free-text/non-catalog PO lines SAP
+       allows without a Material Master link, not something any field in the source can resolve
+       further). 0 of the remaining ProductID-bearing lines pointed at an unknown/deleted product
+       on this tenant at last check, but the guard is now applied here too for consistency.
     """
     headers = load_raw("PurchaseOrderCollection")["rows"]
     items = load_raw("ItemCollection", service_hint="khpurchaseorder")["rows"]
@@ -459,16 +488,16 @@ def build_purchase_orders():
         if po_object_id not in known_po_ids:
             continue
         product_id = item.get("ProductID")
+        product_known = product_id and product_id in _known_product_ids()
         line_rows.append(
             {
                 "id": external_id("sap_po_item", item.get("ObjectID")),
                 "order_id/id": external_id("sap_po", po_object_id),
-                # Products (#57 in the registry) aren't wired up yet - this reference will only
-                # resolve once product_template.csv exists with matching sap_prod_* external IDs.
-                "product_id/id": external_id("sap_prod", product_id) if product_id else "",
-                "name": item.get("Description") or product_id or item.get("ID", ""),
+                "product_id/id": external_id("sap_prod", product_id) if product_known else "",
+                "name": _clean_text(item.get("Description")) or product_id or item.get("ID", ""),
                 "product_qty": item.get("Quantity", "") or "0",
                 "price_unit": item.get("NetUnitPriceAmount", "") or "0",
+                "price_tax": item.get("TaxAmount", "") or "0",
             }
         )
 
@@ -805,7 +834,8 @@ def _group_by_parent(rows):
     return grouped
 
 
-SO_HEADER_FIELDNAMES = ["id", "name", "partner_id/id", "date_order", "state", "currency_id/id", "amount_total"]
+SO_HEADER_FIELDNAMES = ["id", "name", "partner_id/id", "date_order", "state", "currency_id/id",
+                        "amount_total", "salesperson_name"]
 SO_LINE_FIELDNAMES = ["id", "order_id/id", "product_id/id", "name", "price_subtotal",
                       "product_uom_qty", "product_uom/id"]
 
@@ -837,15 +867,51 @@ def build_sales_orders():
        is summed within a TypeCode ('Confirmed' preferred over 'Requested' - Confirmed is what
        SAP actually committed to deliver; only 9,920/9,921 items have any schedule line at all,
        the rest keep quantity 0 as a real, not fabricated, absence).
+
+    Sales Team / Salesperson / Payment Terms were all requested on this object 2026-10-01.
+    Payment Terms: confirmed absent. khsalesorder's live $metadata has no PaymentTerms-equivalent
+    property anywhere (checked every node name) - only PaymentControl (form/blocking/reference,
+    no terms) and PricingTerms (currency/price-date, no terms). A genuine structural gap on this
+    Business Object, not a missed field.
+
+    salesperson_name: real data, now wired in. SalesUnitPartyCollection bundles several party
+    roles per order (34,601 rows for 4,308 orders) with no role code to tell them apart (just
+    ObjectID/ParentObjectID/PartyID, confirmed via live $metadata) - same shape as
+    khpurchaseorder's SupplierCollection. Its FormattedName lives on a separate child entity
+    (SalesUnitPartyName) with NO foreign key back to the parent row as a plain OData property -
+    only reachable via $expand (extract_raw.py now pulls SalesUnitPartyCollection with
+    expand=SalesUnitPartyName; also caught and fixed a real bug in _flatten_expanded() while
+    wiring this up - it only handled an expanded nav arriving as a dict or {"results": [...]},
+    not a bare list, which is the shape this particular property came back in). Resolution:
+    exclude whichever candidate's PartyID matches the order's own resolved customer
+    (partner_id/id above - confirmed via sample data these duplicate the customer's own name,
+    e.g. "Dellorto India Pvt. Ltd." showing up as a SalesUnitParty row too), then take the first
+    remaining candidate's name - SAP has already resolved it server-side, whether the underlying
+    party is an individual employee or a sales org unit (of 219 distinct non-customer PartyIDs,
+    only 2 match a real employee's InternalID in khemployee; the rest are a different numeric
+    range this pipeline has no separate master data for). Plain text, not a user_id/id relation,
+    because most of these codes don't resolve to a specific res.users record - exposing the real
+    name beats fabricating a link.
     """
     headers = load_raw("SalesOrderCollection")["rows"]
     items = load_raw("ItemCollection", service_hint="khsalesorder")["rows"]
     item_products = load_raw("ItemProductCollection")["rows"]
     parties = load_raw("BuyerPartyCollection", service_hint="khsalesorder")["rows"]
     schedule_lines = load_raw("ItemScheduleLineCollection", service_hint="khsalesorder")["rows"]
+    sales_units = load_raw("SalesUnitPartyCollection", service_hint="khsalesorder")["rows"]
 
     party_by_order = _group_by_parent(parties)
     product_by_item = {p["ParentObjectID"]: p.get("ProductID") for p in item_products if p.get("ParentObjectID")}
+    sales_unit_by_order = _group_by_parent(sales_units)
+
+    def salesperson_name(order_object_id, customer_party_id):
+        for candidate in sales_unit_by_order.get(order_object_id, []):
+            if candidate.get("PartyID") == customer_party_id:
+                continue
+            name = candidate.get("SalesUnitPartyName.FormattedName")
+            if name:
+                return name
+        return ""
 
     schedule_by_item = {}
     for s in schedule_lines:
@@ -883,6 +949,7 @@ def build_sales_orders():
                     if h.get("NetAmountCurrencyCode") else ""
                 ),
                 "amount_total": h.get("NetAmount", "") or "0",
+                "salesperson_name": salesperson_name(object_id, partner),
             }
         )
 
@@ -899,7 +966,7 @@ def build_sales_orders():
                 "id": external_id("sap_so_item", object_id),
                 "order_id/id": external_id("sap_so", parent),
                 "product_id/id": external_id("sap_prod", product_id) if product_id else "",
-                "name": item.get("Description") or product_id or item.get("ID", ""),
+                "name": _clean_text(item.get("Description")) or product_id or item.get("ID", ""),
                 "price_subtotal": item.get("NetAmount", "") or "0",
                 "product_uom_qty": qty,
                 "product_uom/id": external_id("sap_uom", unit_code) if unit_code else "",
