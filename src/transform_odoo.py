@@ -2698,6 +2698,61 @@ def build_rfqs():
     }
 
 
+RFQ_COMBINED_FIELDNAMES = [
+    "id", "name", "partner_id/id", "date_order", "state", "currency_id/id", "amount_total",
+    "amount_tax", "incoterms", "incoterms_location", "buyer_responsible_name", "payment_terms",
+    "order_line/product_id/id", "order_line/name", "order_line/product_qty",
+    "order_line/price_unit", "order_line/price_tax",
+]
+
+
+def build_rfq_combined():
+    """
+    Deliverable convenience file: purchase_order_rfq.csv (headers, built by build_rfqs()) and
+    purchase_order_rfq_line.csv (lines, same function) merged into ONE file using Odoo's standard
+    one2many CSV import convention - same pattern as product_pricelist_with_items.csv and
+    mrp_bom_with_lines.csv. An RFQ header row carries its first line item's order_line/* columns
+    (purchase.order's real one2many field name is "order_line", not "order_line_ids"); each
+    further line for the same RFQ is a follow-up row with the header columns left blank so Odoo
+    groups it under the row above. Must run after build_rfqs() in TRANSFORMS. Added 2026-10-01.
+    """
+    headers = list(csv.DictReader(open(os.path.join(ODOO_DIR, "purchase_order_rfq.csv"), encoding="utf-8")))
+    items = list(csv.DictReader(open(os.path.join(ODOO_DIR, "purchase_order_rfq_line.csv"), encoding="utf-8")))
+
+    items_by_rfq = {}
+    for item in items:
+        items_by_rfq.setdefault(item["order_id/id"], []).append(item)
+
+    header_cols = ["id", "name", "partner_id/id", "date_order", "state", "currency_id/id",
+                   "amount_total", "amount_tax", "incoterms", "incoterms_location",
+                   "buyer_responsible_name", "payment_terms"]
+
+    rows = []
+    for header in headers:
+        lines = items_by_rfq.get(header["id"], [])
+        if not lines:
+            row = {col: header[col] for col in header_cols}
+            row.update({
+                "order_line/product_id/id": "", "order_line/name": "",
+                "order_line/product_qty": "", "order_line/price_unit": "",
+                "order_line/price_tax": "",
+            })
+            rows.append(row)
+            continue
+        for i, line in enumerate(lines):
+            row = {col: (header[col] if i == 0 else "") for col in header_cols}
+            row.update({
+                "order_line/product_id/id": line["product_id/id"],
+                "order_line/name": line["name"],
+                "order_line/product_qty": line["product_qty"],
+                "order_line/price_unit": line["price_unit"],
+                "order_line/price_tax": line["price_tax"],
+            })
+            rows.append(row)
+    write_csv("purchase_order_rfq_with_lines.csv", rows, RFQ_COMBINED_FIELDNAMES)
+    return {"purchase_order_rfq_with_lines.csv": len(rows)}
+
+
 BOM_FIELDNAMES = ["id", "product_tmpl_id/id", "product_qty", "code", "type"]
 BOM_LINE_FIELDNAMES = ["id", "bom_id/id", "product_id/id", "product_qty"]
 
@@ -3067,6 +3122,7 @@ TRANSFORMS = [
     ("product_pricelist_with_items (combined deliverable)", build_pricelist_combined),
     ("mrp_production_history (closed orders)", build_production_history),
     ("purchase_order_rfq (draft purchase orders)", build_rfqs),
+    ("purchase_order_rfq_with_lines (combined deliverable)", build_rfq_combined),
     ("stock_quant_adjustment (inventory balances)", build_inventory),
     ("mrp_bom / mrp_bom_line (bills of material)", build_boms),
     ("mrp_bom_with_lines (combined deliverable)", build_bom_combined),
