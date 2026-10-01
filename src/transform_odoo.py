@@ -894,7 +894,7 @@ def _group_by_parent(rows):
 SO_HEADER_FIELDNAMES = ["id", "name", "partner_id/id", "date_order", "state", "currency_id/id",
                         "amount_total", "amount_tax", "salesperson_name"]
 SO_LINE_FIELDNAMES = ["id", "order_id/id", "product_id/id", "name", "price_subtotal",
-                      "product_uom_qty", "product_uom/id", "discount"]
+                      "price_unit", "product_uom_qty", "product_uom/id", "discount"]
 
 # CancellationStatusCode, decoded via khsalesorder's own field (checked live, 2026-09-28):
 # 1=Not Canceled, 4=Canceled, 5=Partially Canceled.
@@ -972,6 +972,19 @@ def build_sales_orders():
     docstring, "this tenant has no discount rules"), confirmed again here (basically 0 across all
     148,805 item price components, one single non-zero exception) - added anyway for
     completeness/transparency rather than omitted, since the field is real, just empty.
+
+    price_unit added 2026-10-01 (team question: "is unit price there?" - it wasn't). Sourced
+    from ItemPriceComponentCollection's "List Price" component (DecimalValue, already a per-1-
+    unit amount - BaseDecimalValue is 1 on every row checked). Real finding while adding this:
+    the List Price component's own CalculationBasisQuantity (the quantity its CalculatedAmount
+    was actually priced against) does NOT always match the "Confirmed" schedule-line quantity
+    this transform uses for product_uom_qty - checked directly, 4,662/9,902 lines (47%) differ.
+    This is a genuine SAP data characteristic, not a transform bug: pricing is locked in against
+    whatever quantity was on the order at pricing time, while the schedule line's "Confirmed"
+    quantity reflects what was *later* actually committed for delivery - the two fields answer
+    different questions and are expected to diverge when a quantity changes after pricing. Do
+    not derive price_unit as price_subtotal/product_uom_qty; use this real field instead, which
+    stays correct regardless of that divergence.
     """
     headers = load_raw("SalesOrderCollection")["rows"]
     items = load_raw("ItemCollection", service_hint="khsalesorder")["rows"]
@@ -987,6 +1000,10 @@ def build_sales_orders():
     discount_by_item = {
         c["ParentObjectID"]: c.get("DecimalValue", "0")
         for c in item_price_components if c.get("TypeCodeText") == "Product Discount (%)"
+    }
+    unit_price_by_item = {
+        c["ParentObjectID"]: c.get("DecimalValue", "0")
+        for c in item_price_components if c.get("TypeCodeText") == "List Price"
     }
 
     def salesperson_name(order_object_id, customer_party_id):
@@ -1054,6 +1071,7 @@ def build_sales_orders():
                 "product_id/id": external_id("sap_prod", product_id) if product_id else "",
                 "name": _clean_text(item.get("Description")) or product_id or item.get("ID", ""),
                 "price_subtotal": item.get("NetAmount", "") or "0",
+                "price_unit": unit_price_by_item.get(object_id, "0"),
                 "product_uom_qty": qty,
                 "product_uom/id": external_id("sap_uom", unit_code) if unit_code else "",
                 "discount": discount_by_item.get(object_id, "0"),

@@ -416,7 +416,14 @@ REGISTRY = [
                "2.76\"L X 1.97\"W) were replaced with the Unicode double-prime (U+2033) - the CSV itself was always "
                "valid RFC 4180, but the escaped-quote-then-more-text pattern is a known rough edge for Excel's "
                "quick-open CSV parser (reported as the product description 'shifting to the next cell'). Same fix "
-               "applied to purchase_order_line.csv.",
+               "applied to purchase_order_line.csv. "
+               "price_unit added same date (team question: was unit price there? - it wasn't) - sourced from "
+               "ItemPriceComponentCollection's 'List Price' component, 9,943/9,947 lines (99.96%). Real finding "
+               "while adding it: that component's own pricing-basis quantity does not always match the 'Confirmed' "
+               "schedule-line quantity used for product_uom_qty - 4,662/9,902 lines (47%) differ. Genuine SAP "
+               "behaviour, not a bug: price is locked in against the quantity on the order at pricing time, while "
+               "the schedule line's Confirmed quantity reflects what was later actually committed for delivery. "
+               "price_subtotal/price_unit must not be derived from product_uom_qty on this data.",
                raw_sources=("khsalesorder__SalesOrderCollection.json", "khsalesorder__ItemCollection.json", "khsalesorder__BuyerPartyCollection.json", "khsalesorder__ItemProductCollection.json", "khsalesorder__ItemScheduleLineCollection.json", "khsalesorder__SalesUnitPartyCollection.json")),
     ObjectSpec(64, "Sales", "Transaction", "Deliveries", False, "stock.picking", "stock_picking_delivery", "built", "REAL DATA: khoutbounddelivery custom service, 130 deliveries, 157 lines. Partner resolved via BuyerPartyCollection (121/130 resolved)",
                raw_sources=("khoutbounddelivery__OutboundDeliveryCollection.json", "khoutbounddelivery__ItemCollection.json", "khoutbounddelivery__BuyerPartyCollection.json")),
