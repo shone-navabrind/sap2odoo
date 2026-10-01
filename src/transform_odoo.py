@@ -926,10 +926,21 @@ def build_sales_orders():
        the rest keep quantity 0 as a real, not fabricated, absence).
 
     Sales Team / Salesperson / Payment Terms were all requested on this object 2026-10-01.
-    Payment Terms: confirmed absent. khsalesorder's live $metadata has no PaymentTerms-equivalent
-    property anywhere (checked every node name) - only PaymentControl (form/blocking/reference,
-    no terms) and PricingTerms (currency/price-date, no terms). A genuine structural gap on this
-    Business Object, not a missed field.
+    Payment Terms: confirmed absent, twice over. First via khsalesorder's live $metadata (no
+    PaymentTerms-equivalent property anywhere - only PaymentControl, form/blocking/reference, no
+    terms; and PricingTerms, currency/price-date, no terms). Then, since Purchase Orders turned
+    out to have a real-but-never-extracted PaymentTerms node (see build_purchase_orders()) that
+    the metadata snapshot alone wouldn't have shown was addable without checking the OData
+    Editor directly, the same check was done live for Sales Orders too: opened khsalesorder in
+    SAP's OData Editor (Application and User Management -> OData Services -> Custom OData
+    Services) and scanned every root-level node on the underlying standard SalesOrder Business
+    Object itself (not just the custom service) alphabetically - it goes straight from
+    PaymentControl to PeriodTerms, nothing in between. So this is a genuine structural gap on the
+    standard Business Object, not something addable by exposing more of it (unlike Purchase
+    Orders) - the "30 days net" value visible on the live Sales Order UI is computed/displayed
+    from elsewhere (most likely the customer's own default payment terms at display time), not
+    stored as a queryable field on the Sales Order itself. No OData Editor change was made (the
+    service was opened read-only and closed without saving).
 
     salesperson_name: real data, now wired in. SalesUnitPartyCollection bundles several party
     roles per order (34,601 rows for 4,308 orders) with no role code to tell them apart (just
