@@ -41,6 +41,11 @@ SOURCES = [
     ("sap/byd/odata/cust/v1/khpurchaseorder", "PurchaseOrderCollection"),  # Custom service, 655 POs
     ("sap/byd/odata/cust/v1/khpurchaseorder", "ItemCollection"),  # PO line items, 1861 rows
     ("sap/byd/odata/cust/v1/khpurchaseorder", "SupplierCollection"),  # Links PO -> supplier BP (PartyID)
+    # PaymentTerms was already a real node on khpurchaseorder's own custom BO (confirmed via its
+    # metadata.xml snapshot) - just never extracted. Found 2026-10-01 while confirming Payment
+    # Terms was genuinely missing on khsalesorder (it IS missing there, needs a live OData Editor
+    # fix - this one doesn't).
+    ("sap/byd/odata/cust/v1/khpurchaseorder", "PaymentTermsCollection"),
     ("sap/byd/odata/cust/v1/vmumaterial", "MaterialCollection"),  # Product master, 3058 materials
     ("sap/byd/odata/cust/v1/vmumaterialvaluationdata", "MaterialValuationDataCollection"),  # Material -> valuation link, 3021 rows
     ("sap/byd/odata/cust/v1/vmumaterialvaluationdata", "ValuationPriceCollection"),  # Cost price history, 1238 rows

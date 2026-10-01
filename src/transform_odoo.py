@@ -405,7 +405,8 @@ def build_res_partner():
 
 
 PO_HEADER_FIELDNAMES = ["id", "name", "partner_id/id", "date_order", "state", "currency_id/id",
-                        "amount_total", "incoterms", "incoterms_location", "buyer_responsible_name"]
+                        "amount_total", "amount_tax", "incoterms", "incoterms_location",
+                        "buyer_responsible_name", "payment_terms"]
 PO_LINE_FIELDNAMES = ["id", "order_id/id", "product_id/id", "name", "product_qty", "price_unit", "price_tax"]
 
 # LifeCycleStatusCodeText values that mean "not yet a real order" - these orders are written to
@@ -458,11 +459,19 @@ def build_purchase_orders():
        "G020"/"G232" are real EmployeeIDs in khemployee. Picks the first candidate that's a known
        EmployeeID rather than the first row, matching the live UI's "Buyer Responsible: G020 -
        Maryann Fernandes" for that PO exactly.
+
+    Two more closed 2026-10-01: amount_tax (header-level, from PurchaseOrderCollection's own
+    TotalTaxAmount - already present, just unmapped) and payment_terms. Payment Terms turned out
+    to NOT need a live OData Editor change here, unlike Sales Orders (see build_sales_orders()) -
+    khpurchaseorder's own metadata.xml snapshot already had a "PaymentTerms" EntityType and
+    PurchaseOrder_PaymentTerms navigation property, just never added to extract_raw.py's
+    SOURCES. Pulled live 2026-10-01 (15,835 rows, one per PO) and wired in directly.
     """
     headers = load_raw("PurchaseOrderCollection")["rows"]
     items = load_raw("ItemCollection", service_hint="khpurchaseorder")["rows"]
     suppliers = load_raw("SupplierCollection", service_hint="khpurchaseorder")["rows"]
     employees_responsible = load_raw("EmployeeResponsibleCollection", service_hint="khpurchaseorder")["rows"]
+    payment_terms = load_raw("PaymentTermsCollection", service_hint="khpurchaseorder")["rows"]
 
     # SupplierCollection bundles several party roles per PO (3529 rows for 655 POs), so taking
     # the first row picked the wrong party or an empty one 33% of the time. Type-aware
@@ -471,6 +480,8 @@ def build_purchase_orders():
     party_by_po = _group_by_parent(suppliers)
     employee_by_po = _group_by_parent(employees_responsible)
     employee_names = _employee_name_by_code()
+    payment_terms_by_po = {p["ParentObjectID"]: p.get("PaymentTermsCodeText", "")
+                            for p in payment_terms if p.get("ParentObjectID")}
 
     header_rows = []
     known_po_ids = set()
@@ -500,9 +511,11 @@ def build_purchase_orders():
                     if header.get("CurrencyCode") else ""
                 ),
                 "amount_total": header.get("TotalNetAmount", "") or "0",
+                "amount_tax": header.get("TotalTaxAmount", "") or "0",
                 "incoterms": header.get("IncotermsCodeText", ""),
                 "incoterms_location": header.get("IncotermsLocationName", ""),
                 "buyer_responsible_name": employee_names.get(buyer_code, "") if buyer_code else "",
+                "payment_terms": payment_terms_by_po.get(object_id, ""),
             }
         )
 
@@ -879,9 +892,9 @@ def _group_by_parent(rows):
 
 
 SO_HEADER_FIELDNAMES = ["id", "name", "partner_id/id", "date_order", "state", "currency_id/id",
-                        "amount_total", "salesperson_name"]
+                        "amount_total", "amount_tax", "salesperson_name"]
 SO_LINE_FIELDNAMES = ["id", "order_id/id", "product_id/id", "name", "price_subtotal",
-                      "product_uom_qty", "product_uom/id"]
+                      "product_uom_qty", "product_uom/id", "discount"]
 
 # CancellationStatusCode, decoded via khsalesorder's own field (checked live, 2026-09-28):
 # 1=Not Canceled, 4=Canceled, 5=Partially Canceled.
@@ -936,6 +949,18 @@ def build_sales_orders():
     range this pipeline has no separate master data for). Plain text, not a user_id/id relation,
     because most of these codes don't resolve to a specific res.users record - exposing the real
     name beats fabricating a link.
+
+    Two more closed 2026-10-01 (team request, Tax + Discount confirmed missing on both SO/PO
+    lines): amount_tax (header) is SalesOrderCollection's own TaxAmount field - already present,
+    just unmapped (matches the "Tax: X INR" total shown under Items on the live UI). discount
+    (line) is ItemPriceComponentCollection's "Product Discount (%)" component, keyed by Item
+    ObjectID - already extracted, just unused. Line-level Tax was investigated too but NOT added:
+    every one of the 9,947 "Tax" price components on this tenant has CalculatedAmount 0 (real
+    tax lives only at the header level here); the real per-line "Discount" component was already
+    found to be 0 tenant-wide for sheet object #60 (Discount Rules - see build_pricelist_items()'s
+    docstring, "this tenant has no discount rules"), confirmed again here (basically 0 across all
+    148,805 item price components, one single non-zero exception) - added anyway for
+    completeness/transparency rather than omitted, since the field is real, just empty.
     """
     headers = load_raw("SalesOrderCollection")["rows"]
     items = load_raw("ItemCollection", service_hint="khsalesorder")["rows"]
@@ -943,10 +968,15 @@ def build_sales_orders():
     parties = load_raw("BuyerPartyCollection", service_hint="khsalesorder")["rows"]
     schedule_lines = load_raw("ItemScheduleLineCollection", service_hint="khsalesorder")["rows"]
     sales_units = load_raw("SalesUnitPartyCollection", service_hint="khsalesorder")["rows"]
+    item_price_components = load_raw("ItemPriceComponentCollection", service_hint="khsalesorder")["rows"]
 
     party_by_order = _group_by_parent(parties)
     product_by_item = {p["ParentObjectID"]: p.get("ProductID") for p in item_products if p.get("ParentObjectID")}
     sales_unit_by_order = _group_by_parent(sales_units)
+    discount_by_item = {
+        c["ParentObjectID"]: c.get("DecimalValue", "0")
+        for c in item_price_components if c.get("TypeCodeText") == "Product Discount (%)"
+    }
 
     def salesperson_name(order_object_id, customer_party_id):
         for candidate in sales_unit_by_order.get(order_object_id, []):
@@ -993,6 +1023,7 @@ def build_sales_orders():
                     if h.get("NetAmountCurrencyCode") else ""
                 ),
                 "amount_total": h.get("NetAmount", "") or "0",
+                "amount_tax": h.get("TaxAmount", "") or "0",
                 "salesperson_name": salesperson_name(object_id, partner),
             }
         )
@@ -1014,6 +1045,7 @@ def build_sales_orders():
                 "price_subtotal": item.get("NetAmount", "") or "0",
                 "product_uom_qty": qty,
                 "product_uom/id": external_id("sap_uom", unit_code) if unit_code else "",
+                "discount": discount_by_item.get(object_id, "0"),
             }
         )
 
