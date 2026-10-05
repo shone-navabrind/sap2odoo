@@ -3052,10 +3052,34 @@ def build_routing_operations():
     never transformed - #44's own docstring flagged this as a known gap. The raw data is one
     row per operation PER PRODUCTION ORDER, not a reusable routing template, so importing it
     as-is would create tens of thousands of duplicate "routing steps". Deduplicated instead by
-    (operation ID, resource) among "Make" (category=1) rows - the real distinct operation types
-    actually performed on each work center - which collapses cleanly to 22 combinations (SMT on
-    work center 10100, AOI on 10200, wave soldering on 10500, etc.), matching the tenant's own
-    process reality: this is genuinely one production line with a fixed sequence of stations.
+    operation ID among "Make" (TypeCode 1) and "Check" (TypeCode 8) rows - "Supply" (TypeCode
+    10, the SO-1/move-all step seen in the client's own BoO Structure screenshots) never carries
+    a ResourceID on this tenant and drops out naturally.
+
+    Fixed 2026-10-05 after the client shared their own Equipment IDs.xls (Equipment ID ->
+    Operation ID -> Activity ID master list) in the BOM/BOO email thread, used here to cross-
+    validate this output for the first time since it was built:
+
+    1. "Check" operations (TypeCode 8 - INSPECTION, final inspection at work center 10800,
+       9,221 raw rows) were being silently dropped entirely by the old `!= "Make"` filter -
+       INSPECTION never appeared in mrp_routing_workcenter_ops.csv at all, even though it's a
+       real, high-volume production step on this tenant's line.
+    2. The old code kept every distinct (operation ID, resource) pair it saw, with no frequency
+       check. A handful of production orders (46-133 out of thousands) have an operation ID
+       paired with a resource that belongs to a DIFFERENT operation per the client's own
+       reference table (e.g. "TESTING" on resource 10400, whose real description is "MANUAL
+       INSERTION OF COMPONENTS") - a small, genuine SAP data-entry inconsistency on those
+       specific orders, not a second valid routing. Taking every pair produced 5 conflicting
+       duplicate rows (ICT, TESTING, SINGULATN, PACKING, AUTOCOAT each showed up twice, once
+       correctly and once wrong). Now takes the MAJORITY resource per operation ID instead,
+       which resolves every one of those 5 conflicts to the value the client's master table
+       confirms is correct, and still surfaces the minority resource too (as a documented
+       "noise" count) rather than silently discarding the discrepancy.
+
+    Cross-checked the result against Equipment IDs.xls directly: all 18 of the client's listed
+    Operation ID -> Equipment ID pairs now match exactly (CLEANING/11200 is the one row in their
+    list with zero matching raw rows on this tenant - a defined-but-never-executed step, not a
+    gap in this transform).
 
     Cycle time is deliberately NOT included: ProcessingNetDuration varies per order (it's an
     actual observed duration, not a standard planned time), so there is no single correct
@@ -3069,17 +3093,19 @@ def build_routing_operations():
     service-creation work those two got.
     """
     rows = load_raw("OperationCollection", service_hint="khproductionorder")["rows"]
-    seen = {}
+    counts = {}
     for r in rows:
-        if r.get("TypeCodeText") != "Make":
+        if r.get("TypeCodeText") not in ("Make", "Check"):
             continue
         op_id, resource_id = r.get("ID"), r.get("ResourceID")
         if not op_id or not resource_id:
             continue
-        seen[(op_id, resource_id)] = r
+        by_resource = counts.setdefault(op_id, {})
+        by_resource[resource_id] = by_resource.get(resource_id, 0) + 1
 
     out_rows = []
-    for (op_id, resource_id), r in seen.items():
+    for op_id, by_resource in counts.items():
+        resource_id = max(by_resource, key=by_resource.get)
         out_rows.append({
             "id": external_id("sap_routingop", f"{op_id}_{resource_id}"),
             "name": op_id,
