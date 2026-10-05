@@ -262,7 +262,20 @@ REGISTRY = [
                              "khbomvariant__ProductionBillOfMaterialItemGroupCollection.json",
                              "khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection.json")),
     ObjectSpec(41, "Manufacturing", "Master", "Routings", False, "mrp.routing.workcenter", "mrp_routing_workcenter", "pending_mapping", "Data source confirmed: 'Released Execution Production Model Operation' (SCM_REPM_OPER)"),
-    ObjectSpec(42, "Manufacturing", "Master", "Work Centers", True, "mrp.workcenter", "mrp_workcenter", "built", "REAL DATA: derived from khproductionorder's OperationCollection (ResourceID/ResourceDescription), deduplicated - no dedicated Work Center master service found, but this data was already on hand (used for #44) - 17 distinct work centers as of 2026-09-25 (was 18 earlier - minor drift in the source data, negligible)",
+    ObjectSpec(42, "Manufacturing", "Master", "Work Centers", True, "mrp.workcenter", "mrp_workcenter", "built", "REAL DATA: derived from khproductionorder's OperationCollection (ResourceID/ResourceDescription), deduplicated - no dedicated Work Center master service found, but this data was already on hand (used for #44) - 17 distinct work centers as of 2026-09-25 (was 18 earlier - minor drift in the source data, negligible). "
+               "Work Center COST investigated 2026-10-05 (team question): found a real, live, module-exposed report "
+               "for exactly this - 'Valid Resource Actual Cost Components' (FININVU17, fin_inventoryvaluation_analytics.svc/"
+               "RPFININVU17_Q0002QueryResults), with CRESOURCE/TRESOURCE (the same Resource = Work Center ID already used "
+               "here) and real per-unit/total cost fields (KCPERUNITCOST, KCTOTAL_COST). NOT a guess - found via the "
+               "Design Data Sources catalog, confirmed as a real EntityType on the correct per-module service (not the "
+               "catch-all). But: this report declares 4 mandatory parameters (Company, Set of Books, Key Date, Currency "
+               "Conversion Date) and returns 0 rows for every combination tried - real Company code '70000' (confirmed "
+               "correct via #13 Journal Entries) plus 5 different plausible Set of Books codes, across 6 different key "
+               "dates spanning 2019-2026 - all syntactically accepted (no error), all empty. This is consistent with "
+               "Resource Actual Costing simply never having been configured/maintained in Business Configuration for "
+               "this tenant (an optional ByDesign scoping item, not a technical gap) - genuine absence, not a pipeline "
+               "issue, same conclusion pattern as the Discount Rules finding. Not added to output_odoo/ since there is "
+               "no real data behind it on this tenant.",
                raw_sources=("khproductionorder__OperationCollection.json",)),
     ObjectSpec(43, "Manufacturing", "Master", "Operations", False, "mrp.routing.workcenter", "mrp_routing_workcenter_ops", "built",
                "REAL DATA, closed 2026-09-28: khproductionorder/OperationCollection was already raw-extracted (82,859 "

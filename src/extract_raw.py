@@ -923,6 +923,21 @@ SOURCES = [
         "CFXA_UUID", "KCACQUISITION_COSTS", "KCACCUMULATED_DEPR", "KCPOSTED_DEPR", "KCNETBOOKVALUE_END_OF",
     ]}),                                                                                                 # per-asset depreciation values
 
+    # "Valid Resource Actual Cost Components" - found via the Design Data Sources catalog
+    # (FININVU17) while checking whether Work Center cost data exists anywhere, 2026-10-05.
+    # CRESOURCE/TRESOURCE is the same Resource = Work Center ID already used for mrp_workcenter.csv,
+    # and KCPERUNITCOST/KCTOTAL_COST are real cost fields - but this report has 4 mandatory
+    # parameters (Company/Set of Books/Key Date/Currency Conversion Date) and returns 0 rows for
+    # every combination tried (real Company '70000', 5 plausible Set of Books codes, 6 key dates
+    # 2019-2026 - all accepted without error, all empty). Kept in SOURCES (always extracts 0 rows,
+    # harmlessly) as documentation that this was checked, not skipped - conclusion: Resource Actual
+    # Costing was never configured/maintained in this tenant's Business Configuration, a genuine
+    # absence, not a technical gap. See #42's registry note.
+    ("sap/byd/odata/fin_inventoryvaluation_analytics.svc", "RPFININVU17_Q0002QueryResults", {"select": [
+        "CRESOURCE", "TRESOURCE", "CCOST_CENTRE", "TCOST_CENTRE", "CVAL_S_DATE", "CVAL_E_DATE",
+        "KCCOSTQTY", "KCPERUNITCOST", "KCPRICEUNIT", "KCTOTAL_COST",
+    ]}),                                                                                                 # resource/work center cost rates - confirmed 0 rows, see comment above
+
     # --- khbatch: real production/expiration dates for stock_lot.csv (#30), closed 2026-09-28
     # after the user asked where these fields were. The thin IdentifiedStock node embedded in
     # khgoodsandactivityconfirmation only exposes 4 fields (no dates at all); IdentifiedStock is
