@@ -261,7 +261,27 @@ REGISTRY = [
                              "khbomvariant__ProductionBillOfMaterialVariantCollection.json",
                              "khbomvariant__ProductionBillOfMaterialItemGroupCollection.json",
                              "khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection.json")),
-    ObjectSpec(41, "Manufacturing", "Master", "Routings", False, "mrp.routing.workcenter", "mrp_routing_workcenter", "pending_mapping", "Data source confirmed: 'Released Execution Production Model Operation' (SCM_REPM_OPER)"),
+    ObjectSpec(41, "Manufacturing", "Master", "Routings", False, "mrp.routing.workcenter", "mrp_bom_operation", "built",
+               "Closed 2026-10-06 - the BOM-to-Operations link the client's own 'SAP - BOM and BOO' email thread flagged "
+               "as missing (Sumit: 'I cannot see the operations related to BOM'). Rahul's screenshot showed BOM and BOO "
+               "joined only via a third object, Production Model - confirmed by building a live custom OData service "
+               "(khroutingoperation/ProductionModelCollection, BO ProductionModel) that it carries NO stored "
+               "BillOfMaterial/BillOfOperations field at all; the two are linked purely by sharing the same ID. That ID "
+               "was already sitting on every khproductionorder/ProductionOrderCollection row (BillOfMaterialID, "
+               "BillOfOperationsID, MainProductOutput.ProductID - all 9,590 orders have all three; 335 distinct BOM IDs "
+               "referenced, all 335 match a real khbomvariant header exactly), so no further OData work was needed - "
+               "just reading two already-extracted raw files together. Per-BOM operation set comes from grouping "
+               "OperationCollection (same source as #43 Operations) by each order's own BillOfMaterialID instead of "
+               "pooling tenant-wide, which genuinely varies by product (confirmed against the client's own BoO "
+               "Structure screenshots - not every BOM's orders run WAVE/FORMING/etc). sequence is the work center's own "
+               "ID (10100, 10200, ...), a real physical-line position confirmed against the client's Equipment IDs.xls. "
+               "382 of 448 BOM variants have at least one operation (the other 66 headers have no production order "
+               "history yet - a real gap in what's been run, not a pipeline gap). See build_bom_operations() in "
+               "src/transform_odoo.py.",
+               raw_sources=("khproductionorder__ProductionOrderCollection.json",
+                            "khproductionorder__OperationCollection.json",
+                            "khbomvariant__ProductionBillOfMaterialCollection.json",
+                            "khbomvariant__ProductionBillOfMaterialVariantCollection.json")),
     ObjectSpec(42, "Manufacturing", "Master", "Work Centers", True, "mrp.workcenter", "mrp_workcenter", "built", "REAL DATA: derived from khproductionorder's OperationCollection (ResourceID/ResourceDescription), deduplicated - no dedicated Work Center master service found, but this data was already on hand (used for #44) - 17 distinct work centers as of 2026-09-25 (was 18 earlier - minor drift in the source data, negligible). "
                "Work Center COST investigated 2026-10-05 (team question): found a real, live, module-exposed report "
                "for exactly this - 'Valid Resource Actual Cost Components' (FININVU17, fin_inventoryvaluation_analytics.svc/"

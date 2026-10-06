@@ -3115,6 +3115,90 @@ def build_routing_operations():
     return {"mrp_routing_workcenter_ops.csv": len(out_rows)}
 
 
+BOM_OPERATION_FIELDNAMES = ["id", "bom_id/id", "workcenter_id/id", "name", "sequence"]
+
+
+def build_bom_operations():
+    """
+    Closes sheet object #41 (Routings - the BOM-to-Operations link), raised in the client's
+    "SAP - BOM and BOO" email thread 2026-10-05 (Sumit: "I cannot see the operations related to
+    BOM"). The screenshot Rahul sent shows BOM and BOO joined only through a third object,
+    Production Model, which carries no BillOfMaterial/BillOfOperations field of its own (checked
+    directly via a live custom OData service, khroutingoperation/ProductionModelCollection,
+    built the same day) - the two are linked purely by sharing the same ID, not by any stored
+    relationship.
+
+    That ID also turned out to already be sitting in khproductionorder/ProductionOrderCollection,
+    extracted since the start of this project but never read for this purpose: every production
+    order carries its own BillOfMaterialID, BillOfOperationsID and MainProductOutput.ProductID
+    directly. All 9,590 orders have all three populated; 335 distinct BOM IDs are referenced, and
+    every one matches a real khbomvariant header ID exactly (0 unmatched) - so no new extraction
+    or OData work was needed after all, just reading two already-extracted raw files together.
+
+    Per-BOM operation set: OperationCollection rows (same source as build_routing_operations())
+    are grouped by their production order's BillOfMaterialID instead of pooled tenant-wide, so
+    each BOM only lists the operations its own orders actually ran (confirmed this varies by
+    product - e.g. not every BOM's orders include WAVE or FORMING - matching the client's own
+    BoO Structure screenshots, where different products show different operation sequences).
+    Same majority-resource rule as build_routing_operations() resolves the rare mis-keyed order.
+
+    sequence is derived from the work center's own ID (10100, 10200, ...), which is a real
+    physical-line position (confirmed against the client's Equipment IDs.xls - the IDs are
+    already laid out in line order), not a fabricated ranking.
+
+    Components stay attached to the BOM header, not a specific variant (same known limitation
+    documented in build_boms()): a header with more than one variant repeats its operation list
+    for each variant, because the source data doesn't distinguish further.
+    """
+    orders = load_raw("ProductionOrderCollection", service_hint="khproductionorder")["rows"]
+    bom_id_by_order = {r["ObjectID"]: r["BillOfMaterialID"]
+                        for r in orders if r.get("ObjectID") and r.get("BillOfMaterialID")}
+
+    operations = load_raw("OperationCollection", service_hint="khproductionorder")["rows"]
+    counts_by_bom = {}
+    for r in operations:
+        if r.get("TypeCodeText") not in ("Make", "Check"):
+            continue
+        op_id, resource_id = r.get("ID"), r.get("ResourceID")
+        bom_id = bom_id_by_order.get(r.get("ParentObjectID"))
+        if not (op_id and resource_id and bom_id):
+            continue
+        by_resource = counts_by_bom.setdefault(bom_id, {}).setdefault(op_id, {})
+        by_resource[resource_id] = by_resource.get(resource_id, 0) + 1
+
+    headers = {r["ObjectID"]: r for r in load_raw("ProductionBillOfMaterialCollection")["rows"]
+               if r.get("ObjectID")}
+    variants = load_raw("ProductionBillOfMaterialVariantCollection")["rows"]
+
+    out_rows = []
+    for variant in variants:
+        if variant.get("ObsoleteIndicator"):
+            continue
+        variant_object_id = variant.get("ObjectID")
+        header = headers.get(variant.get("ParentObjectID"))
+        if not variant_object_id or not header:
+            continue
+        bom_code = header.get("ID")
+        operations_for_bom = counts_by_bom.get(bom_code)
+        if not operations_for_bom:
+            continue
+        bom_id = external_id("sap_bom", variant_object_id)
+        ops_by_resource = sorted(
+            ((op_id, max(by_resource, key=by_resource.get)) for op_id, by_resource in operations_for_bom.items()),
+            key=lambda pair: pair[1],
+        )
+        for i, (op_id, resource_id) in enumerate(ops_by_resource):
+            out_rows.append({
+                "id": external_id("sap_bomop", f"{variant_object_id}_{op_id}"),
+                "bom_id/id": bom_id,
+                "workcenter_id/id": external_id("sap_wc", resource_id),
+                "name": op_id,
+                "sequence": (i + 1) * 10,
+            })
+    write_csv("mrp_bom_operation.csv", out_rows, BOM_OPERATION_FIELDNAMES)
+    return {"mrp_bom_operation.csv": len(out_rows)}
+
+
 TRANSFORMS = [
     ("account_account (chart of accounts)", build_chart_of_accounts),
     ("account_analytic_plan / account_analytic_account (cost centers)", build_cost_centers),
@@ -3156,6 +3240,7 @@ TRANSFORMS = [
     ("account_move_journal (journal entries)", build_journal_entries),
     ("account_asset / account_asset_depreciation_line (fixed assets)", build_fixed_assets),
     ("mrp_routing_workcenter_ops (operations)", build_routing_operations),
+    ("mrp_bom_operation (BOM-to-operations link)", build_bom_operations),
 ]
 
 
