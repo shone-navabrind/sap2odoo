@@ -497,6 +497,151 @@ def _apply_root_to_model(output_rows, matched_ids, fieldnames, seen_fields, serv
                     out[_sap_column(child, field)] = json.dumps(values)
 
 
+def _widen_mrp_bom(output_rows, fieldnames, seen_fields):
+    """
+    mrp_bom.csv's id is sap_bom_<variant ObjectID> - a single real field, but MODEL_ROOTS/
+    _apply_root_to_model only matches a root by ObjectID directly against a SINGLE service's
+    *root* entity set, and this model's own build_boms() keys every row on the VARIANT, not the
+    BOM header - so it needs its own small join here rather than a generic MODEL_ROOTS entry.
+    """
+    service_entities = load_raw_files_for_service("khbomvariant")
+    variants = next((e for e in service_entities
+                     if e["entity_set"] == "ProductionBillOfMaterialVariantCollection"), None)
+    if not variants:
+        return set()
+    variants_by_id = {r["ObjectID"]: r for r in variants["rows"] if r.get("ObjectID")}
+    prefix = "sap__khbomvariant__ProductionBillOfMaterialVariantCollection__"
+    for field in variants["fields"]:
+        column = prefix + field
+        if column not in seen_fields:
+            fieldnames.append(column)
+            seen_fields.add(column)
+
+    matched_ids = set()
+    for row in output_rows:
+        variant_id = row.get("id", "").removeprefix("sap_bom_")
+        source = variants_by_id.get(variant_id)
+        if not source:
+            continue
+        matched_ids.add(row["id"])
+        for field in variants["fields"]:
+            row[prefix + field] = _cell(source.get(field))
+    return matched_ids
+
+
+def _widen_mrp_bom_line(output_rows, fieldnames, seen_fields):
+    """
+    mrp_bom_line.csv's id is sap_bomline_<variant ObjectID>_<component ObjectID> - a composite of
+    TWO real fields glued together by build_boms() (the component's own ParentObjectID points at
+    the BOM HEADER, not the variant, so there is no single raw field this model's id matches
+    directly). Every ObjectID on this tenant is a fixed 32 hex characters (confirmed), so the
+    composite splits back apart unambiguously: chars 0-31 are the variant, the rest (after the
+    joining "_") are the component.
+    """
+    service_entities = load_raw_files_for_service("khbomvariant")
+    components = next((e for e in service_entities
+                       if e["entity_set"] == "ProductionBillOfMaterialItemGroupItemChangeStateCollection"), None)
+    if not components:
+        return set()
+    components_by_id = {r["ObjectID"]: r for r in components["rows"] if r.get("ObjectID")}
+    prefix = "sap__khbomvariant__ProductionBillOfMaterialItemGroupItemChangeStateCollection__"
+    for field in components["fields"]:
+        column = prefix + field
+        if column not in seen_fields:
+            fieldnames.append(column)
+            seen_fields.add(column)
+
+    matched_ids = set()
+    for row in output_rows:
+        suffix = row.get("id", "").removeprefix("sap_bomline_")
+        component_id = suffix[33:]  # suffix[:32] is the variant ObjectID, suffix[32] is "_"
+        source = components_by_id.get(component_id)
+        if not source:
+            continue
+        matched_ids.add(row["id"])
+        for field in components["fields"]:
+            row[prefix + field] = _cell(source.get(field))
+    return matched_ids
+
+
+def _widen_mrp_bom_operation(output_rows, fieldnames, seen_fields):
+    """
+    mrp_bom_operation.csv's id is sap_bomop_<variant ObjectID>_<operation name>, and each row is
+    ITSELF a majority vote across however many real khproductionorder/OperationCollection rows
+    share that (BOM, operation name) - built by build_bom_operations(). There is no single raw
+    row to attach; every OperationCollection row that fed the vote is attached instead, each
+    field collapsed to one scalar when every contributing row agrees (the normal case) or kept as
+    a JSON array when they do not - which surfaces the same real mis-keyed-order noise found
+    during validation (e.g. BOM 730511's ICT operation shows ResourceID as a mix of "10700" and
+    "11700") directly in this file, rather than hiding it behind the majority vote.
+    """
+    service_entities = load_raw_files_for_service("khbomvariant")
+    variants = next((e for e in service_entities
+                     if e["entity_set"] == "ProductionBillOfMaterialVariantCollection"), None)
+    headers = next((e for e in service_entities
+                    if e["entity_set"] == "ProductionBillOfMaterialCollection"), None)
+    if not variants or not headers:
+        return set()
+    header_code_by_id = {r["ObjectID"]: r.get("ID") for r in headers["rows"] if r.get("ObjectID")}
+    bom_code_by_variant = {
+        r["ObjectID"]: header_code_by_id.get(r.get("ParentObjectID"))
+        for r in variants["rows"] if r.get("ObjectID")
+    }
+
+    order_entities = load_raw_files_for_service("khproductionorder")
+    operations = next((e for e in order_entities if e["entity_set"] == "OperationCollection"), None)
+    orders = next((e for e in order_entities if e["entity_set"] == "ProductionOrderCollection"), None)
+    if not operations or not orders:
+        return set()
+    bom_code_by_order = {r["ObjectID"]: r.get("BillOfMaterialID") for r in orders["rows"] if r.get("ObjectID")}
+
+    rows_by_bom_op = {}
+    for r in operations["rows"]:
+        if r.get("TypeCodeText") not in ("Make", "Check"):
+            continue
+        bom_code = bom_code_by_order.get(r.get("ParentObjectID"))
+        op_id = r.get("ID")
+        if not (bom_code and op_id):
+            continue
+        rows_by_bom_op.setdefault((bom_code, op_id), []).append(r)
+
+    audit_fields = ["ResourceID", "ResourceDescription", "ProcessingNetDuration", "CategoryCode",
+                    "CategoryCodeText", "TypeCode", "TypeCodeText", "ResourceCategoryCode",
+                    "ResourceCategoryCodeText", "MainResourceCategoryCode",
+                    "MainResourceCategoryCodeText"]
+    prefix = "sap__khproductionorder__OperationCollection__"
+    for field in audit_fields + ["RecordCount"]:
+        column = prefix + field
+        if column not in seen_fields:
+            fieldnames.append(column)
+            seen_fields.add(column)
+
+    matched_ids = set()
+    for row in output_rows:
+        suffix = row.get("id", "").removeprefix("sap_bomop_")
+        variant_id, _, op_id = suffix[:32], suffix[32:33], suffix[33:]
+        bom_code = bom_code_by_variant.get(variant_id)
+        contributing = rows_by_bom_op.get((bom_code, op_id)) if bom_code else None
+        if not contributing:
+            continue
+        matched_ids.add(row["id"])
+        row[prefix + "RecordCount"] = str(len(contributing))
+        for field in audit_fields:
+            values = [_cell(r.get(field)) for r in contributing]
+            distinct = set(values)
+            row[prefix + field] = next(iter(distinct)) if len(distinct) == 1 else json.dumps(values)
+    return matched_ids
+
+
+COMPOSITE_KEY_MODELS = {
+    "mrp_bom.csv": ("khbomvariant/ProductionBillOfMaterialVariantCollection", _widen_mrp_bom),
+    "mrp_bom_line.csv": ("khbomvariant/ProductionBillOfMaterialItemGroupItemChangeStateCollection",
+                         _widen_mrp_bom_line),
+    "mrp_bom_operation.csv": ("khproductionorder/OperationCollection (majority-vote audit trail)",
+                              _widen_mrp_bom_operation),
+}
+
+
 def write_odoo_model_csvs():
     """
     Write the business-facing full export: the same model-named files as output_odoo/, with
@@ -534,6 +679,12 @@ def write_odoo_model_csvs():
             _apply_root_to_model(output_rows, matched_ids, fieldnames, seen_fields,
                                   service, root_name, prefix, key_fields)
 
+        source_label = " + ".join(f"{service}/{entity_set}" for service, entity_set, _, _ in roots)
+        composite = COMPOSITE_KEY_MODELS.get(filename)
+        if composite:
+            source_label, widen_fn = composite
+            matched_ids |= widen_fn(output_rows, fieldnames, seen_fields)
+
         path = os.path.join(MODEL_DIR, filename)
         with open(path, "w", newline="", encoding="utf-8") as f:
             writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction="ignore")
@@ -544,7 +695,7 @@ def write_odoo_model_csvs():
             "Rows": len(output_rows),
             "Odoo columns": len(odoo_fields),
             "All-column export columns": len(fieldnames),
-            "Root SAP source(s)": " + ".join(f"{service}/{entity_set}" for service, entity_set, _, _ in roots),
+            "Root SAP source(s)": source_label,
             "Rows linked to SAP": len(matched_ids),
             "Rows without direct SAP lineage": len(output_rows) - len(matched_ids),
             "Notes": ("SAP child fields use JSON arrays where a record has several child rows; "
