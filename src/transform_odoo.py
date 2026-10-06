@@ -1702,6 +1702,7 @@ GL_ACCOUNT_SOURCES = [
 ACCOUNT_TYPE_BANDS = [
     ("150", "liability_payable",    "150000 Accounts Payable-Domestic"),
     ("151", "liability_payable",    "151000 Accounts Payable-International"),
+    ("152", "liability_current",    "152000 Advances From Customers"),
     ("16",  "liability_current",    "163455 IGST-Payable-Goa-RCM"),
     ("20",  "asset_fixed",          "202001 Buildings - Administration"),
     ("21",  "asset_fixed",          "212110 Acc Dep Buildings (accumulated depreciation)"),
@@ -1715,6 +1716,12 @@ ACCOUNT_TYPE_BANDS = [
     ("3",   "income",               "300001 Domestic Sales"),
     ("4",   "expense_direct_cost",  "490001 Raw Material (cost of goods)"),
     ("5",   "expense",              "500010 Salary"),
+    # 612000-618000 is entirely Depreciation/Amortisation (P&L expense, not an asset); 620001
+    # "Gain/Loss from Purchase of Asset" is also a P&L account - both found 2026-10-06 when a
+    # user question about the Chart of Accounts led to auditing every account against this
+    # table and finding 19/215 (8.8%) silently mis-typed asset_current by the old unguarded
+    # fallback below (no "6" or "152" band existed at all).
+    ("6",   "expense",              "612000 Depreciation - Buildings - Factory"),
     ("7",   "liability_current",    "700044 GR/IR clearing-Unbills Payable"),
 ]
 
@@ -1724,6 +1731,14 @@ def _account_type(code):
     for prefix, account_type, evidence in sorted(ACCOUNT_TYPE_BANDS, key=lambda b: -len(b[0])):
         if code.startswith(prefix):
             return account_type, evidence
+    # No defined band covers this code - this previously defaulted silently to "asset_current"
+    # with no evidence, which is how 19/215 accounts (152000 Advances From Customers, and the
+    # entire 612000-620001 Depreciation/Amortisation range) got mis-typed undetected until a
+    # user question prompted an audit. Logging here means a future unmatched code gets caught
+    # instead of silently repeating that.
+    logger.warning("No account_type band matches code %r - defaulting to asset_current, "
+                   "same as every other unmatched code; add a real band once the account's "
+                   "actual name is known.", code)
     return "asset_current", ""
 
 
