@@ -2948,60 +2948,48 @@ def build_boms():
 BOM_COMBINED_FIELDNAMES = [
     "id", "product_tmpl_id/id", "product_qty", "code", "type",
     "bom_line_ids/product_id/id", "bom_line_ids/product_qty",
-    "operation_ids/workcenter_id/id", "operation_ids/name", "operation_ids/sequence",
 ]
 
 
 def build_bom_combined():
     """
-    Deliverable convenience file: mrp_bom.csv (headers, build_boms()), mrp_bom_line.csv
-    (components) and mrp_bom_operation.csv (routing, build_bom_operations()) merged into ONE
-    file using Odoo's standard one2many CSV import convention.
-
-    bom_line_ids and operation_ids are two INDEPENDENT one2many relations on mrp.bom, with
-    different real row counts per BOM (a BOM can have 5 components and 3 operations, say) - they
-    are not paired with each other, so each gets its own column group and its own row index,
-    continuing past wherever the other one2many already ran out (max(len(lines), len(ops)) rows
-    for the group). A row's bom_line_ids/* columns are blank once components are exhausted;
-    operation_ids/* are blank once operations are exhausted - Odoo's importer creates whichever
-    sub-record has non-blank columns on a given row, independent of the other one2many field.
-    Header columns (id/product_tmpl_id/product_qty/code/type) appear only on the first row of
-    the group, same as every other combined file here.
-
-    Must run after build_boms() AND build_bom_operations() in TRANSFORMS (reordered 2026-10-07
-    so build_bom_operations() runs first - it used to run last, after this function, which is
-    why operations weren't in this file originally). Same pattern as build_pricelist_combined().
+    Deliverable convenience file: mrp_bom.csv (headers, build_boms()) and mrp_bom_line.csv
+    (lines, same function) merged into ONE file using Odoo's standard one2many CSV import
+    convention - a bom header row carries its own id/product_tmpl_id/product_qty/code/type plus
+    its first line's bom_line_ids/* columns; every further line for that same bom is a follow-up
+    row with the header columns left blank, so Odoo groups it under the bom directly above it.
+    Must run after build_boms() in TRANSFORMS. Same pattern as build_pricelist_combined().
     """
     boms = list(csv.DictReader(open(os.path.join(ODOO_DIR, "mrp_bom.csv"), encoding="utf-8")))
     lines = list(csv.DictReader(open(os.path.join(ODOO_DIR, "mrp_bom_line.csv"), encoding="utf-8")))
-    operations = list(csv.DictReader(open(os.path.join(ODOO_DIR, "mrp_bom_operation.csv"), encoding="utf-8")))
 
     lines_by_bom = {}
     for line in lines:
         lines_by_bom.setdefault(line["bom_id/id"], []).append(line)
-    ops_by_bom = {}
-    for op in operations:
-        ops_by_bom.setdefault(op["bom_id/id"], []).append(op)
 
     rows = []
     for bom in boms:
         bom_lines = lines_by_bom.get(bom["id"], [])
-        bom_ops = ops_by_bom.get(bom["id"], [])
-        row_count = max(len(bom_lines), len(bom_ops), 1)
-        for i in range(row_count):
-            line = bom_lines[i] if i < len(bom_lines) else None
-            op = bom_ops[i] if i < len(bom_ops) else None
+        if not bom_lines:
+            rows.append({
+                "id": bom["id"],
+                "product_tmpl_id/id": bom["product_tmpl_id/id"],
+                "product_qty": bom["product_qty"],
+                "code": bom["code"],
+                "type": bom["type"],
+                "bom_line_ids/product_id/id": "",
+                "bom_line_ids/product_qty": "",
+            })
+            continue
+        for i, line in enumerate(bom_lines):
             rows.append({
                 "id": bom["id"] if i == 0 else "",
                 "product_tmpl_id/id": bom["product_tmpl_id/id"] if i == 0 else "",
                 "product_qty": bom["product_qty"] if i == 0 else "",
                 "code": bom["code"] if i == 0 else "",
                 "type": bom["type"] if i == 0 else "",
-                "bom_line_ids/product_id/id": line["product_id/id"] if line else "",
-                "bom_line_ids/product_qty": line["product_qty"] if line else "",
-                "operation_ids/workcenter_id/id": op["workcenter_id/id"] if op else "",
-                "operation_ids/name": op["name"] if op else "",
-                "operation_ids/sequence": op["sequence"] if op else "",
+                "bom_line_ids/product_id/id": line["product_id/id"],
+                "bom_line_ids/product_qty": line["product_qty"],
             })
     write_csv("mrp_bom_with_lines.csv", rows, BOM_COMBINED_FIELDNAMES)
     return {"mrp_bom_with_lines.csv": len(rows)}
@@ -3348,12 +3336,12 @@ TRANSFORMS = [
     ("purchase_order_rfq_with_lines (combined deliverable)", build_rfq_combined),
     ("stock_quant_adjustment (inventory balances)", build_inventory),
     ("mrp_bom / mrp_bom_line (bills of material)", build_boms),
+    ("mrp_bom_with_lines (combined deliverable)", build_bom_combined),
     ("maintenance_equipment (equipment resources)", build_equipment),
     ("account_move_journal (journal entries)", build_journal_entries),
     ("account_asset / account_asset_depreciation_line (fixed assets)", build_fixed_assets),
     ("mrp_routing_workcenter_ops (operations)", build_routing_operations),
     ("mrp_bom_operation (BOM-to-operations link)", build_bom_operations),
-    ("mrp_bom_with_lines (combined deliverable)", build_bom_combined),
 ]
 
 
