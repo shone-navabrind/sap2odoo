@@ -404,10 +404,11 @@ def build_res_partner():
     }
 
 
-PO_HEADER_FIELDNAMES = ["id", "name", "partner_id/id", "date_order", "state", "currency_id/id",
-                        "amount_total", "amount_tax", "incoterms", "incoterms_location",
-                        "buyer_responsible_name", "payment_terms"]
-PO_LINE_FIELDNAMES = ["id", "order_id/id", "product_id/id", "name", "product_qty", "price_unit", "price_tax"]
+PO_HEADER_FIELDNAMES = ["id", "name", "partner_id/id", "date_order", "date_planned", "state",
+                        "currency_id/id", "amount_total", "amount_tax", "incoterms",
+                        "incoterms_location", "buyer_responsible_name", "payment_terms"]
+PO_LINE_FIELDNAMES = ["id", "order_id/id", "product_id/id", "name", "product_qty", "price_unit",
+                      "price_tax", "date_planned"]
 
 # LifeCycleStatusCodeText values that mean "not yet a real order" - these orders are written to
 # purchase_order_rfq.csv (build_rfqs(), below) instead of purchase_order.csv, so the same real
@@ -466,6 +467,13 @@ def build_purchase_orders():
     khpurchaseorder's own metadata.xml snapshot already had a "PaymentTerms" EntityType and
     PurchaseOrder_PaymentTerms navigation property, just never added to extract_raw.py's
     SOURCES. Pulled live 2026-10-01 (15,835 rows, one per PO) and wired in directly.
+
+    date_planned added 2026-10-07 (user: "Delivery dates are missing"). ItemCollection's
+    DeliveryStartDateTime was already extracted (confirmed in output_raw/, 0 of 46,187 lines
+    blank) but never read by this transform - a real gap, not a missing SAP field. Line-level
+    date_planned comes straight from it; the header's date_planned (Odoo's "Expected Arrival",
+    which this custom BO has no field for) is the earliest DeliveryStartDateTime among that PO's
+    own lines - a real aggregate of real per-line data, not a guess.
     """
     headers = load_raw("PurchaseOrderCollection")["rows"]
     items = load_raw("ItemCollection", service_hint="khpurchaseorder")["rows"]
@@ -482,6 +490,18 @@ def build_purchase_orders():
     employee_names = _employee_name_by_code()
     payment_terms_by_po = {p["ParentObjectID"]: p.get("PaymentTermsCodeText", "")
                             for p in payment_terms if p.get("ParentObjectID")}
+
+    # Earliest DeliveryStartDateTime among a PO's own lines, for the header's date_planned -
+    # this custom BO has no delivery-date field of its own at the header level.
+    earliest_delivery_by_po = {}
+    for item in items:
+        po_object_id = item.get("ParentObjectID")
+        delivery_date = parse_sap_date(item.get("DeliveryStartDateTime"))
+        if not (po_object_id and delivery_date):
+            continue
+        current = earliest_delivery_by_po.get(po_object_id)
+        if not current or delivery_date < current:
+            earliest_delivery_by_po[po_object_id] = delivery_date
 
     header_rows = []
     known_po_ids = set()
@@ -503,6 +523,7 @@ def build_purchase_orders():
                 "name": header.get("ID", object_id),
                 "partner_id/id": external_id("sap_bp", partner_bp) if partner_bp else "",
                 "date_order": parse_sap_date(header.get("CreationDateTime")),
+                "date_planned": earliest_delivery_by_po.get(object_id, ""),
                 # LifeCycleStatusCode values aren't a documented open/closed mapping for this
                 # tenant - these are real historical SAP orders, so treated as confirmed.
                 "state": "purchase",
@@ -535,6 +556,7 @@ def build_purchase_orders():
                 "product_qty": item.get("Quantity", "") or "0",
                 "price_unit": item.get("NetUnitPriceAmount", "") or "0",
                 "price_tax": item.get("TaxAmount", "") or "0",
+                "date_planned": parse_sap_date(item.get("DeliveryStartDateTime")) or "",
             }
         )
 
