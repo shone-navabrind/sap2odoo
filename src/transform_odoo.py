@@ -916,7 +916,7 @@ def _group_by_parent(rows):
 SO_HEADER_FIELDNAMES = ["id", "name", "partner_id/id", "date_order", "state", "currency_id/id",
                         "amount_total", "amount_tax", "salesperson_name"]
 SO_LINE_FIELDNAMES = ["id", "order_id/id", "product_id/id", "name", "price_subtotal",
-                      "price_unit", "product_uom_qty", "product_uom/id", "discount"]
+                      "price_unit", "product_uom_qty", "product_uom/id", "discount", "date_planned"]
 
 # CancellationStatusCode, decoded via khsalesorder's own field (checked live, 2026-09-28):
 # 1=Not Canceled, 4=Canceled, 5=Partially Canceled.
@@ -1007,6 +1007,12 @@ def build_sales_orders():
     different questions and are expected to diverge when a quantity changes after pricing. Do
     not derive price_unit as price_subtotal/product_uom_qty; use this real field instead, which
     stays correct regardless of that divergence.
+
+    date_planned added 2026-10-07 (found missing entirely during an audit prompted by the PO
+    delivery-date gap - see build_purchase_orders()). Same ItemScheduleLineCollection already
+    loaded for quantity above also carries EndDateTime (0/23,785 blank) - never read for this
+    purpose. Uses the same Confirmed-over-Requested preference as quantity, taking the earliest
+    EndDateTime among the matching schedule lines.
     """
     headers = load_raw("SalesOrderCollection")["rows"]
     items = load_raw("ItemCollection", service_hint="khsalesorder")["rows"]
@@ -1053,6 +1059,22 @@ def build_sales_orders():
                 return str(total_qty), unit_code
         return "0", ""
 
+    def item_date_planned(item_object_id):
+        """
+        Earliest EndDateTime among the same preferred schedule-line type (Confirmed over
+        Requested) used for quantity above - a line split across several schedule lines gets
+        the earliest date a portion is due, matching how Odoo's own date_planned represents
+        "when this line is expected," not a single date fabricated from nothing.
+        """
+        lines = schedule_by_item.get(item_object_id, [])
+        for preferred_type in ("Confirmed", "Requested"):
+            matching = [s for s in lines if s.get("TypeCodeText") == preferred_type]
+            if matching:
+                dates = [parse_sap_date(s.get("EndDateTime")) for s in matching]
+                dates = [d for d in dates if d]
+                return min(dates) if dates else ""
+        return ""
+
     header_rows = []
     known_ids = set()
     for h in headers:
@@ -1097,6 +1119,7 @@ def build_sales_orders():
                 "product_uom_qty": qty,
                 "product_uom/id": external_id("sap_uom", unit_code) if unit_code else "",
                 "discount": discount_by_item.get(object_id, "0"),
+                "date_planned": item_date_planned(object_id),
             }
         )
 
@@ -1511,15 +1534,45 @@ def build_pricelists():
 
 
 DELIVERY_HEADER_FIELDNAMES = ["id", "name", "partner_id/id", "scheduled_date", "state"]
-DELIVERY_LINE_FIELDNAMES = ["id", "picking_id/id", "product_id/id", "name"]
+DELIVERY_LINE_FIELDNAMES = ["id", "picking_id/id", "product_id/id", "name", "product_uom_qty"]
 
 
 def build_deliveries():
-    """khoutbounddelivery custom service - 130 deliveries (sheet object #64)."""
+    """
+    khoutbounddelivery custom service (sheet object #64, Outbound Deliveries). 28,825 real
+    headers as of 2026-10-07 (the "130" this docstring used to say was stale).
+
+    Two real gaps fixed 2026-10-07, found during an audit prompted by the PO delivery-date gap:
+
+    1. scheduled_date was using CreationDateTime (when the record was entered in SAP) instead of
+       any real shipping-schedule field - ShippingPeriodCollection (ParentObjectID -> header
+       ObjectID, 0/57,162 blank, confirmed 1:1 or 2:1 with every one of the 28,825 headers) has
+       the real StartDateTime/EndDateTime. A header with 2 rows has identical dates on both
+       (checked directly, not a real split), so the earliest StartDateTime is used without
+       needing to pick between them.
+    2. product_uom_qty was missing entirely from stock_picking_delivery_line.csv - every line
+       would have imported at qty 0. ItemDeliveryQuantityCollection (ParentObjectID -> Item
+       ObjectID) has it, confirmed clean 1:1 with every one of the 32,956 line items.
+    """
     headers = load_raw("OutboundDeliveryCollection")["rows"]
     items = load_raw("ItemCollection", service_hint="khoutbounddelivery")["rows"]
     parties = load_raw("BuyerPartyCollection", service_hint="khoutbounddelivery")["rows"]
+    shipping_periods = load_raw("ShippingPeriodCollection", service_hint="khoutbounddelivery")["rows"]
+    delivery_quantities = load_raw("ItemDeliveryQuantityCollection", service_hint="khoutbounddelivery")["rows"]
     party_by_doc = _group_by_parent(parties)
+
+    earliest_ship_date_by_header = {}
+    for p in shipping_periods:
+        parent = p.get("ParentObjectID")
+        ship_date = parse_sap_date(p.get("StartDateTime"))
+        if not (parent and ship_date):
+            continue
+        current = earliest_ship_date_by_header.get(parent)
+        if not current or ship_date < current:
+            earliest_ship_date_by_header[parent] = ship_date
+
+    qty_by_item = {q["ParentObjectID"]: q.get("Quantity", "")
+                   for q in delivery_quantities if q.get("ParentObjectID")}
 
     header_rows = []
     known_ids = set()
@@ -1534,7 +1587,7 @@ def build_deliveries():
                 "id": external_id("sap_delivery", object_id),
                 "name": h.get("ID", object_id),
                 "partner_id/id": external_id("sap_bp", partner) if partner else "",
-                "scheduled_date": parse_sap_date(h.get("CreationDateTime")),
+                "scheduled_date": earliest_ship_date_by_header.get(object_id, ""),
                 "state": "done",
             }
         )
@@ -1551,6 +1604,7 @@ def build_deliveries():
                 "picking_id/id": external_id("sap_delivery", parent),
                 "product_id/id": external_id("sap_prod", product_id) if product_id else "",
                 "name": product_id or item.get("ID", ""),
+                "product_uom_qty": qty_by_item.get(item.get("ObjectID"), "") or "0",
             }
         )
 
@@ -2184,6 +2238,11 @@ def build_stock_transfers():
     Not Released" draft and a later "Consistent/Released" version - looks like a
     correction/reprocessing pattern for Customer Returns). Keying on ID silently collapsed each
     such pair into one row, dropping the other. ID is kept as the display "name" only.
+
+    scheduled_date fixed 2026-10-07 (found during an audit prompted by the PO delivery-date gap):
+    was using CreationDateTime (when the record was entered in SAP), not a real schedule field.
+    ArrivalPeriodCollection (ParentObjectID -> header ObjectID) has the real StartDateTime -
+    confirmed clean 1:1 with every one of this tenant's inbound delivery headers, 0 blank.
     """
     headers = load_raw("InboundDeliveryCollection", service_hint="khinbounddelivery")["rows"]
     items = load_raw("ItemCollection", service_hint="khinbounddelivery")["rows"]
@@ -2191,6 +2250,11 @@ def build_stock_transfers():
         load_raw("ItemQuantityCollection", service_hint="khinbounddelivery")["rows"])
     senders = _group_by_parent(
         load_raw("SenderPartyCollection", service_hint="khinbounddelivery")["rows"])
+    arrival_date_by_header = {
+        a["ParentObjectID"]: parse_sap_date(a.get("StartDateTime"))
+        for a in load_raw("ArrivalPeriodCollection", service_hint="khinbounddelivery")["rows"]
+        if a.get("ParentObjectID")
+    }
 
     header_rows, known = [], set()
     for delivery in headers:
@@ -2204,7 +2268,7 @@ def build_stock_transfers():
             "id": external_id("sap_inbdel", object_id),
             "name": delivery_id,
             "partner_id/id": external_id("sap_bp", party) if party else "",
-            "scheduled_date": parse_sap_date(delivery.get("CreationDateTime")) or "",
+            "scheduled_date": arrival_date_by_header.get(object_id, "") or "",
             # DeliveryNoteStatusCodeText "Received" is the only terminal state on this tenant.
             "state": "done" if delivery.get("DeliveryNoteStatusCodeText") == "Received" else "assigned",
             "picking_type_id": "stock.picking_type_in",
